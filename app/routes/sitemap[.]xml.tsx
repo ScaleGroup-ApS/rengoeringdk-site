@@ -1,63 +1,23 @@
-/**
- * sitemap[.]xml route — served at /sitemap.xml
- *
- * Dynamically generates an XML sitemap from all published WordPress pages.
- */
 import type { Route } from "./+types/sitemap[.]xml";
-import { getPages, getPosts } from "~/lib/wp-api";
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const siteUrl = new URL(request.url).origin;
+const SITE_URL = "https://rengoering.dk";
+const TODAY = "2026-05-25";
 
-  // Fetch all published pages and posts from WordPress
-  const [pages, posts] = await Promise.all([
-    getPages({ per_page: 100 }).catch(() => []),
-    getPosts({ per_page: 100 }).catch(() => []),
-  ]);
+const PAGES = [
+  { loc: SITE_URL, lastmod: TODAY, priority: "1.0", changefreq: "weekly" },
+  { loc: `${SITE_URL}/om-os`, lastmod: TODAY, priority: "0.8", changefreq: "monthly" },
+  { loc: `${SITE_URL}/tjenester`, lastmod: TODAY, priority: "0.9", changefreq: "monthly" },
+  { loc: `${SITE_URL}/priser`, lastmod: TODAY, priority: "0.8", changefreq: "monthly" },
+  { loc: `${SITE_URL}/kontakt`, lastmod: TODAY, priority: "0.7", changefreq: "monthly" },
+];
 
-  const urls: Array<{ loc: string; lastmod: string; priority: string; changefreq: string }> = [];
-
-  // Homepage
-  urls.push({
-    loc: siteUrl,
-    lastmod: new Date().toISOString().split("T")[0],
-    priority: "1.0",
-    changefreq: "daily",
-  });
-
-  // Pages
-  for (const page of pages) {
-    if (page.status !== "publish") continue;
-    urls.push({
-      loc: `${siteUrl}/${page.slug}`,
-      lastmod: page.modified_gmt.split("T")[0],
-      priority: "0.8",
-      changefreq: "weekly",
-    });
-  }
-
-  // Posts
-  for (const post of posts) {
-    if (post.status !== "publish") continue;
-    urls.push({
-      loc: `${siteUrl}/${post.slug}`,
-      lastmod: post.modified_gmt.split("T")[0],
-      priority: "0.6",
-      changefreq: "monthly",
-    });
-  }
-
+export function loader(_: Route.LoaderArgs) {
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-    ...urls.map(
+    ...PAGES.map(
       (u) =>
-        `  <url>
-    <loc>${escapeXml(u.loc)}</loc>
-    <lastmod>${u.lastmod}</lastmod>
-    <changefreq>${u.changefreq}</changefreq>
-    <priority>${u.priority}</priority>
-  </url>`
+        `  <url>\n    <loc>${escapeXml(u.loc)}</loc>\n    <lastmod>${u.lastmod}</lastmod>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`
     ),
     "</urlset>",
   ].join("\n");
@@ -66,16 +26,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     status: 200,
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": "public, max-age=86400",
     },
   });
 }
 
 function escapeXml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }

@@ -8,7 +8,31 @@ import {
 } from "react-router";
 import type { ReactNode } from "react";
 import type { Route } from "./+types/root";
+import { JsonLd } from "~/components/JsonLd";
 import "./app.css";
+
+const SITE_URL = "https://rengoering.dk";
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": ["Organization", "LocalBusiness"],
+  name: "Define waters A/S",
+  url: SITE_URL,
+  logo: `${SITE_URL}/logo.svg`,
+  email: "info@define-waters.dk",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Boeslunde Byvej 76",
+    addressCountry: "DK",
+  },
+  contactPoint: {
+    "@type": "ContactPoint",
+    email: "info@define-waters.dk",
+    contactType: "customer service",
+    availableLanguage: "Danish",
+  },
+  sameAs: [],
+};
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -33,6 +57,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <Links />
       </head>
       <body className="min-h-screen bg-surface text-text antialiased">
+        <JsonLd data={organizationSchema} />
         {children}
         <ScrollRestoration />
         <Scripts />

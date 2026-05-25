@@ -1,23 +1,13 @@
-/**
- * robots[.]txt route — served at /robots.txt
- *
- * Allows all crawlers, points to the sitemap.
- */
 import type { Route } from "./+types/robots[.]txt";
 
-export function loader({ request }: Route.LoaderArgs) {
-  const siteUrl = new URL(request.url).origin;
+const SITE_URL = "https://rengoering.dk";
 
+export function loader(_: Route.LoaderArgs) {
   const robotsTxt = [
     "User-agent: *",
     "Allow: /",
     "",
-    "# WordPress admin — not publicly relevant",
-    "Disallow: /wp-admin/",
-    "Disallow: /wp-login.php",
-    "Disallow: /wp-json/",
-    "",
-    `Sitemap: ${siteUrl}/sitemap.xml`,
+    `Sitemap: ${SITE_URL}/sitemap.xml`,
   ].join("\n");
 
   return new Response(robotsTxt, {
