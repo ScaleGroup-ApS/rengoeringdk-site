@@ -1,0 +1,99 @@
+---
+# Customer Site Deployment (React Router 7 SSR via Node.js)
+#
+# Serves the customer's public-facing website via server-side rendering.
+# Fetches content from the WordPress WP-REST API.
+# Each customer has a unique Docker image built from their forked repo.
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-site
+  namespace: {{NAMESPACE}}
+  labels:
+    app: customer-site
+    customer: "{{CUSTOMER_ID}}"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: customer-site
+      customer: "{{CUSTOMER_ID}}"
+
+  template:
+    metadata:
+      labels:
+        app: customer-site
+        customer: "{{CUSTOMER_ID}}"
+    spec:
+      containers:
+        - name: customer-site
+          image: registry.scaleweb.dk/{{NAMESPACE}}-site:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: WP_API_URL
+              value: "http://wordpress:80/wp-json"
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+
+      imagePullSecrets:
+        - name: registry-credentials
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-site
+  namespace: {{NAMESPACE}}
+  labels:
+    app: customer-site
+    customer: "{{CUSTOMER_ID}}"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+  selector:
+    app: customer-site
+    customer: "{{CUSTOMER_ID}}"
