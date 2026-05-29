@@ -16,18 +16,19 @@ const SITE_URL = "https://rengoering.dk";
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": ["Organization", "LocalBusiness"],
-  name: "Define waters A/S",
+  name: "Rengøringsfirma ApS",
   url: SITE_URL,
   logo: `${SITE_URL}/logo.svg`,
-  email: "info@define-waters.dk",
+  email: "kontakt@rengoeringsfirma.dk",
+  telephone: "+4570123456",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Boeslunde Byvej 76",
     addressCountry: "DK",
   },
   contactPoint: {
     "@type": "ContactPoint",
-    email: "info@define-waters.dk",
+    email: "kontakt@rengoeringsfirma.dk",
+    telephone: "+4570123456",
     contactType: "customer service",
     availableLanguage: "Danish",
   },

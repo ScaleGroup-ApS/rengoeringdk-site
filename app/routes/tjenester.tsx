@@ -2,7 +2,9 @@ import type { Route } from "./+types/tjenester";
 import { Link } from "react-router";
 import { Header } from "~/components/Header";
 import { Footer } from "~/components/Footer";
+import { ImageFrame } from "~/components/ImageFrame";
 import { JsonLd } from "~/components/JsonLd";
+import { useSiteEffects } from "~/hooks/useSiteEffects";
 import { buildMeta } from "~/lib/seo";
 
 const SITE_URL = "https://rengoering.dk";
@@ -11,11 +13,11 @@ const PAGE_URL = `${SITE_URL}/tjenester`;
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Tjenester | Define waters A/S",
+      title: "Tjenester — Rengøringsfirma ApS",
       description:
-        "Udforsk Define waters A/S's komplette sortiment af rengøringstjenester: hjemmerengøring, erhvervsrengøring, vinduespolering, til-/fraflytningsrengøring og industrirengøring.",
+        "Alt inden for professionel erhvervsrengøring: kontor, vinduespolering, klinik, trappevask, flytte- og industrirengøring. Fast team, dokumenteret kvalitet efter INSTA 800.",
       url: PAGE_URL,
-      siteName: "Define waters A/S",
+      siteName: "Rengøringsfirma ApS",
       type: "website",
       locale: "da_DK",
     }),
@@ -26,8 +28,8 @@ export function meta(_: Route.MetaArgs) {
 const pageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "Tjenester – Define waters A/S",
-  description: "Professionelle rengøringstjenester til private og erhverv.",
+  name: "Tjenester – Rengøringsfirma ApS",
+  description: "Professionel erhvervsrengøring i hele Danmark.",
   url: PAGE_URL,
   breadcrumb: {
     "@type": "BreadcrumbList",
@@ -38,187 +40,187 @@ const pageSchema = {
   },
 };
 
-const SERVICES = [
+const Arrow = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M5 12h14M12 5l7 7-7 7" />
+  </svg>
+);
+
+const Check = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+type Service = {
+  id: string;
+  num: string;
+  title: string;
+  desc: string;
+  tag: string;
+  tagIcon: React.ReactNode;
+  features: string[];
+  flip?: boolean;
+};
+
+const SERVICES: Service[] = [
   {
-    id: "hjem",
-    title: "Hjemmerengøring",
-    tagline: "Dit hjem i topform",
-    icon: "M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10",
-    desc: "Vi tager os af dit hjem, så du kan fokusere på det, der virkelig betyder noget. Vores erfarne rengøringsspecialister sørger for et grundigt og omhyggeligt rent hjem, tilpasset præcis dine ønsker og behov.",
-    features: [
-      "Regelmæssig ugentlig eller 14-dages rengøring",
-      "Grundrengøring af alle rum",
-      "Støvsugning og mopping af gulve",
-      "Rengøring af badeværelse og køkken",
-      "Aftørring af overflader og inventar",
-      "Vinduspolering indendørs",
-    ],
-    color: "from-sky-50 to-blue-50",
-    accent: "bg-sky-50 text-primary",
-  },
-  {
-    id: "erhverv",
-    title: "Erhvervsrengøring",
-    tagline: "Professionelle rammer",
-    icon: "M20 7l-8-4-8 4m16 0v10l-8 4m-8-4V7m8 4l8-4M12 11l-8-4",
-    desc: "Et rent arbejdsmiljø øger produktiviteten og skaber et godt førstehåndsindtryk over for kunder og samarbejdspartnere. Vi leverer fleksible erhvervsrengøringsaftaler til kontorer, butikker, lager og meget mere.",
-    features: [
-      "Daglig, ugentlig eller skræddersyet frekvens",
-      "Rengøring uden for arbejdstid",
-      "Toiletter, kantiner og fællesarealer",
-      "Vinduspolering indendørs og udendørs",
-      "Specialrengøring ved behov",
-      "Fast kontaktperson og fleksibel aftale",
-    ],
-    color: "from-indigo-50 to-sky-50",
-    accent: "bg-indigo-50 text-indigo-700",
+    id: "kontor",
+    num: "01 — KONTOR",
+    title: "Kontorrengøring",
+    desc: "Daglig eller ugentlig rengøring uden for arbejdstid, så medarbejderne altid møder ind til et friskt, repræsentativt kontor. Fast team, der lærer jeres lokaler at kende.",
+    tag: "Mest efterspurgt",
+    tagIcon: <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" />,
+    features: ["Skriveborde & kontaktflader", "Køkken & kantine", "Toiletter & vådrum", "Gulve, støvsugning & mopning"],
   },
   {
     id: "vinduer",
+    num: "02 — GLAS",
     title: "Vinduespolering",
-    tagline: "Klare udsigter",
-    icon: "M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10",
-    desc: "Snavsede vinduer kan ødelægge indtrykket af selv det pæneste hjem eller kontor. Vores vinduespoleringsteam leverer streg- og pletfri ruder — indvendigt og udvendigt på alle bygningstyper.",
-    features: [
-      "Polering af alle vinduestyper og størrelser",
-      "Indvendigt og udvendigt",
-      "Rengøring af rammer og karme",
-      "Glasfacader og butiksvinduer",
-      "Takrude og svær tilgængelighed",
-      "Regelmæssige aftaler eller engangsservice",
-    ],
-    color: "from-cyan-50 to-sky-50",
-    accent: "bg-cyan-50 text-cyan-700",
+    desc: "Klare facader, butiksruder og glaspartier — indvendigt og udvendigt, også i højde. Faste intervaller eller efter behov, så jeres indtryk altid er skarpt.",
+    tag: "Streg- & pletfri",
+    tagIcon: <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10" />,
+    features: ["Facader & butiksruder", "Rammer & karme", "Højde & svær adgang", "Faste intervaller"],
+    flip: true,
   },
   {
-    id: "flytning",
-    title: "Til- og fraflytningsrengøring",
-    tagline: "Depositummet sikret",
-    icon: "M5 12H3l9-9 9 9h-2v7a2 2 0 01-2 2H7a2 2 0 01-2-2v-7",
-    desc: "Sørg for at stå stærkt ved boligaflevering med vores professionelle fraflytningsrengøring. Vi gennemgår alle hjørner og overflader, så du maksimerer chancen for at få dit fulde depositum tilbage.",
-    features: [
-      "Komplet dybderengøring af hele boligen",
-      "Rengøring af hvidevarer indvendigt",
-      "Vinduer, rammer og karme",
-      "Gulvbehandling og fugning",
-      "Skabe og skuffer",
-      "Badeværelse og toilet til perfektion",
-    ],
-    color: "from-teal-50 to-emerald-50",
-    accent: "bg-teal-50 text-teal-700",
+    id: "klinik",
+    num: "03 — SUNDHED",
+    title: "Klinik & hygiejnerengøring",
+    desc: "Dokumenteret hygiejnerengøring til klinikker, tandlæger, institutioner og laboratorier med skærpede krav. Tydelige procedurer og fuld sporbarhed på hvert besøg.",
+    tag: "Hygiejnesikret",
+    tagIcon: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></>,
+    features: ["Afspritning af kontaktflader", "Behandlings- & venterum", "Farvekodet udstyr", "Dokumentation pr. besøg"],
+  },
+  {
+    id: "trappe",
+    num: "04 — EJENDOM",
+    title: "Trappevask & ejendomsservice",
+    desc: "Faste aftaler for ejendomme, boligforeninger og erhvervslejemål. Rene trapper, elevatorer og fællesarealer — år efter år, med samme faste kontaktperson.",
+    tag: "Faste aftaler",
+    tagIcon: <path d="M3 9h18M9 21V9M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" />,
+    features: ["Trapper & reposer", "Elevatorer & entré", "Fællesarealer", "Vinduer i opgange"],
+    flip: true,
+  },
+  {
+    id: "flytte",
+    num: "05 — FLYTNING",
+    title: "Flytte- & byggerengøring",
+    desc: "Grundig fraflytnings- og byggerengøring til erhvervslejemål. Afleveret efter aftale og klar til syn — så I står stærkt ved overdragelsen.",
+    tag: "Klar til syn",
+    tagIcon: <path d="M5 12H3l9-9 9 9h-2v7a2 2 0 01-2 2H7a2 2 0 01-2-2z" />,
+    features: ["Dybderengøring af alt", "Byggestøv & pletter", "Hvidevarer indvendigt", "Vinduer, karme & gulve"],
   },
   {
     id: "industri",
-    title: "Industrirengøring",
-    tagline: "Tung rengøring — let gjort",
-    icon: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5",
-    desc: "Industrielle miljøer stiller særlige krav til rengøring. Vores specialuddannede team håndterer selv de mest krævende rengøringsopgaver i produktions- og lagerfaciliteter med professionelt udstyr.",
-    features: [
-      "Produktionshaller og lagerlokaler",
-      "Maskinrengøring og vedligeholdelse",
-      "Gulvrengøring og -behandling",
-      "Affedtning og sanering",
-      "Højtryksrensning",
-      "Overholdelse af hygiejne- og sikkerhedskrav",
-    ],
-    color: "from-slate-50 to-sky-50",
-    accent: "bg-slate-100 text-slate-700",
+    num: "06 — INDUSTRI",
+    title: "Industri & lager",
+    desc: "Specialrengøring af produktion, lager og haller med professionelt udstyr og fokus på sikkerhed. Vi tilpasser os jeres drift og åbningstider.",
+    tag: "Tungt udstyr",
+    tagIcon: <path d="M12 2L2 7l10 5 10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />,
+    features: ["Produktions- & lagerhaller", "Gulvbehandling", "Højtryksrensning", "Sikkerheds- & hygiejnekrav"],
+    flip: true,
   },
 ];
 
+const STEPS = [
+  { n: "TRIN 01", title: "Uforpligtende besøg", desc: "Vi ser lokalerne og lytter til jeres behov og ønsker." },
+  { n: "TRIN 02", title: "Skræddersyet tilbud", desc: "Fast, gennemsigtig pris inden for 24 timer." },
+  { n: "TRIN 03", title: "Opstart med fast team", desc: "Samme medarbejdere hver gang — oplært i jeres lokaler." },
+  { n: "TRIN 04", title: "Løbende kvalitetstjek", desc: "Vi dokumenterer og følger op, så standarden holder." },
+];
+
 export default function Tjenester(_: Route.ComponentProps) {
+  useSiteEffects();
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="page">
       <Header />
       <JsonLd data={pageSchema} />
 
-      <main className="flex-1">
-        {/* Hero */}
-        <section className="bg-surface-dim py-20 border-b border-sky-100" style={{ contain: "layout style paint" }}>
-          <div className="max-w-6xl mx-auto px-6">
-            <nav className="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Brødkrumme">
-              <Link to="/" className="hover:text-primary transition-colors">Forside</Link>
-              <span aria-hidden="true">/</span>
-              <span className="text-text font-medium">Tjenester</span>
+      <main>
+        <header className="phero">
+          <div className="wrap">
+            <nav className="crumb reveal" aria-label="Brødkrumme">
+              <Link to="/">Forside</Link>
+              <span className="sep">/</span>
+              <b>Tjenester</b>
             </nav>
-            <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-4">Vores tjenester</p>
-              <h1 className="text-5xl md:text-6xl font-bold text-secondary mb-6 leading-tight tracking-tight">
-                Alt inden for professionel rengøring
-              </h1>
-              <p className="text-xl text-text-muted leading-relaxed">
-                Fra ugentlig hjemmerengøring til industriel specialrengøring — vi har løsningen, uanset hvad dit behov er.
-              </p>
+            <p className="eyebrow reveal">Vores ydelser</p>
+            <h1 className="reveal d1">Alt inden for professionel erhvervsrengøring</h1>
+            <p className="lead reveal d2">
+              Fra det daglige kontor til specialopgaver med skærpede hygiejnekrav. Vi sammensætter
+              en fast aftale, der passer til jeres bygning, branche og budget — leveret af et fast,
+              oplært team.
+            </p>
+            <div className="introstrip">
+              <div className="introstat reveal d2"><div className="v tnum">6 brancher</div><div className="l">Specialiseret erfaring</div></div>
+              <div className="introstat reveal d3"><div className="v tnum">24 timer</div><div className="l">Svar på dit tilbud</div></div>
+              <div className="introstat reveal d4"><div className="v">INSTA 800</div><div className="l">Dokumenteret kvalitet</div></div>
             </div>
           </div>
+        </header>
+
+        <section className="wrap" style={{ paddingBottom: "var(--pad-section)" }}>
+          {SERVICES.map((svc) => (
+            <article key={svc.id} className={`svcrow${svc.flip ? " flip" : ""}`} id={svc.id}>
+              <div className="media reveal">
+                <ImageFrame label={`Foto · ${svc.title}`} />
+                <span className="tag-float">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    {svc.tagIcon}
+                  </svg>
+                  {svc.tag}
+                </span>
+              </div>
+              <div className="reveal d1">
+                <span className="svc-num">{svc.num}</span>
+                <h2>{svc.title}</h2>
+                <p className="desc">{svc.desc}</p>
+                <ul className="feat">
+                  {svc.features.map((f) => (
+                    <li key={f}><span className="ck"><Check /></span>{f}</li>
+                  ))}
+                </ul>
+                <div className="acts">
+                  <Link className="btn btn-primary" to="/priser#beregner">Beregn pris</Link>
+                  <Link className="btn btn-ghost" to="/kontakt">Få et tilbud</Link>
+                </div>
+              </div>
+            </article>
+          ))}
         </section>
 
-        {/* Services */}
-        <section className="py-20" style={{ contain: "layout style paint" }}>
-          <div className="max-w-6xl mx-auto px-6 space-y-16">
-            {SERVICES.map((service, i) => (
-              <article
-                key={service.id}
-                className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${i % 2 === 1 ? "lg:flex-row-reverse" : ""}`}
-              >
-                <div className={i % 2 === 1 ? "lg:order-2" : ""}>
-                  <div className={`w-14 h-14 rounded-xl ${service.accent} flex items-center justify-center mb-5`}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d={service.icon}/>
-                    </svg>
-                  </div>
-                  <p className="text-xs font-bold uppercase tracking-[0.15em] text-text-muted mb-2">{service.tagline}</p>
-                  <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4 tracking-tight">{service.title}</h2>
-                  <p className="text-text-muted leading-relaxed mb-6">{service.desc}</p>
-                  <ul className="space-y-3 mb-8">
-                    {service.features.map((f) => (
-                      <li key={f} className="flex items-start gap-3">
-                        <span className="w-5 h-5 rounded-full bg-sky-50 text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                        </span>
-                        <span className="text-text-muted text-sm">{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    to="/kontakt"
-                    className="inline-flex items-center gap-2 px-7 py-3.5 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-all hover:shadow-lg hover:shadow-primary/25"
-                  >
-                    Få et tilbud
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </Link>
-                </div>
-                <div className={`rounded-3xl bg-gradient-to-br ${service.color} p-12 flex items-center justify-center min-h-64 border border-sky-100 ${i % 2 === 1 ? "lg:order-1" : ""}`}>
-                  <div className="text-center">
-                    <div className="w-24 h-24 rounded-full bg-white/60 flex items-center justify-center mx-auto mb-4 shadow-sm">
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0369a1" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d={service.icon}/>
-                      </svg>
-                    </div>
-                    <p className="text-2xl font-bold text-secondary">{service.title}</p>
-                  </div>
-                </div>
-              </article>
+        <section className="blk wrap" style={{ borderTop: "1px solid var(--hairline)" }}>
+          <div className="shead reveal">
+            <p className="eyebrow">Sådan kommer I i gang</p>
+            <h2 style={{ fontSize: "var(--fs-display)" }}>Fra tilbud til rent kontor på 4 trin</h2>
+          </div>
+          <div className="steps">
+            {STEPS.map((s, i) => (
+              <div key={s.n} className={`step reveal${i ? ` d${i}` : ""}`}>
+                <div className="n">{s.n}</div>
+                <h4>{s.title}</h4>
+                <p>{s.desc}</p>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="py-20 bg-primary" style={{ contain: "layout style paint" }}>
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-5 tracking-tight">
-              Ikke sikker på, hvad du har brug for?
-            </h2>
-            <p className="text-blue-100/80 text-lg mb-10">
-              Kontakt os for en gratis rådgivning, og vi finder den rette løsning til dig.
-            </p>
-            <Link
-              to="/kontakt"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary font-semibold rounded-full hover:bg-sky-50 transition-all hover:shadow-xl"
-            >
-              Kontakt os gratis
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </Link>
+        <section className="blk wrap" style={{ paddingTop: 0 }}>
+          <div className="ctaband reveal">
+            <h2>Ikke sikker på, hvad I har brug for?</h2>
+            <p>Beregn en vejledende pris på under et minut — eller ring, så finder vi den rette løsning sammen.</p>
+            <div className="row">
+              <Link className="btn btn-white btn-lg" to="/priser#beregner">Beregn din pris <Arrow /></Link>
+              <a
+                className="btn btn-lg"
+                style={{ background: "rgba(255,255,255,.14)", color: "#fff", border: "1px solid rgba(255,255,255,.3)" }}
+                href="tel:+4570123456"
+              >
+                Ring 70 12 34 56
+              </a>
+            </div>
           </div>
         </section>
       </main>

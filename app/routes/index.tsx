@@ -2,7 +2,9 @@ import type { Route } from "./+types/index";
 import { Link } from "react-router";
 import { Header } from "~/components/Header";
 import { Footer } from "~/components/Footer";
+import { ImageFrame } from "~/components/ImageFrame";
 import { JsonLd } from "~/components/JsonLd";
+import { useSiteEffects } from "~/hooks/useSiteEffects";
 import { buildMeta } from "~/lib/seo";
 
 const SITE_URL = "https://rengoering.dk";
@@ -10,11 +12,11 @@ const SITE_URL = "https://rengoering.dk";
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Define waters A/S | Professionel Rengøring",
+      title: "Rengøringsfirma ApS — Professionel erhvervsrengøring",
       description:
-        "Define waters A/S leverer professionel rengøring til private og erhverv. Erfarne rengøringsfolk, fleksible aftaler og garanteret kvalitet. Kontakt os for et uforpligtende tilbud.",
+        "Vi holder kontorer, klinikker og butikker rene for over 500 danske virksomheder. Fast team, fleksible aftaler og dokumenteret kvalitet efter INSTA 800.",
       url: SITE_URL,
-      siteName: "Define waters A/S",
+      siteName: "Rengøringsfirma ApS",
       type: "website",
       locale: "da_DK",
     }),
@@ -25,245 +27,387 @@ export function meta(_: Route.MetaArgs) {
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "Define waters A/S – Professionel Rengøring",
+  name: "Rengøringsfirma ApS – Professionel erhvervsrengøring",
   description:
-    "Professionel rengøring til private og erhverv i Danmark. Skræddersyede løsninger og garanteret kvalitet.",
+    "Professionel erhvervsrengøring i hele Danmark. Fast team, dokumenteret kvalitet og svanemærkede produkter.",
   url: SITE_URL,
 };
 
+const Star = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+  </svg>
+);
+
+const Arrow = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M5 12h14M12 5l7 7-7 7" />
+  </svg>
+);
+
 const SERVICES = [
   {
-    icon: "M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10",
-    title: "Hjemmerengøring",
-    desc: "Regelmæssig og grundig rengøring af din bolig, tilpasset dine behov og ønsker.",
+    icon: <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" />,
+    title: "Kontorrengøring",
+    desc: "Daglig eller ugentlig rengøring uden for arbejdstid — så I møder ind til et friskt og repræsentativt kontor.",
   },
   {
-    icon: "M20 7l-8-4-8 4m16 0v10l-8 4m-8-4V7m8 4l8-4M12 11l-8-4",
-    title: "Erhvervsrengøring",
-    desc: "Skab et rent og professionelt arbejdsmiljø. Vi rengør kontor, butik eller lager.",
-  },
-  {
-    icon: "M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10",
+    icon: <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10" />,
     title: "Vinduespolering",
-    desc: "Skinnende rene ruder uden striber. Udendørs og indendørs polering af alle vinduestyper.",
+    desc: "Streg- og pletfri facader, butiksruder og glaspartier — indvendigt og udvendigt, også i højde.",
   },
   {
-    icon: "M5 12H3l9-9 9 9h-2v7a2 2 0 01-2 2H7a2 2 0 01-2-2v-7",
-    title: "Til- og fraflytning",
-    desc: "Dybderengøring ved ind- eller udflytning, så du er sikret fuld depositum tilbage.",
+    icon: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></>,
+    title: "Klinik & sundhed",
+    desc: "Dokumenteret hygiejnerengøring til klinikker, tandlæger og institutioner med skærpede krav.",
   },
-];
-
-const STATS = [
-  { value: "10+", label: "Års erfaring" },
-  { value: "500+", label: "Tilfredse kunder" },
-  { value: "98%", label: "Tilfredshedsrate" },
-  { value: "100%", label: "Miljøvenlige midler" },
+  {
+    icon: <path d="M3 9h18M9 21V9M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" />,
+    title: "Trappevask",
+    desc: "Faste aftaler for ejendomme og boligforeninger — rene trapper, elevatorer og fællesarealer.",
+  },
+  {
+    icon: <path d="M5 12H3l9-9 9 9h-2v7a2 2 0 01-2 2H7a2 2 0 01-2-2z" />,
+    title: "Flytterengøring",
+    desc: "Grundig fraflytningsrengøring til erhvervslejemål — afleveret efter aftale, klar til syn.",
+  },
+  {
+    icon: <path d="M12 2L2 7l10 5 10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />,
+    title: "Industri & lager",
+    desc: "Specialrengøring af produktion, lager og haller med professionelt udstyr og sikkerhed i top.",
+  },
 ];
 
 const TRUST_POINTS = [
   {
-    path: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4",
-    title: "Forsikret & certificeret",
-    desc: "Vi er fuldt forsikrede og arbejder efter branchens bedste standarder.",
+    icon: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />,
+    title: "Fuldt forsikret & kvalitetssikret",
+    desc: "Vi arbejder efter INSTA 800 og dokumenterer hvert besøg, så I altid kan se kvaliteten sort på hvidt.",
   },
   {
-    path: "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 6v6l4 2",
-    title: "Fleksible tider",
-    desc: "Vi tilpasser os din hverdag — dag, aften eller weekend efter aftale.",
+    icon: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+    title: "Fast team & fast kontaktperson",
+    desc: "Samme dygtige medarbejdere hver gang — og én person I altid kan ringe til.",
   },
   {
-    path: "M12 2.69l5.66 5.66a8 8 0 11-11.31 0z",
-    title: "Miljøvenlige produkter",
-    desc: "Vi benytter udelukkende godkendte, miljøvenlige rengøringsmidler.",
-  },
-  {
-    path: "M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z",
-    title: "Garanteret kvalitet",
-    desc: "Ikke tilfreds? Vi kommer tilbage og gør det rigtigt — helt gratis.",
+    icon: <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z" />,
+    title: "Svanemærkede produkter",
+    desc: "Skånsomt for mennesker og miljø — uden at gå på kompromis med det rene resultat.",
   },
 ];
 
-export default function Index(_: Route.ComponentProps) {
+const CERTS = [
+  {
+    icon: <><circle cx="12" cy="8" r="6" /><path d="M9 13.5L7 22l5-3 5 3-2-8.5" /></>,
+    title: "INSTA 800",
+    sub: "Kvalitetsstandard",
+  },
+  {
+    icon: <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z" />,
+    title: "Svanemærket",
+    sub: "Miljøcertificeret",
+  },
+  {
+    icon: <path d="M20 6L9 17l-5-5" />,
+    title: "ISO 9001",
+    sub: "Kvalitetsledelse",
+  },
+  {
+    icon: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />,
+    title: "Forsikret",
+    sub: "Op til 10 mio. kr.",
+  },
+];
+
+const TESTIMONIALS = [
+  {
+    quote: "Vores kontor har aldrig været renere. Teamet er diskret, grundigt og altid til tiden. Vi anbefaler dem varmt.",
+    name: "Mette Sørensen",
+    role: "Facility Manager, Nordhavn Group",
+    initials: "MS",
+  },
+  {
+    quote: "Skift til Rengøringsfirma var den bedste beslutning. Fast kontaktperson, og kvaliteten er konsekvent måned efter måned.",
+    name: "Jonas Brandt",
+    role: "Ejer, Habit Retail",
+    initials: "JB",
+  },
+  {
+    quote: "Professionelle fra første kontakt. De forstod vores hygiejnekrav som klinik og leverer hver gang upåklageligt.",
+    name: "Camilla Holm",
+    role: "Klinikleder, Klinik Sund",
+    initials: "CH",
+  },
+];
+
+const CLIENT_LOGOS = [
+  { shape: <circle cx="12" cy="12" r="10" />, name: "Nordhavn Group" },
+  { shape: <rect x="3" y="3" width="18" height="18" rx="4" />, name: "Bolig&Co" },
+  { shape: <path d="M12 2l9 5v10l-9 5-9-5V7z" />, name: "Mejlby A/S" },
+  { shape: <path d="M3 12h18M12 3v18" />, name: "Klinik Sund" },
+  { shape: <polygon points="12,2 22,20 2,20" />, name: "Vestas Kontor" },
+  { shape: <circle cx="12" cy="12" r="9" />, name: "Habit Retail" },
+  { shape: <rect x="4" y="4" width="16" height="16" rx="8" />, name: "Nordisk Tech" },
+];
+
+const STATS = [
+  { count: 500, decimals: 0, suffix: "+", label: "Faste erhvervskunder" },
+  { count: 15, decimals: 0, suffix: "", label: "Års erfaring" },
+  { count: 1.8, decimals: 1, suffix: "M", label: "m² rengjort årligt" },
+  { count: 4.9, decimals: 1, suffix: "", label: "Trustpilot-score" },
+];
+
+const STEPS = [
+  { n: "TRIN 01", title: "Uforpligtende besøg", desc: "Vi kommer forbi, ser lokalerne og lytter til jeres behov." },
+  { n: "TRIN 02", title: "Skræddersyet tilbud", desc: "I får en fast, gennemsigtig pris inden for 24 timer." },
+  { n: "TRIN 03", title: "Opstart med fast team", desc: "Samme medarbejdere hver gang — oplært i jeres lokaler." },
+  { n: "TRIN 04", title: "Løbende kvalitetstjek", desc: "Vi dokumenterer og følger op, så standarden holder." },
+];
+
+function StarRow({ count = 5 }: { count?: number }) {
   return (
-    <div className="flex flex-col min-h-screen">
+    <span className="stars">
+      {Array.from({ length: count }, (_, i) => <Star key={i} />)}
+    </span>
+  );
+}
+
+export default function Index(_: Route.ComponentProps) {
+  useSiteEffects();
+
+  return (
+    <div className="page">
       <Header />
       <JsonLd data={websiteSchema} />
 
-      <main className="flex-1">
-        {/* Hero */}
-        <section className="relative overflow-hidden bg-secondary" style={{ contain: "layout style paint" }}>
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle at 20% 50%, #0ea5e9 0%, transparent 50%), radial-gradient(circle at 80% 20%, #06b6d4 0%, transparent 40%)",
-            }}
-            aria-hidden="true"
-          />
-          <div className="relative max-w-6xl mx-auto px-6 py-28 md:py-40">
-            <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent mb-6">
-                Define waters A/S
-              </p>
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-[1.05] tracking-tight">
-                Rent og{" "}
-                <span className="text-primary-light">strålende</span>{" "}
-                — hver gang
+      <main>
+        {/* hero */}
+        <header className="hero">
+          <div className="wrap hero-grid">
+            <div>
+              <p className="eyebrow reveal">Erhvervsrengøring i hele Danmark</p>
+              <h1 className="reveal d1">
+                Et <span className="hl">skinnende</span> indtryk — hver eneste dag
               </h1>
-              <p className="text-lg md:text-xl text-text-on-dark/70 mb-10 leading-relaxed max-w-2xl">
-                Professionel rengøring til private og erhverv. Vi leverer skræddersyede løsninger med erfarne fagfolk og miljøvenlige produkter.
+              <p className="hero-lead reveal d2">
+                Vi holder kontorer, klinikker og butikker rene for over 500 danske virksomheder.
+                Fast team, fleksible aftaler og dokumenteret kvalitet efter INSTA 800.
               </p>
-              <div className="flex flex-wrap gap-4">
-                <Link
-                  to="/kontakt"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-95"
-                >
-                  Få et gratis tilbud
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              <div className="hero-cta reveal d3">
+                <Link className="btn btn-primary" to="/priser#beregner">
+                  Beregn din pris <Arrow />
                 </Link>
-                <Link
-                  to="/tjenester"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 text-white font-semibold rounded-full hover:bg-white/20 transition-all border border-white/20"
-                >
-                  Se vores tjenester
+                <Link className="btn btn-ghost" to="/tjenester">
+                  Se vores ydelser
                 </Link>
+              </div>
+              <div className="hero-rating reveal d4">
+                <StarRow />
+                <span className="rtxt">
+                  <b>4,9/5</b> på Trustpilot · baseret på <b>512</b> anmeldelser
+                </span>
+              </div>
+            </div>
+
+            <div className="hero-media reveal d2">
+              <ImageFrame className="hero-img-frame" label="Lyst, rent kontor" />
+              <div className="float-card tl">
+                <span className="fc-ico">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                </span>
+                <div>
+                  <div className="fc-big tnum">98%</div>
+                  <div className="fc-sub">fastholder os år efter år</div>
+                </div>
+              </div>
+              <div className="float-card br">
+                <div className="fc-big tnum">15 år</div>
+                <div className="fc-sub">i branchen siden 2010</div>
               </div>
             </div>
           </div>
-        </section>
+        </header>
 
-        {/* Stats */}
-        <section className="bg-primary" aria-label="Nøgletal">
-          <div className="max-w-6xl mx-auto px-6 py-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {STATS.map((s) => (
-                <div key={s.label} className="text-center">
-                  <p className="text-4xl font-bold text-white mb-1">{s.value}</p>
-                  <p className="text-sm text-blue-100/80">{s.label}</p>
-                </div>
+        {/* logo wall */}
+        <section className="logos" aria-label="Kunder">
+          <p className="logos-label reveal">
+            Betroet af <b>500+ virksomheder</b> — fra startups til børsnoterede
+          </p>
+          <div className="marquee">
+            <div className="marquee-track">
+              {[...CLIENT_LOGOS, ...CLIENT_LOGOS].map((logo, i) => (
+                <span className="clientlogo" key={i}>
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">{logo.shape}</svg>
+                  {logo.name}
+                </span>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Services */}
-        <section className="py-24 bg-surface-dim" style={{ contain: "layout style paint" }}>
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-4">Vores tjenester</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-secondary mb-5 tracking-tight">
-                Hvad kan vi hjælpe med?
+        {/* stats band */}
+        <section className="statsband" aria-label="Nøgletal">
+          <div className="wrap statsgrid">
+            {STATS.map((s, i) => (
+              <div key={s.label} className={`stat reveal${i ? ` d${i}` : ""}`}>
+                <div className="v">
+                  <span data-count={s.count} data-decimals={s.decimals} className="tnum">0</span>
+                  {s.suffix && <span className="u">{s.suffix}</span>}
+                </div>
+                <div className="l">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* services */}
+        <section className="blk wrap" id="tjenester">
+          <div className="shead reveal">
+            <p className="eyebrow">Vores ydelser</p>
+            <h2>Rengøring til alle slags erhverv</h2>
+            <p>
+              Fra det daglige kontor til specialopgaver med høje hygiejnekrav. Vi sammensætter
+              en aftale, der passer præcis til jeres bygning og budget.
+            </p>
+          </div>
+          <div className="svc-grid">
+            {SERVICES.map((svc, i) => (
+              <article key={svc.title} className={`svc reveal${i % 3 ? ` d${i % 3}` : ""}`} data-tilt="4">
+                <div className="svc-ico">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    {svc.icon}
+                  </svg>
+                </div>
+                <h3>{svc.title}</h3>
+                <p>{svc.desc}</p>
+                <Link to="/tjenester" className="more">
+                  Læs mere <Arrow />
+                </Link>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* why + certs */}
+        <section className="blk wrap">
+          <div className="why-grid">
+            <div>
+              <p className="eyebrow reveal">Hvorfor Rengøringsfirma</p>
+              <h2 className="reveal d1" style={{ fontSize: "var(--fs-display)", marginTop: 16 }}>
+                En partner I kan stole blindt på
               </h2>
-              <p className="text-text-muted text-lg leading-relaxed">
-                Vi tilbyder et bredt udvalg af professionelle rengøringsydelser — alt fra ugentlig hjemmerengøring til specialrengøring.
-              </p>
+              <div className="why-list">
+                {TRUST_POINTS.map((p, i) => (
+                  <div key={p.title} className={`why-item reveal d${i + 1}`}>
+                    <span className="why-ico">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        {p.icon}
+                      </svg>
+                    </span>
+                    <div>
+                      <h4>{p.title}</h4>
+                      <p>{p.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {SERVICES.map((service) => (
-                <Link
-                  key={service.title}
-                  to="/tjenester"
-                  className="group bg-white rounded-2xl p-7 shadow-sm border border-sky-50 hover:border-primary/30 hover:shadow-md transition-all"
-                >
-                  <div className="w-14 h-14 rounded-xl bg-sky-50 text-primary flex items-center justify-center mb-5 group-hover:bg-primary group-hover:text-white transition-all">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d={service.icon}/>
+            <div className="certs reveal d2">
+              {CERTS.map((c) => (
+                <div className="cert" key={c.title}>
+                  <div className="cert-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      {c.icon}
                     </svg>
                   </div>
-                  <h3 className="text-lg font-bold text-secondary mb-2">{service.title}</h3>
-                  <p className="text-sm text-text-muted leading-relaxed">{service.desc}</p>
-                  <span className="inline-flex items-center gap-1 mt-4 text-sm font-medium text-primary group-hover:gap-2 transition-all">
-                    Læs mere
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </span>
-                </Link>
+                  <b>{c.title}</b>
+                  <span>{c.sub}</span>
+                </div>
               ))}
             </div>
-            <div className="text-center mt-12">
-              <Link
-                to="/tjenester"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-all hover:shadow-lg hover:shadow-primary/25"
-              >
-                Se alle tjenester
-              </Link>
+          </div>
+        </section>
+
+        {/* coverage */}
+        <section className="blk cover" id="dækning">
+          <div className="wrap cover-grid">
+            <div>
+              <p className="eyebrow reveal">Dækning</p>
+              <h2 className="reveal d1" style={{ fontSize: "var(--fs-display)", marginTop: 16 }}>
+                Vi rengør i hele Danmark
+              </h2>
+              <p className="reveal d2" style={{ fontSize: "var(--fs-lead)", color: "var(--text-dim)", marginTop: 18, lineHeight: 1.5 }}>
+                Med teams fordelt over hele landet er vi aldrig langt væk. Fra hovedstaden til
+                Vestjylland — samme høje standard, uanset hvor I holder til.
+              </p>
+              <div className="cities reveal d3">
+                {["København", "Aarhus", "Odense", "Aalborg", "Esbjerg", "+ 90 byer"].map((c) => (
+                  <span className="city-chip" key={c}><i />{c}</span>
+                ))}
+              </div>
+            </div>
+            <div className="map reveal d2">
+              <DKMap />
             </div>
           </div>
         </section>
 
-        {/* Why us */}
-        <section className="py-24" style={{ contain: "layout style paint" }}>
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-4">Hvorfor vælge os</p>
-                <h2 className="text-4xl md:text-5xl font-bold text-secondary mb-6 tracking-tight">
-                  Rengøring du kan stole på
-                </h2>
-                <p className="text-text-muted text-lg leading-relaxed mb-10">
-                  Hos Define waters A/S kombinerer vi faglig ekspertise med en personlig tilgang. Vi er ikke tilfredse, før du er det.
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {TRUST_POINTS.map((point) => (
-                    <div key={point.title} className="flex gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-sky-50 text-primary flex items-center justify-center flex-shrink-0">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={point.path}/></svg>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-secondary mb-1">{point.title}</h3>
-                        <p className="text-sm text-text-muted leading-relaxed">{point.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="relative">
-                <div className="rounded-3xl overflow-hidden bg-gradient-to-br from-sky-50 via-blue-50 to-sky-100 aspect-square flex items-center justify-center">
-                  <div className="text-center p-12">
-                    <div className="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#0369a1" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-                        <line x1="9" y1="9" x2="9.01" y2="9"/>
-                        <line x1="15" y1="9" x2="15.01" y2="9"/>
-                      </svg>
-                    </div>
-                    <p className="text-6xl font-bold text-primary mb-2">98%</p>
-                    <p className="text-xl font-semibold text-secondary mb-2">Kundetilfredshed</p>
-                    <p className="text-text-muted">Baseret på kundeevalueringer</p>
+        {/* testimonials */}
+        <section className="blk wrap" id="anmeldelser">
+          <div className="shead center reveal">
+            <p className="eyebrow">Anmeldelser</p>
+            <h2>Det siger vores kunder</h2>
+            <p>Gennemsnitlig 4,9 ud af 5 stjerner på tværs af Trustpilot og Google.</p>
+          </div>
+          <div className="tcards">
+            {TESTIMONIALS.map((t, i) => (
+              <article key={t.name} className={`tcard reveal${i ? ` d${i}` : ""}`}>
+                <StarRow />
+                <blockquote>“{t.quote}”</blockquote>
+                <div className="who">
+                  <div className="avatar" aria-hidden="true">{t.initials}</div>
+                  <div>
+                    <b>{t.name}</b>
+                    <span>{t.role}</span>
                   </div>
                 </div>
-                <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl p-5 shadow-lg border border-sky-50">
-                  <p className="text-3xl font-bold text-primary">500+</p>
-                  <p className="text-sm text-text-muted">Tilfredse kunder</p>
-                </div>
-              </div>
-            </div>
+              </article>
+            ))}
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="py-20 bg-primary" style={{ contain: "layout style paint" }}>
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-5 tracking-tight">
-              Klar til et renere hjem eller kontor?
-            </h2>
-            <p className="text-blue-100/80 text-lg mb-10 max-w-xl mx-auto">
-              Kontakt os i dag og få et gratis, uforpligtende tilbud inden for 24 timer.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Link
-                to="/kontakt"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary font-semibold rounded-full hover:bg-sky-50 transition-all hover:shadow-xl"
-              >
-                Kontakt os nu
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </Link>
+        {/* process */}
+        <section className="blk wrap">
+          <div className="shead reveal">
+            <p className="eyebrow">Sådan kommer I i gang</p>
+            <h2 style={{ fontSize: "var(--fs-display)" }}>Fra tilbud til rent kontor på 4 trin</h2>
+          </div>
+          <div className="steps">
+            {STEPS.map((s, i) => (
+              <div key={s.n} className={`step reveal${i ? ` d${i}` : ""}`}>
+                <div className="n">{s.n}</div>
+                <h4>{s.title}</h4>
+                <p>{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA band */}
+        <section className="blk wrap" id="kontakt">
+          <div className="ctaband reveal">
+            <h2>Klar til et renere arbejdsmiljø?</h2>
+            <p>Få et gratis, uforpligtende tilbud inden for 24 timer. Ingen binding — bare et renere kontor.</p>
+            <div className="row">
+              <a className="btn btn-white" href="tel:+4570123456">Ring 70 12 34 56</a>
               <a
-                href="mailto:info@define-waters.dk"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-primary-dark text-white font-semibold rounded-full hover:bg-secondary transition-all border border-blue-400/30"
+                className="btn"
+                style={{ background: "rgba(255,255,255,.14)", color: "#fff", border: "1px solid rgba(255,255,255,.3)" }}
+                href="mailto:kontakt@rengoeringsfirma.dk"
               >
-                info@define-waters.dk
+                Skriv til os
               </a>
             </div>
           </div>
@@ -272,5 +416,68 @@ export default function Index(_: Route.ComponentProps) {
 
       <Footer />
     </div>
+  );
+}
+
+/* ── Static SVG map of Denmark ───────────────────────────────────────── */
+function DKMap() {
+  const cities = [
+    { x: 505, y: 282, name: "København", anchor: "start" as const },
+    { x: 238, y: 248, name: "Aarhus", anchor: "start" as const },
+    { x: 335, y: 322, name: "Odense", anchor: "start" as const },
+    { x: 214, y: 128, name: "Aalborg", anchor: "start" as const },
+    { x: 138, y: 344, name: "Esbjerg", anchor: "start" as const },
+  ];
+  const regions: Array<[number, number, number, number]> = [
+    [190, 295, 80, 120],
+    [245, 240, 52, 88],
+    [212, 132, 46, 72],
+    [232, 70, 18, 30],
+    [150, 350, 38, 40],
+    [335, 322, 44, 36],
+    [470, 288, 54, 54],
+    [452, 372, 52, 18],
+    [575, 332, 13, 14],
+  ];
+  const inRegions = (x: number, y: number) => {
+    for (const [cx, cy, rx, ry] of regions) {
+      const dx = (x - cx) / rx;
+      const dy = (y - cy) / ry;
+      if (dx * dx + dy * dy <= 1) return true;
+    }
+    return false;
+  };
+  const dots: Array<{ x: number; y: number }> = [];
+  for (let y = 30; y < 440; y += 15) {
+    for (let x = 90; x < 600; x += 15) {
+      const jx = x + (((x * 7 + y) % 5) - 2) * 0.6;
+      const jy = y + (((y * 5 + x) % 5) - 2) * 0.6;
+      if (inRegions(jx, jy)) dots.push({ x: jx, y: jy });
+    }
+  }
+
+  return (
+    <svg viewBox="0 0 600 480" width="100%" style={{ height: "auto", overflow: "visible" }} role="img" aria-label="Dækningskort over Danmark">
+      {dots.map((d, i) => (
+        <circle key={i} cx={d.x.toFixed(1)} cy={d.y.toFixed(1)} r={2.4} fill="rgba(8,106,119,0.20)" />
+      ))}
+      {cities.map((c) => (
+        <g key={c.name}>
+          <circle cx={c.x} cy={c.y} r={9} fill="#0EA5B7" opacity={0.18} />
+          <circle cx={c.x} cy={c.y} r={5} fill="#0EA5B7" />
+          <text
+            x={c.x + 12}
+            y={c.y + 4}
+            textAnchor={c.anchor}
+            fill="#06262B"
+            fontSize="15"
+            fontWeight="700"
+            fontFamily="'Inter', sans-serif"
+          >
+            {c.name}
+          </text>
+        </g>
+      ))}
+    </svg>
   );
 }

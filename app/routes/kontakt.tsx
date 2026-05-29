@@ -1,8 +1,11 @@
+import { useState } from "react";
+import type { FormEvent } from "react";
 import type { Route } from "./+types/kontakt";
 import { Link } from "react-router";
 import { Header } from "~/components/Header";
 import { Footer } from "~/components/Footer";
 import { JsonLd } from "~/components/JsonLd";
+import { useSiteEffects } from "~/hooks/useSiteEffects";
 import { buildMeta } from "~/lib/seo";
 
 const SITE_URL = "https://rengoering.dk";
@@ -11,11 +14,11 @@ const PAGE_URL = `${SITE_URL}/kontakt`;
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Kontakt | Define waters A/S",
+      title: "Kontakt — Rengøringsfirma ApS",
       description:
-        "Kontakt Define waters A/S for et gratis og uforpligtende tilbud på rengøring. Vi svarer inden for 24 timer. Send os en besked eller skriv direkte til info@define-waters.dk.",
+        "Få et gratis, uforpligtende tilbud inden for 24 timer. Skriv eller ring — vi vender tilbage hurtigst muligt.",
       url: PAGE_URL,
-      siteName: "Define waters A/S",
+      siteName: "Rengøringsfirma ApS",
       type: "website",
       locale: "da_DK",
     }),
@@ -26,8 +29,8 @@ export function meta(_: Route.MetaArgs) {
 const pageSchema = {
   "@context": "https://schema.org",
   "@type": "ContactPage",
-  name: "Kontakt – Define waters A/S",
-  description: "Kontakt os for et gratis tilbud på professionel rengøring.",
+  name: "Kontakt – Rengøringsfirma ApS",
+  description: "Kontakt os for et gratis tilbud på erhvervsrengøring.",
   url: PAGE_URL,
   breadcrumb: {
     "@type": "BreadcrumbList",
@@ -38,229 +41,286 @@ const pageSchema = {
   },
 };
 
-const INFO_ITEMS = [
-  {
-    icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
-    label: "E-mail",
-    value: "info@define-waters.dk",
-    href: "mailto:info@define-waters.dk",
-  },
-  {
-    icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z",
-    label: "Adresse",
-    value: "Boeslunde Byvej 76",
-    href: undefined,
-  },
-  {
-    icon: "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 6v6l4 2",
-    label: "Åbningstider",
-    value: "Man–fre: 7:00–17:00",
-    href: undefined,
-  },
+const Arrow = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M5 12h14M12 5l7 7-7 7" />
+  </svg>
+);
+
+const SERVICE_OPTIONS = [
+  "Kontorrengøring",
+  "Erhvervs- / butiksrengøring",
+  "Klinik & hygiejnerengøring",
+  "Vinduespolering",
+  "Trappevask & ejendomsservice",
+  "Flytte- / byggerengøring",
+  "Industri & lager",
+  "Andet",
 ];
 
-export default function Kontakt(_: Route.ComponentProps) {
+type Errors = Partial<Record<"navn" | "email" | "tlf", boolean>>;
+
+function ContactForm() {
+  const [errors, setErrors] = useState<Errors>({});
+  const [sent, setSent] = useState(false);
+  const [values, setValues] = useState({
+    navn: "",
+    virksomhed: "",
+    email: "",
+    tlf: "",
+    type: SERVICE_OPTIONS[0],
+    besked: "",
+  });
+
+  const update = (k: keyof typeof values) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setValues((v) => ({ ...v, [k]: e.target.value }));
+    if (k === "navn" || k === "email" || k === "tlf") {
+      setErrors((prev) => ({ ...prev, [k]: false }));
+    }
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(values.email.trim());
+    const next: Errors = {
+      navn: values.navn.trim() === "",
+      email: !emailOk,
+      tlf: values.tlf.trim().length < 6,
+    };
+    setErrors(next);
+    if (next.navn || next.email || next.tlf) {
+      const first = (Object.keys(next) as Array<keyof Errors>).find((k) => next[k]);
+      if (first) {
+        const el = document.getElementById(first) as HTMLInputElement | null;
+        el?.focus();
+      }
+      return;
+    }
+    setSent(true);
+  };
+
+  const resetForm = () => {
+    setSent(false);
+    setValues({ navn: "", virksomhed: "", email: "", tlf: "", type: SERVICE_OPTIONS[0], besked: "" });
+    setErrors({});
+  };
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="formcard reveal">
+      {!sent && (
+        <form onSubmit={handleSubmit} noValidate>
+          <h2>Få et gratis tilbud</h2>
+          <p className="sub">Udfyld formularen, så kontakter vi dig hurtigst muligt.</p>
+          <div className="fgrid">
+            <div className={`field${errors.navn ? " invalid" : ""}`}>
+              <label htmlFor="navn">Navn <span className="req">*</span></label>
+              <input
+                type="text"
+                id="navn"
+                name="navn"
+                autoComplete="name"
+                placeholder="Dit fulde navn"
+                value={values.navn}
+                onChange={update("navn")}
+                className={errors.navn ? "err" : ""}
+              />
+              <span className="msg">Skriv venligst dit navn.</span>
+            </div>
+            <div className="field">
+              <label htmlFor="virksomhed">Virksomhed</label>
+              <input
+                type="text"
+                id="virksomhed"
+                name="virksomhed"
+                autoComplete="organization"
+                placeholder="Firmanavn"
+                value={values.virksomhed}
+                onChange={update("virksomhed")}
+              />
+              <span className="msg">&nbsp;</span>
+            </div>
+            <div className={`field${errors.email ? " invalid" : ""}`}>
+              <label htmlFor="email">E-mail <span className="req">*</span></label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                autoComplete="email"
+                placeholder="dig@firma.dk"
+                value={values.email}
+                onChange={update("email")}
+                className={errors.email ? "err" : ""}
+              />
+              <span className="msg">Skriv venligst en gyldig e-mail.</span>
+            </div>
+            <div className={`field${errors.tlf ? " invalid" : ""}`}>
+              <label htmlFor="tlf">Telefon <span className="req">*</span></label>
+              <input
+                type="tel"
+                id="tlf"
+                name="tlf"
+                autoComplete="tel"
+                placeholder="+45 .."
+                value={values.tlf}
+                onChange={update("tlf")}
+                className={errors.tlf ? "err" : ""}
+              />
+              <span className="msg">Skriv venligst et telefonnummer.</span>
+            </div>
+            <div className="field full">
+              <label htmlFor="type">Hvad drejer det sig om?</label>
+              <select id="type" name="type" value={values.type} onChange={update("type")}>
+                {SERVICE_OPTIONS.map((o) => (
+                  <option key={o}>{o}</option>
+                ))}
+              </select>
+              <span className="msg">&nbsp;</span>
+            </div>
+            <div className="field full">
+              <label htmlFor="besked">Besked</label>
+              <textarea
+                id="besked"
+                name="besked"
+                placeholder="Fortæl os kort om jeres lokaler, areal og ønsker .."
+                value={values.besked}
+                onChange={update("besked")}
+              />
+              <span className="msg">&nbsp;</span>
+            </div>
+          </div>
+          <div className="form-foot">
+            <button type="submit" className="btn btn-primary btn-lg">
+              Send forespørgsel <Arrow />
+            </button>
+            <span className="note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              Vi svarer inden for 24 timer
+            </span>
+          </div>
+        </form>
+      )}
+      {sent && (
+        <div className="success show">
+          <div className="ok">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+          </div>
+          <h3>Tak for din henvendelse!</h3>
+          <p>Vi har modtaget din forespørgsel og vender tilbage inden for 24 timer.</p>
+          <button type="button" className="btn btn-ghost" style={{ marginTop: 22 }} onClick={resetForm}>
+            Send en ny
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function Kontakt(_: Route.ComponentProps) {
+  useSiteEffects();
+
+  return (
+    <div className="page">
       <Header />
       <JsonLd data={pageSchema} />
 
-      <main className="flex-1">
-        {/* Hero */}
-        <section className="bg-surface-dim py-20 border-b border-sky-100" style={{ contain: "layout style paint" }}>
-          <div className="max-w-6xl mx-auto px-6">
-            <nav className="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Brødkrumme">
-              <Link to="/" className="hover:text-primary transition-colors">Forside</Link>
-              <span aria-hidden="true">/</span>
-              <span className="text-text font-medium">Kontakt</span>
+      <main>
+        <header className="phero">
+          <div className="wrap">
+            <nav className="crumb reveal" aria-label="Brødkrumme">
+              <Link to="/">Forside</Link>
+              <span className="sep">/</span>
+              <b>Kontakt</b>
             </nav>
-            <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-4">Kontakt os</p>
-              <h1 className="text-5xl md:text-6xl font-bold text-secondary mb-6 leading-tight tracking-tight">
-                Vi er klar til at hjælpe dig
-              </h1>
-              <p className="text-xl text-text-muted leading-relaxed">
-                Udfyld formularen herunder, og vi vender tilbage med et gratis tilbud inden for 24 timer.
-              </p>
-            </div>
+            <p className="eyebrow reveal">Kontakt</p>
+            <h1 className="reveal d1">Lad os tage en snak</h1>
+            <p className="lead reveal d2">
+              Skriv eller ring — vi vender tilbage med et gratis, uforpligtende tilbud inden for
+              24 timer. Ingen binding, bare et renere kontor.
+            </p>
           </div>
-        </section>
+        </header>
 
-        {/* Contact Section */}
-        <section className="py-24" style={{ contain: "layout style paint" }}>
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-16">
-              {/* Form */}
-              <div className="lg:col-span-3">
-                <h2 className="text-2xl font-bold text-secondary mb-8">Send os en besked</h2>
-                <form
-                  action="mailto:info@define-waters.dk"
-                  method="get"
-                  encType="text/plain"
-                  className="space-y-6"
-                  aria-label="Kontaktformular"
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="navn" className="block text-sm font-semibold text-secondary mb-2">
-                        Dit navn <span className="text-red-500" aria-label="påkrævet">*</span>
-                      </label>
-                      <input
-                        id="navn"
-                        name="navn"
-                        type="text"
-                        required
-                        placeholder="Fornavn Efternavn"
-                        className="w-full px-4 py-3 rounded-xl border border-sky-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-secondary placeholder:text-text-muted/50 bg-white"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-semibold text-secondary mb-2">
-                        E-mail <span className="text-red-500" aria-label="påkrævet">*</span>
-                      </label>
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        required
-                        placeholder="din@email.dk"
-                        className="w-full px-4 py-3 rounded-xl border border-sky-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-secondary placeholder:text-text-muted/50 bg-white"
-                      />
-                    </div>
-                  </div>
+        <section className="wrap" style={{ paddingBottom: "var(--pad-section)" }}>
+          <div className="kgrid">
+            <ContactForm />
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="telefon" className="block text-sm font-semibold text-secondary mb-2">
-                        Telefon
-                      </label>
-                      <input
-                        id="telefon"
-                        name="telefon"
-                        type="tel"
-                        placeholder="+45 12 34 56 78"
-                        className="w-full px-4 py-3 rounded-xl border border-sky-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-secondary placeholder:text-text-muted/50 bg-white"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="tjeneste" className="block text-sm font-semibold text-secondary mb-2">
-                        Tjeneste
-                      </label>
-                      <select
-                        id="tjeneste"
-                        name="tjeneste"
-                        className="w-full px-4 py-3 rounded-xl border border-sky-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-secondary bg-white"
-                      >
-                        <option value="">Vælg tjeneste...</option>
-                        <option value="hjem">Hjemmerengøring</option>
-                        <option value="erhverv">Erhvervsrengøring</option>
-                        <option value="vinduer">Vinduespolering</option>
-                        <option value="flytning">Til-/fraflytning</option>
-                        <option value="industri">Industrirengøring</option>
-                        <option value="andet">Andet</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="adresse" className="block text-sm font-semibold text-secondary mb-2">
-                      Adresse / lokation
-                    </label>
-                    <input
-                      id="adresse"
-                      name="adresse"
-                      type="text"
-                      placeholder="Gadenavn 1, 4200 By"
-                      className="w-full px-4 py-3 rounded-xl border border-sky-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-secondary placeholder:text-text-muted/50 bg-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="besked" className="block text-sm font-semibold text-secondary mb-2">
-                      Besked <span className="text-red-500" aria-label="påkrævet">*</span>
-                    </label>
-                    <textarea
-                      id="besked"
-                      name="besked"
-                      required
-                      rows={5}
-                      placeholder="Fortæl os om dit rengøringsbehov: størrelse, frekvens, specielle ønsker..."
-                      className="w-full px-4 py-3 rounded-xl border border-sky-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-secondary placeholder:text-text-muted/50 bg-white resize-none"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-all hover:shadow-lg hover:shadow-primary/25 active:scale-[0.99]"
-                  >
-                    Send besked
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <line x1="22" y1="2" x2="11" y2="13"/>
-                      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            <aside>
+              <div className="infocard reveal d1">
+                <div className="iitem">
+                  <span className="ii">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
                     </svg>
-                  </button>
-                  <p className="text-xs text-text-muted text-center">
-                    Vi svarer inden for 24 timer på hverdage.
-                  </p>
-                </form>
+                  </span>
+                  <div>
+                    <div className="il">Ring til os</div>
+                    <div className="iv"><a href="tel:+4570123456">+45 70 12 34 56</a></div>
+                  </div>
+                </div>
+                <div className="iitem">
+                  <span className="ii">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z" />
+                      <path d="M22 6l-10 7L2 6" />
+                    </svg>
+                  </span>
+                  <div>
+                    <div className="il">Skriv til os</div>
+                    <div className="iv"><a href="mailto:kontakt@rengoeringsfirma.dk">kontakt@rengoeringsfirma.dk</a></div>
+                  </div>
+                </div>
+                <div className="iitem">
+                  <span className="ii">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M12 7v5l3 2" />
+                    </svg>
+                  </span>
+                  <div>
+                    <div className="il">Åbningstider</div>
+                    <div className="iv">Man–fre 7–18 · Lør 8–14</div>
+                  </div>
+                </div>
+                <div className="iitem">
+                  <span className="ii">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                  </span>
+                  <div>
+                    <div className="il">Hovedkontor</div>
+                    <div className="iv">Erhvervsvej 12, 2600 Glostrup</div>
+                  </div>
+                </div>
               </div>
 
-              {/* Contact Info */}
-              <aside className="lg:col-span-2">
-                <h2 className="text-2xl font-bold text-secondary mb-8">Kontaktoplysninger</h2>
-                <div className="space-y-6 mb-10">
-                  {INFO_ITEMS.map((item) => (
-                    <div key={item.label} className="flex gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-sky-50 text-primary flex items-center justify-center flex-shrink-0">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                          <path d={item.icon}/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">{item.label}</p>
-                        {item.href ? (
-                          <a href={item.href} className="text-secondary font-semibold hover:text-primary transition-colors">
-                            {item.value}
-                          </a>
-                        ) : (
-                          <p className="text-secondary font-semibold">{item.value}</p>
-                        )}
-                      </div>
-                    </div>
+              <div className="promise reveal d2" style={{ marginTop: 18 }}>
+                <div className="pi">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9z" />
+                  </svg>
+                </div>
+                <h3>Svar inden for 24 timer</h3>
+                <p>
+                  Vi ved, en travl hverdag ikke kan vente. Derfor får du altid et hurtigt svar —
+                  og et tilbud, du kan forstå.
+                </p>
+              </div>
+
+              <div className="map-side reveal d3">
+                <p className="eyebrow">Vi dækker hele Danmark</p>
+                <div className="cities" style={{ marginTop: 14 }}>
+                  {["København", "Aarhus", "Odense", "Aalborg", "+ 90 byer"].map((c) => (
+                    <span className="city-chip" key={c}><i />{c}</span>
                   ))}
                 </div>
-
-                {/* Promise Box */}
-                <div className="bg-surface-dim rounded-2xl p-7 border border-sky-100">
-                  <h3 className="font-bold text-secondary mb-4 text-lg">Vores løfte til dig</h3>
-                  <ul className="space-y-3">
-                    {[
-                      "Gratis og uforpligtende tilbud",
-                      "Svar inden for 24 timer",
-                      "Ingen skjulte gebyrer",
-                      "Tilfredshedsgaranti",
-                    ].map((promise) => (
-                      <li key={promise} className="flex items-center gap-3">
-                        <span className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                        </span>
-                        <span className="text-sm text-text-muted">{promise}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="mt-6 bg-primary rounded-2xl p-7">
-                  <p className="text-white font-semibold mb-1">Foretrækker du e-mail?</p>
-                  <a
-                    href="mailto:info@define-waters.dk"
-                    className="text-blue-100 hover:text-white transition-colors font-medium break-all"
-                  >
-                    info@define-waters.dk
-                  </a>
-                </div>
-              </aside>
-            </div>
+              </div>
+            </aside>
           </div>
         </section>
       </main>

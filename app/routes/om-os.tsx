@@ -2,7 +2,9 @@ import type { Route } from "./+types/om-os";
 import { Link } from "react-router";
 import { Header } from "~/components/Header";
 import { Footer } from "~/components/Footer";
+import { ImageFrame } from "~/components/ImageFrame";
 import { JsonLd } from "~/components/JsonLd";
+import { useSiteEffects } from "~/hooks/useSiteEffects";
 import { buildMeta } from "~/lib/seo";
 
 const SITE_URL = "https://rengoering.dk";
@@ -11,11 +13,11 @@ const PAGE_URL = `${SITE_URL}/om-os`;
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Om Os | Define waters A/S",
+      title: "Om os — Rengøringsfirma ApS",
       description:
-        "Lær Define waters A/S at kende. Vi er et erfarent rengøringsfirma med over 10 års erfaring. Vores mission er at levere ren, sund og bæredygtig rengøring til hvert eneste kunde.",
+        "15 år med rent arbejde og glade kunder. Vi er et landsdækkende rengøringsfirma med fast team, INSTA 800-kvalitet og svanemærkede produkter.",
       url: PAGE_URL,
-      siteName: "Define waters A/S",
+      siteName: "Rengøringsfirma ApS",
       type: "website",
       locale: "da_DK",
     }),
@@ -26,187 +28,228 @@ export function meta(_: Route.MetaArgs) {
 const pageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "Om Os – Define waters A/S",
-  description: "Lær Define waters A/S at kende – vores mission, værdier og team.",
+  name: "Om os – Rengøringsfirma ApS",
+  description: "Lær Rengøringsfirma ApS at kende.",
   url: PAGE_URL,
   breadcrumb: {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Forside", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "Om Os", item: PAGE_URL },
+      { "@type": "ListItem", position: 2, name: "Om os", item: PAGE_URL },
     ],
   },
 };
 
+const STATS = [
+  { count: 2010, decimals: 0, suffix: "", label: "Grundlagt" },
+  { count: 500, decimals: 0, suffix: "+", label: "Faste kunder" },
+  { count: 65, decimals: 0, suffix: "", label: "Medarbejdere" },
+  { count: 95, decimals: 0, suffix: "+", label: "Byer dækket" },
+];
+
+const TIMELINE = [
+  { year: "2010", title: "Det hele begynder", desc: "To fagfolk, én varevogn og de første kontorer i København." },
+  { year: "2014", title: "Certificeret efter INSTA 800", desc: "Vi indfører dokumenteret kvalitetsstyring på hver eneste opgave." },
+  { year: "2018", title: "100 faste erhvervskunder", desc: "Vi udvider til Aarhus og Odense og bliver svanemærket-leverandør." },
+  { year: "2022", title: "Landsdækkende", desc: "Teams i hele Danmark — fra hovedstaden til Vestjylland." },
+  { year: "I dag", title: "500+ kunder & 4,9 på Trustpilot", desc: "Samme ambition som dag ét: grundigt, ordentligt, til tiden." },
+];
+
 const VALUES = [
   {
-    icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
-    title: "Kvalitet",
-    desc: "Vi kompromitterer aldrig med kvaliteten. Hvert eneste job udføres med samme høje standard.",
+    icon: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></>,
+    title: "Kvalitet, der kan måles",
+    desc: "Vi arbejder efter INSTA 800 og dokumenterer hvert besøg. Er du ikke tilfreds, kommer vi tilbage — gratis.",
   },
   {
-    icon: "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75",
-    title: "Pålidelighed",
-    desc: "Vi møder til aftalt tid, hver gang. Dine aftaler er hellige for os.",
+    icon: <><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" /></>,
+    title: "Faste, dygtige mennesker",
+    desc: "Samme team hver gang, oplært i jeres lokaler. Ordentlige løn- og arbejdsvilkår — det kan mærkes på kvaliteten.",
   },
   {
-    icon: "M12 2.69l5.66 5.66a8 8 0 11-11.31 0z",
-    title: "Bæredygtighed",
-    desc: "Vi bruger kun miljøgodkendte rengøringsmidler, der er skånsomme over for natur og mennesker.",
-  },
-  {
-    icon: "M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z",
-    title: "Omsorg",
-    desc: "Vi behandler din bolig eller dit kontor, som var det vores eget.",
+    icon: <path d="M11 20A7 7 0 019 6c4-2 9-2 11 0 0 6-4 12-9 14zM4 21c2-5 5-8 8-10" />,
+    title: "Grønt som standard",
+    desc: "Svanemærkede midler og effektive metoder, der er skånsomme mod både mennesker og miljø.",
   },
 ];
 
+const TEAM = [
+  { name: "Lars Mikkelsen", role: "Stifter & direktør" },
+  { name: "Anne Kjær", role: "Driftschef" },
+  { name: "Mehmet Yılmaz", role: "Teamleder, Sjælland" },
+  { name: "Sofie Dahl", role: "Kundeansvarlig" },
+];
+
+const CERTS = [
+  { title: "INSTA 800", sub: "Kvalitetsstandard", icon: <><circle cx="12" cy="8" r="6" /><path d="M9 13.5L7 22l5-3 5 3-2-8.5" /></> },
+  { title: "Svanemærket", sub: "Miljøcertificeret", icon: <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z" /> },
+  { title: "ISO 9001", sub: "Kvalitetsledelse", icon: <path d="M20 6L9 17l-5-5" /> },
+  { title: "Forsikret", sub: "Op til 10 mio. kr.", icon: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /> },
+];
+
+const PortraitIcon = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="9" r="4" />
+    <path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" />
+  </svg>
+);
+
 export default function OmOs(_: Route.ComponentProps) {
+  useSiteEffects();
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="page">
       <Header />
       <JsonLd data={pageSchema} />
 
-      <main className="flex-1">
-        {/* Hero */}
-        <section className="bg-surface-dim py-20 border-b border-sky-100" style={{ contain: "layout style paint" }}>
-          <div className="max-w-6xl mx-auto px-6">
-            <nav className="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Brødkrumme">
-              <Link to="/" className="hover:text-primary transition-colors">Forside</Link>
-              <span aria-hidden="true">/</span>
-              <span className="text-text font-medium">Om os</span>
+      <main>
+        <header className="phero">
+          <div className="wrap">
+            <nav className="crumb reveal" aria-label="Brødkrumme">
+              <Link to="/">Forside</Link>
+              <span className="sep">/</span>
+              <b>Om os</b>
             </nav>
-            <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-4">Om os</p>
-              <h1 className="text-5xl md:text-6xl font-bold text-secondary mb-6 leading-tight tracking-tight">
-                Vi definerer standarden for ren&shy;gøring
-              </h1>
-              <p className="text-xl text-text-muted leading-relaxed">
-                Define waters A/S er mere end et rengøringsfirma. Vi er din partner i at skabe rene, sunde og indbydende omgivelser — dag efter dag.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Story */}
-        <section className="py-24" style={{ contain: "layout style paint" }}>
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-6 tracking-tight">
-                  Vores historie
-                </h2>
-                <div className="space-y-4 text-text-muted leading-relaxed">
-                  <p>
-                    Define waters A/S blev grundlagt med en klar vision: at revolutionere rengøringsbranchen med professionel ekspertise, miljøbevidsthed og ægte omsorg for kunderne.
-                  </p>
-                  <p>
-                    Med base på Sjælland har vi i over et årti opbygget et solidt ry for kvalitet og pålidelighed. Vores team af erfarne rengøringsspecialister betjener hundredvis af private og erhvervskunder over hele Danmark.
-                  </p>
-                  <p>
-                    Vi tror på, at et rent miljø er fundamentet for et godt liv og en produktiv hverdag. Derfor sætter vi os ikke bare til opgave at rengøre — vi skaber rum, hvor mennesker trives.
-                  </p>
-                </div>
-                <div className="mt-8 flex flex-wrap gap-4">
-                  <Link
-                    to="/kontakt"
-                    className="inline-flex items-center gap-2 px-7 py-3.5 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-all hover:shadow-lg hover:shadow-primary/25"
-                  >
-                    Kontakt os
-                  </Link>
-                  <Link
-                    to="/tjenester"
-                    className="inline-flex items-center gap-2 px-7 py-3.5 border border-primary/30 text-primary font-semibold rounded-full hover:bg-sky-50 transition-all"
-                  >
-                    Se tjenester
-                  </Link>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-surface-dim rounded-2xl p-8 text-center border border-sky-100">
-                  <p className="text-5xl font-bold text-primary mb-2">10+</p>
-                  <p className="text-text-muted font-medium">Års erfaring</p>
-                </div>
-                <div className="bg-primary rounded-2xl p-8 text-center mt-8">
-                  <p className="text-5xl font-bold text-white mb-2">500+</p>
-                  <p className="text-blue-100/80 font-medium">Tilfredse kunder</p>
-                </div>
-                <div className="bg-secondary rounded-2xl p-8 text-center">
-                  <p className="text-5xl font-bold text-white mb-2">98%</p>
-                  <p className="text-text-on-dark/70 font-medium">Tilfredshedsrate</p>
-                </div>
-                <div className="bg-surface-dim rounded-2xl p-8 text-center border border-sky-100 mt-8">
-                  <p className="text-5xl font-bold text-primary mb-2">100%</p>
-                  <p className="text-text-muted font-medium">Miljøvenlige</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Mission */}
-        <section className="py-24 bg-secondary" style={{ contain: "layout style paint" }}>
-          <div className="max-w-6xl mx-auto px-6 text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent mb-4">Vores mission</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight max-w-3xl mx-auto">
-              At levere rengøring i verdensklasse — med omtanke
-            </h2>
-            <p className="text-text-on-dark/60 text-xl max-w-2xl mx-auto leading-relaxed">
-              Vi definerer ikke bare vandets rensende kraft — vi definerer standarden for, hvad professionel rengøring kan og bør være.
+            <p className="eyebrow reveal">Om os</p>
+            <h1 className="reveal d1">15 år med rent arbejde — og glade kunder</h1>
+            <p className="lead reveal d2">
+              Siden 2010 har vi hjulpet danske virksomheder med at tage sig godt ud. Vi startede med
+              ét team og én varevogn. I dag rengør vi for over 500 kunder i hele landet — men
+              ambitionen er den samme: at gøre det grundigt, og at gøre det ordentligt.
             </p>
           </div>
-        </section>
+        </header>
 
-        {/* Values */}
-        <section className="py-24 bg-surface-dim" style={{ contain: "layout style paint" }}>
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-4">Vores værdier</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-secondary mb-5 tracking-tight">
-                Det vi tror på
-              </h2>
-              <p className="text-text-muted text-lg leading-relaxed">
-                Vores værdier er ikke bare ord på en mur. De er kernen i alt, hvad vi gør.
+        {/* story */}
+        <section className="wrap" style={{ paddingBottom: "var(--pad-section)" }}>
+          <div className="story">
+            <div className="reveal">
+              <ImageFrame label="Holdet og varevognen" />
+            </div>
+            <div className="reveal d1">
+              <p className="eyebrow">Vores historie</p>
+              <h2 style={{ marginTop: 14 }}>Bygget på tillid, ét rent lokale ad gangen</h2>
+              <p>
+                Rengøringsfirma blev grundlagt af to fagfolk med en simpel idé: rengøring skal være
+                til at stole på. Ingen skjulte gebyrer, ingen udskiftning af personale hver uge —
+                bare et fast team, der kender jeres lokaler og leverer samme høje standard hver gang.
+              </p>
+              <p>
+                I dag er vi vokset til et landsdækkende hold, men vi driver stadig firmaet som en
+                lokal partner. Det er derfor 98% af vores kunder bliver hos os år efter år.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {VALUES.map((v) => (
-                <div key={v.title} className="bg-white rounded-2xl p-7 border border-sky-100 shadow-sm">
-                  <div className="w-12 h-12 rounded-xl bg-sky-50 text-primary flex items-center justify-center mb-5">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d={v.icon}/>
+          </div>
+        </section>
+
+        {/* stats */}
+        <section className="statsband">
+          <div className="wrap statsgrid">
+            {STATS.map((s, i) => (
+              <div key={s.label} className={`stat reveal${i ? ` d${i}` : ""}`}>
+                <div className="v">
+                  <span data-count={s.count} data-decimals={s.decimals} className="tnum">0</span>
+                  {s.suffix && <span className="u">{s.suffix}</span>}
+                </div>
+                <div className="l">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* timeline */}
+        <section className="blk wrap">
+          <div className="shead center reveal">
+            <p className="eyebrow">Rejsen</p>
+            <h2>Fra varevogn til landsdækkende</h2>
+          </div>
+          <div className="tl">
+            {TIMELINE.map((t, i) => (
+              <div key={t.year} className={`tl-item reveal${i ? ` d${i}` : ""}`}>
+                <div className="tl-year">{t.year}</div>
+                <h4>{t.title}</h4>
+                <p>{t.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* values */}
+        <section className="blk" style={{ background: "var(--bg-sunken)", paddingBlock: "var(--pad-section)" }}>
+          <div className="wrap">
+            <div className="shead center reveal">
+              <p className="eyebrow">Det vi står for</p>
+              <h2>Tre løfter, vi aldrig går på kompromis med</h2>
+            </div>
+            <div className="vals">
+              {VALUES.map((v, i) => (
+                <div key={v.title} className={`val reveal${i ? ` d${i}` : ""}`}>
+                  <div className="vi">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      {v.icon}
                     </svg>
                   </div>
-                  <h3 className="text-lg font-bold text-secondary mb-2">{v.title}</h3>
-                  <p className="text-sm text-text-muted leading-relaxed">{v.desc}</p>
+                  <h4>{v.title}</h4>
+                  <p>{v.desc}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="py-20 bg-primary" style={{ contain: "layout style paint" }}>
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-5 tracking-tight">
-              Vil du vide mere om Define waters A/S?
-            </h2>
-            <p className="text-blue-100/80 text-lg mb-10">
-              Ring eller skriv til os — vi er klar til at hjælpe.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
+        {/* team */}
+        <section className="blk wrap">
+          <div className="shead center reveal">
+            <p className="eyebrow">Holdet</p>
+            <h2>Menneskene bag de rene resultater</h2>
+            <p>Et udpluk af de faste ansigter, du møder.</p>
+          </div>
+          <div className="team">
+            {TEAM.map((m, i) => (
+              <div key={m.name} className={`member reveal${i ? ` d${i}` : ""}`}>
+                <ImageFrame label={`Portræt af ${m.name}`} icon={PortraitIcon} style={{ borderRadius: "var(--radius-2xl)" }} />
+                <b>{m.name}</b>
+                <span>{m.role}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* certs */}
+        <section className="blk" style={{ background: "var(--bg-sunken)", paddingBlock: "var(--pad-section)" }}>
+          <div className="wrap">
+            <div className="shead center reveal">
+              <p className="eyebrow">Certificeringer</p>
+              <h2>Dokumenteret, forsikret og godkendt</h2>
+            </div>
+            <div className="certs reveal d1" style={{ gridTemplateColumns: "repeat(4, 1fr)", maxWidth: 900, marginInline: "auto" }}>
+              {CERTS.map((c) => (
+                <div key={c.title} className="cert">
+                  <div className="cert-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      {c.icon}
+                    </svg>
+                  </div>
+                  <b>{c.title}</b>
+                  <span>{c.sub}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="blk wrap">
+          <div className="ctaband reveal">
+            <h2>Skal vi også tage os af jeres lokaler?</h2>
+            <p>Få et gratis tilbud, eller beregn en vejledende pris på under et minut.</p>
+            <div className="row">
+              <Link className="btn btn-white btn-lg" to="/priser#beregner">Beregn din pris</Link>
               <Link
+                className="btn btn-lg"
+                style={{ background: "rgba(255,255,255,.14)", color: "#fff", border: "1px solid rgba(255,255,255,.3)" }}
                 to="/kontakt"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary font-semibold rounded-full hover:bg-sky-50 transition-all hover:shadow-xl"
               >
-                Tag kontakt
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </Link>
-              <Link
-                to="/tjenester"
-                className="inline-flex items-center px-8 py-4 bg-primary-dark text-white font-semibold rounded-full hover:bg-secondary transition-all border border-blue-400/30"
-              >
-                Se vores tjenester
+                Kontakt os
               </Link>
             </div>
           </div>
