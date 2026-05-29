@@ -5,6 +5,7 @@ import { Footer } from "~/components/Footer";
 import { ImageFrame } from "~/components/ImageFrame";
 import { JsonLd } from "~/components/JsonLd";
 import { useSiteEffects } from "~/hooks/useSiteEffects";
+import { PHOTOS } from "~/lib/photos";
 import { buildMeta } from "~/lib/seo";
 
 const SITE_URL = "https://rengoering.dk";
@@ -74,10 +75,10 @@ const VALUES = [
 ];
 
 const TEAM = [
-  { name: "Lars Mikkelsen", role: "Stifter & direktør" },
-  { name: "Anne Kjær", role: "Driftschef" },
-  { name: "Mehmet Yılmaz", role: "Teamleder, Sjælland" },
-  { name: "Sofie Dahl", role: "Kundeansvarlig" },
+  { name: "Lars Mikkelsen", role: "Stifter & direktør", photo: PHOTOS.team1 },
+  { name: "Anne Kjær", role: "Driftschef", photo: PHOTOS.team2 },
+  { name: "Mehmet Yılmaz", role: "Teamleder, Sjælland", photo: PHOTOS.team3 },
+  { name: "Sofie Dahl", role: "Kundeansvarlig", photo: PHOTOS.team4 },
 ];
 
 const CERTS = [
@@ -86,13 +87,6 @@ const CERTS = [
   { title: "ISO 9001", sub: "Kvalitetsledelse", icon: <path d="M20 6L9 17l-5-5" /> },
   { title: "Forsikret", sub: "Op til 10 mio. kr.", icon: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /> },
 ];
-
-const PortraitIcon = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <circle cx="12" cy="9" r="4" />
-    <path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" />
-  </svg>
-);
 
 export default function OmOs(_: Route.ComponentProps) {
   useSiteEffects();
@@ -124,7 +118,7 @@ export default function OmOs(_: Route.ComponentProps) {
         <section className="wrap" style={{ paddingBottom: "var(--pad-section)" }}>
           <div className="story">
             <div className="reveal">
-              <ImageFrame label="Holdet og varevognen" />
+              <ImageFrame src={PHOTOS.story} alt="Holdet på arbejde" />
             </div>
             <div className="reveal d1">
               <p className="eyebrow">Vores historie</p>
@@ -207,7 +201,7 @@ export default function OmOs(_: Route.ComponentProps) {
           <div className="team">
             {TEAM.map((m, i) => (
               <div key={m.name} className={`member reveal${i ? ` d${i}` : ""}`}>
-                <ImageFrame label={`Portræt af ${m.name}`} icon={PortraitIcon} style={{ borderRadius: "var(--radius-2xl)" }} />
+                <ImageFrame src={m.photo} alt={`Portræt af ${m.name}`} style={{ borderRadius: "var(--radius-2xl)" }} />
                 <b>{m.name}</b>
                 <span>{m.role}</span>
               </div>

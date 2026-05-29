@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
 type Props = {
@@ -5,6 +6,8 @@ type Props = {
   style?: CSSProperties;
   icon?: ReactNode;
   label?: string;
+  src?: string;
+  alt?: string;
 };
 
 const DEFAULT_ICON = (
@@ -14,10 +17,21 @@ const DEFAULT_ICON = (
   </svg>
 );
 
-export function ImageFrame({ className = "", style, icon, label }: Props) {
+export function ImageFrame({ className = "", style, icon, label, src, alt }: Props) {
+  const [failed, setFailed] = useState(false);
+  const showImg = src && !failed;
   return (
-    <div className={`img-frame ${className}`.trim()} style={style} role="img" aria-label={label || "Billede"}>
-      <div className="ph-icon" aria-hidden="true">{icon || DEFAULT_ICON}</div>
+    <div
+      className={`img-frame${showImg ? " has-img" : ""} ${className}`.trim()}
+      style={style}
+      role="img"
+      aria-label={alt || label || "Billede"}
+    >
+      {showImg ? (
+        <img src={src} alt={alt || label || ""} loading="lazy" onError={() => setFailed(true)} />
+      ) : (
+        <div className="ph-icon" aria-hidden="true">{icon || DEFAULT_ICON}</div>
+      )}
     </div>
   );
 }

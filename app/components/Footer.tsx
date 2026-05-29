@@ -42,7 +42,7 @@ export function Footer() {
           <div className="fcol">
             <h5>Kontakt</h5>
             <a href="tel:+4570123456">+45 70 12 34 56</a>
-            <a href="mailto:kontakt@rengoeringsfirma.dk">kontakt@rengoeringsfirma.dk</a>
+            <a className="foot-email" href="mailto:kontakt@rengoeringsfirma.dk">kontakt@rengoeringsfirma.dk</a>
             <a>CVR 12 34 56 78</a>
           </div>
         </div>

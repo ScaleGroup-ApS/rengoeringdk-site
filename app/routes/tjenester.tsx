@@ -5,6 +5,7 @@ import { Footer } from "~/components/Footer";
 import { ImageFrame } from "~/components/ImageFrame";
 import { JsonLd } from "~/components/JsonLd";
 import { useSiteEffects } from "~/hooks/useSiteEffects";
+import { PHOTOS } from "~/lib/photos";
 import { buildMeta } from "~/lib/seo";
 
 const SITE_URL = "https://rengoering.dk";
@@ -61,6 +62,7 @@ type Service = {
   tagIcon: React.ReactNode;
   features: string[];
   flip?: boolean;
+  photo: string;
 };
 
 const SERVICES: Service[] = [
@@ -72,6 +74,7 @@ const SERVICES: Service[] = [
     tag: "Mest efterspurgt",
     tagIcon: <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" />,
     features: ["Skriveborde & kontaktflader", "Køkken & kantine", "Toiletter & vådrum", "Gulve, støvsugning & mopning"],
+    photo: PHOTOS.svcKontor,
   },
   {
     id: "vinduer",
@@ -82,6 +85,7 @@ const SERVICES: Service[] = [
     tagIcon: <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10" />,
     features: ["Facader & butiksruder", "Rammer & karme", "Højde & svær adgang", "Faste intervaller"],
     flip: true,
+    photo: PHOTOS.svcVinduer,
   },
   {
     id: "klinik",
@@ -91,6 +95,7 @@ const SERVICES: Service[] = [
     tag: "Hygiejnesikret",
     tagIcon: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></>,
     features: ["Afspritning af kontaktflader", "Behandlings- & venterum", "Farvekodet udstyr", "Dokumentation pr. besøg"],
+    photo: PHOTOS.svcKlinik,
   },
   {
     id: "trappe",
@@ -101,6 +106,7 @@ const SERVICES: Service[] = [
     tagIcon: <path d="M3 9h18M9 21V9M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" />,
     features: ["Trapper & reposer", "Elevatorer & entré", "Fællesarealer", "Vinduer i opgange"],
     flip: true,
+    photo: PHOTOS.svcTrappe,
   },
   {
     id: "flytte",
@@ -110,6 +116,7 @@ const SERVICES: Service[] = [
     tag: "Klar til syn",
     tagIcon: <path d="M5 12H3l9-9 9 9h-2v7a2 2 0 01-2 2H7a2 2 0 01-2-2z" />,
     features: ["Dybderengøring af alt", "Byggestøv & pletter", "Hvidevarer indvendigt", "Vinduer, karme & gulve"],
+    photo: PHOTOS.svcFlytte,
   },
   {
     id: "industri",
@@ -120,6 +127,7 @@ const SERVICES: Service[] = [
     tagIcon: <path d="M12 2L2 7l10 5 10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />,
     features: ["Produktions- & lagerhaller", "Gulvbehandling", "Højtryksrensning", "Sikkerheds- & hygiejnekrav"],
     flip: true,
+    photo: PHOTOS.svcIndustri,
   },
 ];
 
@@ -165,7 +173,7 @@ export default function Tjenester(_: Route.ComponentProps) {
           {SERVICES.map((svc) => (
             <article key={svc.id} className={`svcrow${svc.flip ? " flip" : ""}`} id={svc.id}>
               <div className="media reveal">
-                <ImageFrame label={`Foto · ${svc.title}`} />
+                <ImageFrame src={svc.photo} alt={svc.title} />
                 <span className="tag-float">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     {svc.tagIcon}
