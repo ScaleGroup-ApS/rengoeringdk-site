@@ -459,12 +459,40 @@ function DKMap() {
 
   return (
     <svg viewBox="0 0 600 480" width="100%" style={{ height: "auto", overflow: "visible" }} role="img" aria-label="Dækningskort over Danmark">
+      <style>{`
+        @keyframes dkDotBreathe {
+          0%, 100% { opacity: 0.18; }
+          50%      { opacity: 0.55; }
+        }
+        @keyframes dkCityGlow {
+          0%, 100% { opacity: 0.18; }
+          50%      { opacity: 0.40; }
+        }
+        .dk-dot       { animation: dkDotBreathe 4.2s ease-in-out infinite; }
+        .dk-city-glow { animation: dkCityGlow 2.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+        @media (prefers-reduced-motion: reduce) {
+          .dk-dot, .dk-city-glow { animation: none; }
+          .dk-ring { display: none; }
+        }
+      `}</style>
       {dots.map((d, i) => (
-        <circle key={i} cx={d.x.toFixed(1)} cy={d.y.toFixed(1)} r={2.4} fill="rgba(8,106,119,0.20)" />
+        <circle
+          key={i}
+          className="dk-dot"
+          cx={d.x.toFixed(1)}
+          cy={d.y.toFixed(1)}
+          r={2.4}
+          fill="rgba(8,106,119,0.20)"
+          style={{ animationDelay: `${((i * 53) % 100) / 100 * 4.2}s` }}
+        />
       ))}
-      {cities.map((c) => (
+      {cities.map((c, i) => (
         <g key={c.name}>
-          <circle cx={c.x} cy={c.y} r={9} fill="#0EA5B7" opacity={0.18} />
+          <circle className="dk-ring" cx={c.x} cy={c.y} r={5} fill="#0EA5B7" opacity={0}>
+            <animate attributeName="r" values="5;24;24" dur="2.8s" begin={`${i * 0.4}s`} repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.55;0;0" dur="2.8s" begin={`${i * 0.4}s`} repeatCount="indefinite" />
+          </circle>
+          <circle className="dk-city-glow" cx={c.x} cy={c.y} r={9} fill="#0EA5B7" style={{ animationDelay: `${i * 0.4}s` }} />
           <circle cx={c.x} cy={c.y} r={5} fill="#0EA5B7" />
           <text
             x={c.x + 12}
