@@ -74,13 +74,6 @@ const VALUES = [
   },
 ];
 
-const TEAM = [
-  { name: "Lars Mikkelsen", role: "Stifter & direktør", photo: PHOTOS.team1 },
-  { name: "Anne Kjær", role: "Driftschef", photo: PHOTOS.team2 },
-  { name: "Mehmet Yılmaz", role: "Teamleder, Sjælland", photo: PHOTOS.team3 },
-  { name: "Sofie Dahl", role: "Kundeansvarlig", photo: PHOTOS.team4 },
-];
-
 const CERTS = [
   { title: "INSTA 800", sub: "Kvalitetsstandard", icon: <><circle cx="12" cy="8" r="6" /><path d="M9 13.5L7 22l5-3 5 3-2-8.5" /></> },
   { title: "Svanemærket", sub: "Miljøcertificeret", icon: <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z" /> },
@@ -188,24 +181,6 @@ export default function OmOs(_: Route.ComponentProps) {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* team */}
-        <section className="blk wrap">
-          <div className="shead center reveal">
-            <p className="eyebrow">Holdet</p>
-            <h2>Menneskene bag de rene resultater</h2>
-            <p>Et udpluk af de faste ansigter, du møder.</p>
-          </div>
-          <div className="team">
-            {TEAM.map((m, i) => (
-              <div key={m.name} className={`member reveal${i ? ` d${i}` : ""}`}>
-                <ImageFrame src={m.photo} alt={`Portræt af ${m.name}`} style={{ borderRadius: "var(--radius-2xl)" }} />
-                <b>{m.name}</b>
-                <span>{m.role}</span>
-              </div>
-            ))}
           </div>
         </section>
 

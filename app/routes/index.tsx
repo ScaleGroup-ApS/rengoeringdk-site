@@ -43,8 +43,9 @@ const AUDIENCE_COPY = {
     h1Post: " hjem — uden besværet",
     lead:
       "Vi tager os af rengøringen i dit hjem, så du kan bruge tiden på det vigtige. Fast personale, fleksible aftaler og svanemærkede produkter.",
-    ctaPrimary: "Få et tilbud",
-    ctaSecondary: "Se priser",
+    primaryHref: "/priser?for=privat#beregner",
+    secondaryHref: "/kontakt",
+    secondaryLabel: "Få et tilbud",
     imageAlt: "Lyst, rent privat hjem med store vinduer",
   },
   erhverv: {
@@ -54,8 +55,9 @@ const AUDIENCE_COPY = {
     h1Post: " indtryk — hver eneste dag",
     lead:
       "Vi holder kontorer, klinikker og butikker rene for over 500 danske virksomheder. Fast team, fleksible aftaler og dokumenteret kvalitet efter INSTA 800.",
-    ctaPrimary: "Beregn din pris",
-    ctaSecondary: "Se vores ydelser",
+    primaryHref: "/priser?for=erhverv#beregner",
+    secondaryHref: "/tjenester",
+    secondaryLabel: "Se vores ydelser",
     imageAlt: "Lyst, rent kontor med store vinduer",
   },
 } as const;
@@ -242,11 +244,11 @@ export default function Index(_: Route.ComponentProps) {
               </h1>
               <p className="hero-lead reveal d2">{copy.lead}</p>
               <div className="hero-cta reveal d3">
-                <Link className="btn btn-primary" to="/priser#beregner">
-                  {copy.ctaPrimary} <Arrow />
+                <Link className="btn btn-primary" to={copy.primaryHref}>
+                  Beregn din pris <Arrow />
                 </Link>
-                <Link className="btn btn-ghost" to={audience === "privat" ? "/priser" : "/tjenester"}>
-                  {copy.ctaSecondary}
+                <Link className="btn btn-ghost" to={copy.secondaryHref}>
+                  {copy.secondaryLabel}
                 </Link>
               </div>
               <div className="trust-marks reveal d4">

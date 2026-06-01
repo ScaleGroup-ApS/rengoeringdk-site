@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Route } from "./+types/priser";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { Header } from "~/components/Header";
 import { Footer } from "~/components/Footer";
 import { JsonLd } from "~/components/JsonLd";
@@ -52,14 +52,23 @@ const Check = () => (
   </svg>
 );
 
+type Audience = "privat" | "erhverv";
+
 type PropertyType = { rate: number; name: string; icon: React.ReactNode };
-const TYPES: PropertyType[] = [
+
+const TYPES_PRIVAT: PropertyType[] = [
+  { rate: 2.4, name: "Lejlighed", icon: <path d="M3 21h18M6 21V7l12-4v18M10 9h0M14 9h0M10 13h0M14 13h0M10 17h0M14 17h0" /> },
+  { rate: 2.6, name: "Hus", icon: <><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" /><path d="M9 21v-6h6v6" /></> },
+  { rate: 2.9, name: "Sommerhus", icon: <><path d="M2 22h20M3 22V10l9-7 9 7v12" /><path d="M9 22v-5h6v5" /></> },
+  { rate: 3.4, name: "Flytterengøring", icon: <path d="M5 12H3l9-9 9 9h-2v7a2 2 0 01-2 2H7a2 2 0 01-2-2z" /> },
+];
+
+const TYPES_ERHVERV: PropertyType[] = [
   { rate: 2.2, name: "Kontor", icon: <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" /> },
   { rate: 2.4, name: "Butik", icon: <path d="M3 9l1-5h16l1 5M4 9v11h16V9M4 9h16M9 20v-6h6v6" /> },
   { rate: 3.2, name: "Klinik", icon: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M12 8v6M9 11h6" /></> },
   { rate: 1.6, name: "Lager / industri", icon: <path d="M12 2L2 7l10 5 10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /> },
   { rate: 2.0, name: "Ejendom / trappe", icon: <path d="M3 9h18M9 21V9M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" /> },
-  { rate: 2.6, name: "Privat bolig", icon: <><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" /><path d="M9 21v-6h6v6" /></> },
 ];
 
 type Freq = { mult: number; vpm: number; name: string };
@@ -73,7 +82,17 @@ const FREQS: Freq[] = [
 ];
 
 type Addon = { name: string; add?: number; pct?: number; icon: React.ReactNode; sub: string };
-const ADDONS: Addon[] = [
+
+const ADDONS_PRIVAT: Addon[] = [
+  { name: "Vinduespolering", add: 149, sub: "+149 kr./besøg", icon: <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10" /> },
+  { name: "Ovn & hvidevarer", add: 195, sub: "+195 kr./besøg", icon: <><path d="M3 3h18v18H3z" /><path d="M3 9h18M9 21V9" /></> },
+  { name: "Tøjvask & stryg", add: 129, sub: "+129 kr./besøg", icon: <path d="M3 6h18M6 6v14a2 2 0 002 2h8a2 2 0 002-2V6M9 10h6" /> },
+  { name: "Terrasse & udeareal", add: 175, sub: "+175 kr./besøg", icon: <><path d="M12 2L2 12h3v8h14v-8h3z" /></> },
+  { name: "Aften / weekend", pct: 0.15, sub: "+15% tillæg", icon: <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /> },
+  { name: "Grøn rengøring +", add: 129, sub: "+129 kr./besøg", icon: <path d="M11 20A7 7 0 019 6c4-2 9-2 11 0 0 6-4 12-9 14zM4 21c2-5 5-8 8-10" /> },
+];
+
+const ADDONS_ERHVERV: Addon[] = [
   { name: "Vinduespolering", add: 149, sub: "+149 kr./besøg", icon: <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10" /> },
   { name: "Gulvbehandling", add: 199, sub: "+199 kr./besøg", icon: <path d="M3 9h18M3 15h18M9 3v18M15 3v18" /> },
   { name: "Køkken / kantine", add: 99, sub: "+99 kr./besøg", icon: <path d="M3 2v7c0 1 1 2 2 2s2-1 2-2V2M5 11v11M15 2c-1.5 0-3 2-3 5s1.5 4 3 4v11" /> },
@@ -139,27 +158,53 @@ function m2note(v: number) {
   return "≈ stort erhvervsareal";
 }
 
+const WIZ_STEPS = [
+  { label: "Type" },
+  { label: "Ejendom" },
+  { label: "Areal" },
+  { label: "Frekvens" },
+  { label: "Tilvalg" },
+  { label: "Pris" },
+] as const;
+
 function Prisberegner() {
+  const [searchParams] = useSearchParams();
+  const initialAudience: Audience = searchParams.get("for") === "erhverv" ? "erhverv" : "privat";
+
+  const [step, setStep] = useState(0);
+  const [audience, setAudience] = useState<Audience>(initialAudience);
   const [typeIdx, setTypeIdx] = useState(0);
-  const [m2, setM2] = useState(120);
-  const [freqIdx, setFreqIdx] = useState(2); // Ugentligt
+  const [m2, setM2] = useState(80);
+  const [freqIdx, setFreqIdx] = useState(2);
   const [selectedAddons, setSelectedAddons] = useState<Set<number>>(new Set());
 
-  const type = TYPES[typeIdx];
+  useEffect(() => {
+    const param = searchParams.get("for");
+    if (param === "privat" || param === "erhverv") {
+      setAudience(param);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    setTypeIdx(0);
+    setSelectedAddons(new Set());
+    setM2(audience === "privat" ? 80 : 150);
+  }, [audience]);
+
+  const types = audience === "privat" ? TYPES_PRIVAT : TYPES_ERHVERV;
+  const addons = audience === "privat" ? ADDONS_PRIVAT : ADDONS_ERHVERV;
+  const type = types[typeIdx] ?? types[0];
   const freq = FREQS[freqIdx];
 
   const result = useMemo(() => {
-    const fixedAdd = Array.from(selectedAddons).reduce((sum, i) => {
-      const a = ADDONS[i];
-      return sum + (a.add ?? 0);
-    }, 0);
-    const pctAddon = Array.from(selectedAddons).map((i) => ADDONS[i]).find((a) => a.pct !== undefined);
+    const fixedAdd = Array.from(selectedAddons).reduce((sum, i) => sum + (addons[i]?.add ?? 0), 0);
+    const pctAddon = Array.from(selectedAddons).map((i) => addons[i]).find((a) => a?.pct !== undefined);
     let perVisit = (BASE + m2 * type.rate) * freq.mult + fixedAdd;
     if (pctAddon?.pct) perVisit *= 1 + pctAddon.pct;
     const oneOff = freq.vpm === 0;
     const perMonth = oneOff ? perVisit : perVisit * freq.vpm;
     return { perVisit, perMonth, oneOff };
-  }, [typeIdx, m2, freqIdx, selectedAddons, type.rate, freq.mult, freq.vpm]);
+  }, [m2, type.rate, freq.mult, freq.vpm, selectedAddons, addons]);
 
   const toggleAddon = (i: number) => {
     setSelectedAddons((prev) => {
@@ -170,155 +215,239 @@ function Prisberegner() {
     });
   };
 
+  const goNext = () => setStep((s) => Math.min(s + 1, WIZ_STEPS.length - 1));
+  const goBack = () => setStep((s) => Math.max(s - 1, 0));
+  const goReset = () => {
+    setStep(0);
+    setSelectedAddons(new Set());
+  };
+
   return (
     <div className="calc reveal">
-      <div className="calc-main">
-        {/* Step 1: type */}
-        <div className="cstep">
-          <div className="clabel"><span className="cnum">1</span> Hvad skal vi rengøre? <span className="opt">{type.name}</span></div>
-          <div className="type-grid">
-            {TYPES.map((t, i) => (
-              <button
-                key={t.name}
-                type="button"
-                className={`type-card${i === typeIdx ? " sel" : ""}`}
-                onClick={() => setTypeIdx(i)}
-                aria-pressed={i === typeIdx}
-              >
-                <span className="ti">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    {t.icon}
-                  </svg>
-                </span>
-                <b>{t.name.split(" / ")[0]}</b>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Step 2: m2 */}
-        <div className="cstep">
-          <div className="clabel"><span className="cnum">2</span> Hvor stort er arealet?</div>
-          <div className="m2row">
-            <span className="m2val tnum">{m2.toLocaleString("da-DK")}</span>
-            <span className="m2unit">m²</span>
-            <span className="m2note">{m2note(m2)}</span>
-          </div>
-          <input
-            type="range"
-            className="rng"
-            min={20}
-            max={2000}
-            step={10}
-            value={m2}
-            onChange={(e) => setM2(parseInt(e.target.value, 10))}
-            aria-label="Areal i m²"
-          />
-          <div className="rng-ends"><span>20 m²</span><span>2.000 m²</span></div>
-        </div>
-
-        {/* Step 3: frequency */}
-        <div className="cstep">
-          <div className="clabel"><span className="cnum">3</span> Hvor ofte? <span className="opt">{freq.name}</span></div>
-          <div className="seg">
-            {FREQS.map((f, i) => (
-              <button
-                key={f.name}
-                type="button"
-                className={i === freqIdx ? "sel" : ""}
-                onClick={() => setFreqIdx(i)}
-                aria-pressed={i === freqIdx}
-              >
-                {f.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Step 4: addons */}
-        <div className="cstep">
-          <div className="clabel"><span className="cnum">4</span> Tilvalg <span className="opt">valgfrit</span></div>
-          <div className="addons">
-            {ADDONS.map((a, i) => (
-              <button
-                key={a.name}
-                type="button"
-                className={`addon${selectedAddons.has(i) ? " sel" : ""}`}
-                onClick={() => toggleAddon(i)}
-                aria-pressed={selectedAddons.has(i)}
-              >
-                <span className="ai">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    {a.icon}
-                  </svg>
-                </span>
-                <span className="atxt">
-                  <b>{a.name}</b>
-                  <span>{a.sub}</span>
-                </span>
-                <span className="chk">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </span>
-              </button>
-            ))}
-          </div>
+      <div className="wiz-head">
+        <div className="wiz-steps" aria-label="Trin">
+          {WIZ_STEPS.map((s, i) => (
+            <div
+              key={s.label}
+              className={`wiz-step${i === step ? " active" : ""}${i < step ? " done" : ""}`}
+            >
+              <div className="wiz-dot" aria-hidden="true"><span>{i + 1}</span></div>
+              <div className="wiz-label">{s.label}</div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* result */}
-      <aside className="calc-side">
-        <p className="res-eyebrow">Estimeret pris</p>
-        <div className="res-price tnum">{kr(result.oneOff ? result.perVisit : result.perMonth, result.oneOff ? 5 : 10)}</div>
-        <p className="res-per">{result.oneOff ? "engangspris · ekskl. moms" : "pr. måned · ekskl. moms"}</p>
+      <div className="wiz-body">
+        <div className="wiz-count">Trin {step + 1} af {WIZ_STEPS.length}</div>
 
-        <div className="res-visit">
-          <div>
-            <div className="rv tnum">{kr(result.perVisit, 5)}</div>
-            <span>pr. besøg</span>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <div className="rv tnum">
-              {result.oneOff ? "1" : freq.vpm.toLocaleString("da-DK", { maximumFractionDigits: 1 })}
+        {step === 0 && (
+          <>
+            <h3 className="wiz-title">Hvem er du?</h3>
+            <p className="wiz-sub">Vi tilpasser priser og tilvalg efter, om det er til hjemmet eller virksomheden.</p>
+            <div className="aud-grid">
+              <button
+                type="button"
+                className={`aud-card${audience === "privat" ? " sel" : ""}`}
+                onClick={() => setAudience("privat")}
+                aria-pressed={audience === "privat"}
+              >
+                <span className="aud-ico">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
+                    <path d="M9 21v-6h6v6" />
+                  </svg>
+                </span>
+                <b>Privat</b>
+                <span>Hjem, lejlighed, sommerhus</span>
+              </button>
+              <button
+                type="button"
+                className={`aud-card${audience === "erhverv" ? " sel" : ""}`}
+                onClick={() => setAudience("erhverv")}
+                aria-pressed={audience === "erhverv"}
+              >
+                <span className="aud-ico">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" />
+                  </svg>
+                </span>
+                <b>Erhverv</b>
+                <span>Kontor, butik, klinik, ejendom</span>
+              </button>
             </div>
-            <span>besøg / måned</span>
-          </div>
-        </div>
+          </>
+        )}
 
-        <div className="res-break">
-          <div className="rb">
-            <span>{freq.name} · {m2} m²</span>
-            <span>{kr(result.perVisit, 5)} / besøg</span>
-          </div>
-          {selectedAddons.size > 0 && (
-            <div className="rb">
-              <span>Tilvalg</span>
-              <span>{selectedAddons.size} valgt</span>
+        {step === 1 && (
+          <>
+            <h3 className="wiz-title">Hvad skal vi rengøre?</h3>
+            <p className="wiz-sub">Vælg den type, der passer bedst — vi tilpasser pris og opgaver derefter.</p>
+            <div className="type-grid">
+              {types.map((t, i) => (
+                <button
+                  key={t.name}
+                  type="button"
+                  className={`type-card${i === typeIdx ? " sel" : ""}`}
+                  onClick={() => setTypeIdx(i)}
+                  aria-pressed={i === typeIdx}
+                >
+                  <span className="ti">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      {t.icon}
+                    </svg>
+                  </span>
+                  <b>{t.name.split(" / ")[0]}</b>
+                </button>
+              ))}
             </div>
-          )}
-        </div>
+          </>
+        )}
 
-        <div className="res-cta">
-          <Link className="btn btn-white btn-lg" to="/kontakt">
-            Få præcist tilbud <Arrow />
-          </Link>
-          <a
-            className="btn btn-lg"
-            style={{ background: "rgba(255,255,255,.14)", color: "#fff", border: "1px solid rgba(255,255,255,.3)" }}
-            href="tel:+4570123456"
-          >
-            Ring 70 12 34 56
-          </a>
-        </div>
-        <p className="res-note">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 16v-4M12 8h.01" />
-          </svg>
-          Vejledende estimat. Endelig pris fastsættes efter et gratis besøg og afhænger af lokalernes tilstand.
-        </p>
-      </aside>
+        {step === 2 && (
+          <>
+            <h3 className="wiz-title">Hvor stort er arealet?</h3>
+            <p className="wiz-sub">Justér skyderen — vi viser en omtrentlig størrelseskategori for at hjælpe.</p>
+            <div className="m2row">
+              <span className="m2val tnum">{m2.toLocaleString("da-DK")}</span>
+              <span className="m2unit">m²</span>
+              <span className="m2note">{m2note(m2)}</span>
+            </div>
+            <input
+              type="range"
+              className="rng"
+              min={20}
+              max={2000}
+              step={10}
+              value={m2}
+              onChange={(e) => setM2(parseInt(e.target.value, 10))}
+              aria-label="Areal i m²"
+            />
+            <div className="rng-ends"><span>20 m²</span><span>2.000 m²</span></div>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <h3 className="wiz-title">Hvor ofte skal vi komme?</h3>
+            <p className="wiz-sub">De fleste vælger ugentligt eller hver 14. dag. Du kan altid ændre det senere.</p>
+            <div className="seg">
+              {FREQS.map((f, i) => (
+                <button
+                  key={f.name}
+                  type="button"
+                  className={i === freqIdx ? "sel" : ""}
+                  onClick={() => setFreqIdx(i)}
+                  aria-pressed={i === freqIdx}
+                >
+                  {f.name}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {step === 4 && (
+          <>
+            <h3 className="wiz-title">Tilvalg <span style={{ fontWeight: 600, color: "var(--text-mute)", fontSize: ".75em" }}>(valgfrit)</span></h3>
+            <p className="wiz-sub">Læg ekstra ydelser oveni — eller spring videre, hvis du ikke har brug for nogen.</p>
+            <div className="addons">
+              {addons.map((a, i) => (
+                <button
+                  key={a.name}
+                  type="button"
+                  className={`addon${selectedAddons.has(i) ? " sel" : ""}`}
+                  onClick={() => toggleAddon(i)}
+                  aria-pressed={selectedAddons.has(i)}
+                >
+                  <span className="ai">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      {a.icon}
+                    </svg>
+                  </span>
+                  <span className="atxt">
+                    <b>{a.name}</b>
+                    <span>{a.sub}</span>
+                  </span>
+                  <span className="chk">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {step === 5 && (
+          <aside className="calc-side" style={{ margin: "0 -1px", borderRadius: 16 }}>
+            <p className="res-eyebrow">Estimeret pris · {audience === "privat" ? "Privat" : "Erhverv"}</p>
+            <div className="res-price tnum">{kr(result.oneOff ? result.perVisit : result.perMonth, result.oneOff ? 5 : 10)}</div>
+            <p className="res-per">{result.oneOff ? "engangspris · ekskl. moms" : "pr. måned · ekskl. moms"}</p>
+
+            <div className="res-visit">
+              <div>
+                <div className="rv tnum">{kr(result.perVisit, 5)}</div>
+                <span>pr. besøg</span>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div className="rv tnum">
+                  {result.oneOff ? "1" : freq.vpm.toLocaleString("da-DK", { maximumFractionDigits: 1 })}
+                </div>
+                <span>besøg / måned</span>
+              </div>
+            </div>
+
+            <div className="res-break">
+              <div className="rb"><span>Type</span><span>{type.name}</span></div>
+              <div className="rb"><span>Areal</span><span>{m2.toLocaleString("da-DK")} m²</span></div>
+              <div className="rb"><span>Frekvens</span><span>{freq.name}</span></div>
+              {selectedAddons.size > 0 && (
+                <div className="rb"><span>Tilvalg</span><span>{selectedAddons.size} valgt</span></div>
+              )}
+            </div>
+
+            <div className="res-cta">
+              <Link className="btn btn-white btn-lg" to="/kontakt">
+                Få præcist tilbud <Arrow />
+              </Link>
+              <a
+                className="btn btn-lg"
+                style={{ background: "rgba(255,255,255,.14)", color: "#fff", border: "1px solid rgba(255,255,255,.3)" }}
+                href="tel:+4570123456"
+              >
+                Ring 70 12 34 56
+              </a>
+            </div>
+            <p className="res-note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4M12 8h.01" />
+              </svg>
+              Vejledende estimat. Endelig pris fastsættes efter et gratis besøg og afhænger af lokalernes tilstand.
+            </p>
+          </aside>
+        )}
+      </div>
+
+      <div className="wiz-nav">
+        {step > 0 ? (
+          <button type="button" className="btn btn-ghost" onClick={goBack}>
+            ← Tilbage
+          </button>
+        ) : <span />}
+        <span className="spacer" />
+        {step < WIZ_STEPS.length - 1 ? (
+          <button type="button" className="btn btn-primary" onClick={goNext}>
+            Næste <Arrow />
+          </button>
+        ) : (
+          <button type="button" className="btn btn-ghost" onClick={goReset}>
+            Start forfra
+          </button>
+        )}
+      </div>
     </div>
   );
 }

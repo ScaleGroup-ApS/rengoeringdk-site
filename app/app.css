@@ -415,12 +415,11 @@ nav.bar .wrap { display: flex; align-items: center; justify-content: space-betwe
 .btn-lg { padding: 18px 32px; font-size: 1.0625rem; }
 
 /* ── priser: prisberegner ─────────────────────────────────────────────── */
-.calc { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--radius-3xl); box-shadow: var(--shadow-lg); overflow: hidden; display: grid; grid-template-columns: 1.55fr 1fr; }
+.calc { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--radius-3xl); box-shadow: var(--shadow-lg); overflow: hidden; }
 .calc-main { padding: clamp(26px, 4vw, 44px); }
 .calc-side { background: linear-gradient(165deg, var(--accent-deep), var(--accent)); color: #fff; padding: clamp(26px, 4vw, 40px); position: relative; overflow: hidden; }
 .calc-side::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 80% 0%, rgba(141,232,88,.4), transparent 55%), radial-gradient(circle at 0% 100%, rgba(255,255,255,.12), transparent 50%); pointer-events: none; }
 .calc-side > * { position: relative; }
-@media (max-width: 880px) { .calc { grid-template-columns: 1fr; } }
 
 .cstep { margin-bottom: 30px; }
 .cstep:last-child { margin-bottom: 0; }
@@ -453,6 +452,55 @@ input[type=range].rng::-moz-range-thumb { width: 22px; height: 22px; border-radi
 .seg button:hover { border-color: var(--accent); color: var(--accent-deep); }
 .seg button.sel { background: var(--accent); border-color: var(--accent); color: #fff; }
 @media (max-width: 520px) { .seg { grid-template-columns: repeat(2, 1fr); } }
+
+/* ── prisberegner wizard ─────────────────────────────────────────────── */
+.wiz-head { padding: clamp(22px, 3vw, 32px) clamp(26px, 4vw, 44px) 0; }
+.wiz-steps { display: flex; align-items: center; gap: 0; margin-bottom: 22px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+.wiz-steps::-webkit-scrollbar { display: none; }
+.wiz-step { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.wiz-step + .wiz-step::before { content: ''; width: clamp(18px, 4vw, 40px); height: 2px; background: var(--hairline-2); margin: 0 clamp(6px, 1.5vw, 14px); border-radius: 2px; }
+.wiz-step.done + .wiz-step::before, .wiz-step + .wiz-step.active::before, .wiz-step + .wiz-step.done::before { background: var(--accent); }
+.wiz-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); color: var(--text-mute); display: grid; place-items: center; font-weight: 800; font-size: 13px; border: 2px solid var(--hairline-2); transition: .25s; }
+.wiz-step.active .wiz-dot { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.wiz-step.done .wiz-dot { background: var(--accent-deep); color: #fff; border-color: var(--accent-deep); }
+.wiz-step.done .wiz-dot::before { content: '✓'; }
+.wiz-step.done .wiz-dot span { display: none; }
+.wiz-label { font-size: var(--fs-meta); font-weight: 700; color: var(--text-mute); white-space: nowrap; }
+.wiz-step.active .wiz-label { color: var(--ink); }
+.wiz-step.done .wiz-label { color: var(--accent-deep); }
+@media (max-width: 720px) { .wiz-label { display: none; } .wiz-step + .wiz-step::before { width: 22px; } }
+
+.wiz-body { padding: clamp(8px, 2vw, 16px) clamp(26px, 4vw, 44px) clamp(20px, 3vw, 32px); min-height: 320px; }
+.wiz-title { font-size: clamp(1.4rem, 2.6vw, 1.85rem); font-weight: 800; letter-spacing: -.02em; color: var(--ink); margin: 6px 0 6px; }
+.wiz-sub { color: var(--text-dim); font-size: var(--fs-sm); margin-bottom: 24px; }
+.wiz-count { font-size: var(--fs-meta); font-weight: 700; color: var(--accent-deep); letter-spacing: .08em; text-transform: uppercase; }
+
+.wiz-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: clamp(18px, 2.5vw, 26px) clamp(26px, 4vw, 44px); border-top: 1px solid var(--hairline); background: var(--surface-2); }
+.wiz-nav .btn { padding: 12px 22px; }
+.wiz-nav .spacer { flex: 1; }
+.wiz-nav-summary { font-size: var(--fs-meta); color: var(--text-mute); display: none; }
+@media (min-width: 760px) { .wiz-nav-summary { display: inline; } }
+
+/* audience step */
+.aud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 560px; margin: 0 auto; }
+.aud-card { background: var(--surface-1); border: 2px solid var(--hairline-2); border-radius: var(--radius-2xl); padding: 32px 22px; text-align: center; cursor: pointer; transition: all .25s; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.aud-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.aud-card.sel { border-color: var(--accent); background: var(--accent-soft); box-shadow: var(--shadow-md); }
+.aud-card .aud-ico { width: 56px; height: 56px; border-radius: var(--radius-lg); background: var(--accent-soft); color: var(--accent-deep); display: grid; place-items: center; transition: .25s; }
+.aud-card.sel .aud-ico { background: var(--accent); color: #fff; }
+.aud-card .aud-ico svg { width: 30px; height: 30px; }
+.aud-card b { font-size: 1.2rem; color: var(--ink); font-weight: 800; letter-spacing: -.02em; }
+.aud-card span { font-size: var(--fs-meta); color: var(--text-mute); }
+@media (max-width: 520px) { .aud-grid { grid-template-columns: 1fr; } }
+
+/* final result step */
+.wiz-result { display: grid; grid-template-columns: 1fr; gap: 0; }
+.wiz-result .calc-side { border-radius: 0; }
+.wiz-recap { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; margin: 18px 0 8px; }
+.wiz-recap .rcp { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--hairline); font-size: var(--fs-sm); }
+.wiz-recap .rcp span:first-child { color: var(--text-mute); }
+.wiz-recap .rcp span:last-child { color: var(--ink); font-weight: 700; }
+@media (max-width: 600px) { .wiz-recap { grid-template-columns: 1fr; } }
 
 .addons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .addon { border: 1.5px solid var(--hairline); border-radius: var(--radius-lg); padding: 13px 14px; display: flex; align-items: center; gap: 11px; background: var(--surface-1); transition: all .2s; text-align: left; cursor: pointer; }
