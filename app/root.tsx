@@ -16,18 +16,20 @@ const SITE_URL = "https://rengoering.dk";
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": ["Organization", "LocalBusiness"],
-  name: "Rengøringsfirma ApS",
+  name: "Define Cleaning Services ApS",
   url: SITE_URL,
   logo: `${SITE_URL}/logo.svg`,
-  email: "kontakt@rengoeringsfirma.dk",
+  email: "info@define-cleaning.dk",
   telephone: "+4570123456",
+  taxID: "DK40681086",
+  vatID: "DK40681086",
   address: {
     "@type": "PostalAddress",
     addressCountry: "DK",
   },
   contactPoint: {
     "@type": "ContactPoint",
-    email: "kontakt@rengoeringsfirma.dk",
+    email: "info@define-cleaning.dk",
     telephone: "+4570123456",
     contactType: "customer service",
     availableLanguage: "Danish",

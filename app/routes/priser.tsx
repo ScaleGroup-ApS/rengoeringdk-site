@@ -13,11 +13,11 @@ const PAGE_URL = `${SITE_URL}/priser`;
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Priser & prisberegner — Rengøringsfirma ApS",
+      title: "Priser & prisberegner — Define Cleaning Services ApS",
       description:
         "Få din pris på under et minut. Vælg ejendomstype, areal og frekvens — vi viser en gennemsigtig, vejledende pris. Ingen skjulte gebyrer.",
       url: PAGE_URL,
-      siteName: "Rengøringsfirma ApS",
+      siteName: "Define Cleaning Services ApS",
       type: "website",
       locale: "da_DK",
     }),
@@ -28,7 +28,7 @@ export function meta(_: Route.MetaArgs) {
 const pageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "Priser – Rengøringsfirma ApS",
+  name: "Priser – Define Cleaning Services ApS",
   description: "Gennemsigtige priser og interaktiv beregner for erhvervsrengøring.",
   url: PAGE_URL,
   breadcrumb: {

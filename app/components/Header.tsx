@@ -9,9 +9,7 @@ const NAV_ITEMS = [
   { label: "Kontakt", href: "/kontakt" },
 ];
 
-const PHONE = "+45 70 12 34 56";
 const PHONE_HREF = "tel:+4570123456";
-const EMAIL = "kontakt@rengoeringsfirma.dk";
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -40,34 +38,10 @@ export function Header() {
 
   return (
     <>
-      <div className="ubar">
-        <div className="wrap">
-          <span className="ubar-tp ubar-hide">
-            <span className="stars" style={{ color: "var(--trustpilot)" }}>
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-            </span>
-            Trustpilot · <b>4,9 / 5</b> · 512 anmeldelser
-          </span>
-          <div className="ubar-right">
-            <a href={PHONE_HREF}>{PHONE}</a>
-            <a href={`mailto:${EMAIL}`} className="ubar-hide">{EMAIL}</a>
-            <a className="ubar-hide">Hele Danmark · man–fre 7–18</a>
-          </div>
-        </div>
-      </div>
-
       <nav className={`bar${scrolled ? " scrolled" : ""}`}>
         <div className="wrap">
-          <Link className="logo" to="/" aria-label="Rengøringsfirma — Forside">
-            <span className="logo-mark">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M3 11l8-7 8 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
-                <path d="M9 21v-6h6v6" />
-              </svg>
-            </span>
-            Rengøringsfirma
+          <Link className="logo" to="/" aria-label="Define Cleaning Services — Forside">
+            <img src="/logo.svg" alt="Define Cleaning Services" className="logo-img" />
           </Link>
 
           <div className="navlinks">

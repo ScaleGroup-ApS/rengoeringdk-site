@@ -8,17 +8,11 @@ export function Footer() {
       <div className="wrap">
         <div className="foot-grid">
           <div>
-            <Link className="logo" to="/" aria-label="Rengøringsfirma — Forside">
-              <span className="logo-mark">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M3 11l8-7 8 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
-                  <path d="M9 21v-6h6v6" />
-                </svg>
-              </span>
-              Rengøringsfirma
+            <Link className="logo" to="/" aria-label="Define Cleaning Services — Forside">
+              <img src="/logo.svg" alt="Define Cleaning Services" className="logo-img" />
             </Link>
             <p>
-              Professionel erhvervsrengøring i hele Danmark siden 2010. Fast team,
+              Professionel rengøring i hele Danmark. Fast team,
               dokumenteret kvalitet og svanemærkede produkter.
             </p>
           </div>
@@ -42,13 +36,13 @@ export function Footer() {
           <div className="fcol">
             <h5>Kontakt</h5>
             <a href="tel:+4570123456">+45 70 12 34 56</a>
-            <a className="foot-email" href="mailto:kontakt@rengoeringsfirma.dk">kontakt@rengoeringsfirma.dk</a>
-            <a>CVR 12 34 56 78</a>
+            <a className="foot-email" href="mailto:info@define-cleaning.dk">info@define-cleaning.dk</a>
+            <a>CVR 40 68 10 86</a>
           </div>
         </div>
 
         <div className="foot-bot">
-          <span>© {year} Rengøringsfirma ApS. Alle rettigheder forbeholdes.</span>
+          <span>© {year} Define Cleaning Services ApS. Alle rettigheder forbeholdes.</span>
           <span>Handelsbetingelser · Privatlivspolitik · Cookies</span>
         </div>
       </div>
