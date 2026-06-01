@@ -14,11 +14,11 @@ const PAGE_URL = `${SITE_URL}/tjenester`;
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Tjenester — Rengøringsfirma ApS",
+      title: "Tjenester — Define Cleaning Services ApS",
       description:
         "Alt inden for professionel erhvervsrengøring: kontor, vinduespolering, klinik, trappevask, flytte- og industrirengøring. Fast team, dokumenteret kvalitet efter INSTA 800.",
       url: PAGE_URL,
-      siteName: "Rengøringsfirma ApS",
+      siteName: "Define Cleaning Services ApS",
       type: "website",
       locale: "da_DK",
     }),
@@ -29,7 +29,7 @@ export function meta(_: Route.MetaArgs) {
 const pageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "Tjenester – Rengøringsfirma ApS",
+  name: "Tjenester – Define Cleaning Services ApS",
   description: "Professionel erhvervsrengøring i hele Danmark.",
   url: PAGE_URL,
   breadcrumb: {

@@ -1,5 +1,6 @@
 import type { Route } from "./+types/index";
 import { Link } from "react-router";
+import { useState } from "react";
 import { Header } from "~/components/Header";
 import { Footer } from "~/components/Footer";
 import { ImageFrame } from "~/components/ImageFrame";
@@ -13,11 +14,11 @@ const SITE_URL = "https://rengoering.dk";
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Rengøringsfirma ApS — Professionel erhvervsrengøring",
+      title: "Define Cleaning Services ApS — Rengøring for privat & erhverv",
       description:
-        "Vi holder kontorer, klinikker og butikker rene for over 500 danske virksomheder. Fast team, fleksible aftaler og dokumenteret kvalitet efter INSTA 800.",
+        "Professionel rengøring i hele Danmark — til både private hjem og virksomheder. Fast team, fleksible aftaler og svanemærkede produkter.",
       url: SITE_URL,
-      siteName: "Rengøringsfirma ApS",
+      siteName: "Define Cleaning Services ApS",
       type: "website",
       locale: "da_DK",
     }),
@@ -28,11 +29,38 @@ export function meta(_: Route.MetaArgs) {
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "Rengøringsfirma ApS – Professionel erhvervsrengøring",
+  name: "Define Cleaning Services ApS – Rengøring for privat & erhverv",
   description:
-    "Professionel erhvervsrengøring i hele Danmark. Fast team, dokumenteret kvalitet og svanemærkede produkter.",
+    "Professionel rengøring i hele Danmark — til både private hjem og virksomheder. Fast team, dokumenteret kvalitet og svanemærkede produkter.",
   url: SITE_URL,
 };
+
+const AUDIENCE_COPY = {
+  privat: {
+    eyebrow: "Hjemmerengøring i hele Danmark",
+    h1Pre: "Et ",
+    h1Hl: "skinnende",
+    h1Post: " hjem — uden besværet",
+    lead:
+      "Vi tager os af rengøringen i dit hjem, så du kan bruge tiden på det vigtige. Fast personale, fleksible aftaler og svanemærkede produkter.",
+    ctaPrimary: "Få et tilbud",
+    ctaSecondary: "Se priser",
+    imageAlt: "Lyst, rent privat hjem med store vinduer",
+  },
+  erhverv: {
+    eyebrow: "Erhvervsrengøring i hele Danmark",
+    h1Pre: "Et ",
+    h1Hl: "skinnende",
+    h1Post: " indtryk — hver eneste dag",
+    lead:
+      "Vi holder kontorer, klinikker og butikker rene for over 500 danske virksomheder. Fast team, fleksible aftaler og dokumenteret kvalitet efter INSTA 800.",
+    ctaPrimary: "Beregn din pris",
+    ctaSecondary: "Se vores ydelser",
+    imageAlt: "Lyst, rent kontor med store vinduer",
+  },
+} as const;
+
+type Audience = keyof typeof AUDIENCE_COPY;
 
 const Star = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -128,7 +156,7 @@ const TESTIMONIALS = [
     initials: "MS",
   },
   {
-    quote: "Skift til Rengøringsfirma var den bedste beslutning. Fast kontaktperson, og kvaliteten er konsekvent måned efter måned.",
+    quote: "Skift til Define var den bedste beslutning. Fast kontaktperson, og kvaliteten er konsekvent måned efter måned.",
     name: "Jonas Brandt",
     role: "Ejer, Habit Retail",
     initials: "JB",
@@ -175,6 +203,8 @@ function StarRow({ count = 5 }: { count?: number }) {
 
 export default function Index(_: Route.ComponentProps) {
   useSiteEffects();
+  const [audience, setAudience] = useState<Audience>("privat");
+  const copy = AUDIENCE_COPY[audience];
 
   return (
     <div className="page">
@@ -186,23 +216,55 @@ export default function Index(_: Route.ComponentProps) {
         <header className="hero">
           <div className="wrap hero-grid">
             <div>
-              <p className="eyebrow reveal">Erhvervsrengøring i hele Danmark</p>
+              <div className="aud-toggle reveal" role="tablist" aria-label="Vælg målgruppe">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={audience === "privat"}
+                  className={audience === "privat" ? "sel" : ""}
+                  onClick={() => setAudience("privat")}
+                >
+                  Privat
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={audience === "erhverv"}
+                  className={audience === "erhverv" ? "sel" : ""}
+                  onClick={() => setAudience("erhverv")}
+                >
+                  Erhverv
+                </button>
+              </div>
+              <p className="eyebrow reveal">{copy.eyebrow}</p>
               <h1 className="reveal d1">
-                Et <span className="hl">skinnende</span> indtryk — hver eneste dag
+                {copy.h1Pre}<span className="hl">{copy.h1Hl}</span>{copy.h1Post}
               </h1>
-              <p className="hero-lead reveal d2">
-                Vi holder kontorer, klinikker og butikker rene for over 500 danske virksomheder.
-                Fast team, fleksible aftaler og dokumenteret kvalitet efter INSTA 800.
-              </p>
+              <p className="hero-lead reveal d2">{copy.lead}</p>
               <div className="hero-cta reveal d3">
                 <Link className="btn btn-primary" to="/priser#beregner">
-                  Beregn din pris <Arrow />
+                  {copy.ctaPrimary} <Arrow />
                 </Link>
-                <Link className="btn btn-ghost" to="/tjenester">
-                  Se vores ydelser
+                <Link className="btn btn-ghost" to={audience === "privat" ? "/priser" : "/tjenester"}>
+                  {copy.ctaSecondary}
                 </Link>
               </div>
-              <div className="hero-rating reveal d4">
+              <div className="trust-marks reveal d4">
+                <span className="tm-label">Certificeret af</span>
+                <span className="trust-mark svane" title="Svanemærket — det nordiske miljømærke">
+                  <span className="tm-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-2 5-6 6-6 11a6 6 0 0012 0c0-5-4-6-6-11z"/></svg>
+                  </span>
+                  Svanemærket
+                </span>
+                <span className="trust-mark servn" title="Medlem af Servicenormen">
+                  <span className="tm-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                  </span>
+                  Servicenormen
+                </span>
+              </div>
+              <div className="hero-rating reveal d4" style={{ marginTop: 20 }}>
                 <StarRow />
                 <span className="rtxt">
                   <b>4,9/5</b> på Trustpilot · baseret på <b>512</b> anmeldelser
@@ -211,7 +273,7 @@ export default function Index(_: Route.ComponentProps) {
             </div>
 
             <div className="hero-media reveal d2">
-              <ImageFrame className="hero-img-frame" src={PHOTOS.hero} alt="Lyst, rent kontor med store vinduer" />
+              <ImageFrame className="hero-img-frame" src={PHOTOS.hero} alt={copy.imageAlt} />
               <div className="float-card tl">
                 <span className="fc-ico">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -267,10 +329,10 @@ export default function Index(_: Route.ComponentProps) {
         <section className="blk wrap" id="tjenester">
           <div className="shead reveal">
             <p className="eyebrow">Vores ydelser</p>
-            <h2>Rengøring til alle slags erhverv</h2>
+            <h2>Rengøring til både hjem og erhverv</h2>
             <p>
-              Fra det daglige kontor til specialopgaver med høje hygiejnekrav. Vi sammensætter
-              en aftale, der passer præcis til jeres bygning og budget.
+              Fra det daglige kontor og hjemmerengøring til specialopgaver med høje hygiejnekrav.
+              Vi sammensætter en aftale, der passer præcis til dig og dit budget.
             </p>
           </div>
           <div className="svc-grid">
@@ -295,7 +357,7 @@ export default function Index(_: Route.ComponentProps) {
         <section className="blk wrap">
           <div className="why-grid">
             <div>
-              <p className="eyebrow reveal">Hvorfor Rengøringsfirma</p>
+              <p className="eyebrow reveal">Hvorfor Define</p>
               <h2 className="reveal d1" style={{ fontSize: "var(--fs-display)", marginTop: 16 }}>
                 En partner I kan stole blindt på
               </h2>
@@ -406,7 +468,7 @@ export default function Index(_: Route.ComponentProps) {
               <a
                 className="btn"
                 style={{ background: "rgba(255,255,255,.14)", color: "#fff", border: "1px solid rgba(255,255,255,.3)" }}
-                href="mailto:kontakt@rengoeringsfirma.dk"
+                href="mailto:info@define-cleaning.dk"
               >
                 Skriv til os
               </a>

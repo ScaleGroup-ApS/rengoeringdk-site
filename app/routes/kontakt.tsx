@@ -14,11 +14,11 @@ const PAGE_URL = `${SITE_URL}/kontakt`;
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Kontakt — Rengøringsfirma ApS",
+      title: "Kontakt — Define Cleaning Services ApS",
       description:
         "Få et gratis, uforpligtende tilbud inden for 24 timer. Skriv eller ring — vi vender tilbage hurtigst muligt.",
       url: PAGE_URL,
-      siteName: "Rengøringsfirma ApS",
+      siteName: "Define Cleaning Services ApS",
       type: "website",
       locale: "da_DK",
     }),
@@ -29,7 +29,7 @@ export function meta(_: Route.MetaArgs) {
 const pageSchema = {
   "@context": "https://schema.org",
   "@type": "ContactPage",
-  name: "Kontakt – Rengøringsfirma ApS",
+  name: "Kontakt – Define Cleaning Services ApS",
   description: "Kontakt os for et gratis tilbud på erhvervsrengøring.",
   url: PAGE_URL,
   breadcrumb: {
@@ -270,7 +270,7 @@ export default function Kontakt(_: Route.ComponentProps) {
                   </span>
                   <div>
                     <div className="il">Skriv til os</div>
-                    <div className="iv"><a href="mailto:kontakt@rengoeringsfirma.dk">kontakt@rengoeringsfirma.dk</a></div>
+                    <div className="iv"><a href="mailto:info@define-cleaning.dk">info@define-cleaning.dk</a></div>
                   </div>
                 </div>
                 <div className="iitem">
