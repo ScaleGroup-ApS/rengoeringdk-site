@@ -190,8 +190,9 @@ nav.bar { position: sticky; top: 0; z-index: 50; background: rgba(246,251,251,.8
 nav.bar.scrolled { border-color: var(--hairline); box-shadow: var(--shadow-sm); background: rgba(255,255,255,.9); }
 nav.bar .wrap { display: flex; align-items: center; justify-content: space-between; height: 74px; gap: 24px; }
 .logo { display: inline-flex; align-items: center; gap: 11px; font-weight: 800; font-size: 1.18rem; color: var(--ink); letter-spacing: -.03em; }
-.logo img.logo-img { height: 44px; width: auto; display: block; }
-.site-footer .logo img.logo-img { height: 48px; filter: brightness(0) invert(1); }
+.logo img.logo-img { height: 62px; width: auto; display: block; }
+.site-footer .logo img.logo-img { height: 64px; filter: brightness(0) invert(1); }
+@media (max-width: 520px) { .logo img.logo-img { height: 52px; } }
 .navlinks { display: flex; gap: 6px; align-items: center; }
 .navlinks a { font-size: var(--fs-sm); font-weight: 600; color: var(--text-dim); padding: 9px 14px; border-radius: var(--radius-md); transition: color .2s, background .2s; }
 .navlinks a:hover, .navlinks a.active { color: var(--ink); background: var(--surface-2); }
