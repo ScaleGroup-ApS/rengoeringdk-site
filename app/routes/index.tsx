@@ -1,6 +1,5 @@
 import type { Route } from "./+types/index";
 import { Link } from "react-router";
-import { useState } from "react";
 import { Header } from "~/components/Header";
 import { Footer } from "~/components/Footer";
 import { ImageFrame } from "~/components/ImageFrame";
@@ -28,47 +27,15 @@ export function meta(_: Route.MetaArgs) {
 
 const websiteSchema = {
   "@context": "https://schema.org",
-  "@type": "WebPage",
-  name: "Define Cleaning Services ApS – Rengøring for privat & erhverv",
-  description:
-    "Professionel rengøring i hele Danmark — til både private hjem og virksomheder. Fast team, dokumenteret kvalitet og svanemærkede produkter.",
+  "@type": "WebSite",
+  name: "Define Cleaning Services ApS",
   url: SITE_URL,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${SITE_URL}/tjenester?q={search_term_string}`,
+    "query-input": "required name=search_term_string",
+  },
 };
-
-const AUDIENCE_COPY = {
-  privat: {
-    eyebrow: "Hjemmerengøring i hele Danmark",
-    h1Pre: "Et ",
-    h1Hl: "skinnende",
-    h1Post: " hjem — uden besværet",
-    lead:
-      "Vi tager os af rengøringen i dit hjem, så du kan bruge tiden på det vigtige. Fast personale, fleksible aftaler og svanemærkede produkter.",
-    primaryHref: "/priser?for=privat#beregner",
-    secondaryHref: "/kontakt",
-    secondaryLabel: "Få et tilbud",
-    imageAlt: "Lyst, rent privat hjem med store vinduer",
-  },
-  erhverv: {
-    eyebrow: "Erhvervsrengøring i hele Danmark",
-    h1Pre: "Et ",
-    h1Hl: "skinnende",
-    h1Post: " indtryk — hver eneste dag",
-    lead:
-      "Vi holder kontorer, klinikker og butikker rene for over 500 danske virksomheder. Fast team, fleksible aftaler og dokumenteret kvalitet efter INSTA 800.",
-    primaryHref: "/priser?for=erhverv#beregner",
-    secondaryHref: "/tjenester",
-    secondaryLabel: "Se vores ydelser",
-    imageAlt: "Lyst, rent kontor med store vinduer",
-  },
-} as const;
-
-type Audience = keyof typeof AUDIENCE_COPY;
-
-const Star = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-  </svg>
-);
 
 const Arrow = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -76,79 +43,11 @@ const Arrow = () => (
   </svg>
 );
 
-const SERVICES = [
-  {
-    icon: <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" />,
-    title: "Kontorrengøring",
-    desc: "Daglig eller ugentlig rengøring uden for arbejdstid — så I møder ind til et friskt og repræsentativt kontor.",
-  },
-  {
-    icon: <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10" />,
-    title: "Vinduespolering",
-    desc: "Streg- og pletfri facader, butiksruder og glaspartier — indvendigt og udvendigt, også i højde.",
-  },
-  {
-    icon: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></>,
-    title: "Klinik & sundhed",
-    desc: "Dokumenteret hygiejnerengøring til klinikker, tandlæger og institutioner med skærpede krav.",
-  },
-  {
-    icon: <path d="M3 9h18M9 21V9M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" />,
-    title: "Trappevask",
-    desc: "Faste aftaler for ejendomme og boligforeninger — rene trapper, elevatorer og fællesarealer.",
-  },
-  {
-    icon: <path d="M5 12H3l9-9 9 9h-2v7a2 2 0 01-2 2H7a2 2 0 01-2-2z" />,
-    title: "Flytterengøring",
-    desc: "Grundig fraflytningsrengøring til erhvervslejemål — afleveret efter aftale, klar til syn.",
-  },
-  {
-    icon: <path d="M12 2L2 7l10 5 10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />,
-    title: "Industri & lager",
-    desc: "Specialrengøring af produktion, lager og haller med professionelt udstyr og sikkerhed i top.",
-  },
-];
-
-const TRUST_POINTS = [
-  {
-    icon: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />,
-    title: "Fuldt forsikret & kvalitetssikret",
-    desc: "Vi arbejder efter INSTA 800 og dokumenterer hvert besøg, så I altid kan se kvaliteten sort på hvidt.",
-  },
-  {
-    icon: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
-    title: "Fast team & fast kontaktperson",
-    desc: "Samme dygtige medarbejdere hver gang — og én person I altid kan ringe til.",
-  },
-  {
-    icon: <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z" />,
-    title: "Svanemærkede produkter",
-    desc: "Skånsomt for mennesker og miljø — uden at gå på kompromis med det rene resultat.",
-  },
-];
-
-const CERTS = [
-  {
-    icon: <><circle cx="12" cy="8" r="6" /><path d="M9 13.5L7 22l5-3 5 3-2-8.5" /></>,
-    title: "INSTA 800",
-    sub: "Kvalitetsstandard",
-  },
-  {
-    icon: <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z" />,
-    title: "Svanemærket",
-    sub: "Miljøcertificeret",
-  },
-  {
-    icon: <path d="M20 6L9 17l-5-5" />,
-    title: "ISO 9001",
-    sub: "Kvalitetsledelse",
-  },
-  {
-    icon: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />,
-    title: "Forsikret",
-    sub: "Op til 10 mio. kr.",
-  },
-];
+const Star = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+  </svg>
+);
 
 const TESTIMONIALS = [
   {
@@ -164,35 +63,18 @@ const TESTIMONIALS = [
     initials: "JB",
   },
   {
-    quote: "Professionelle fra første kontakt. De forstod vores hygiejnekrav som klinik og leverer hver gang upåklageligt.",
+    quote: "Vi har haft Define hjemme hver 14. dag i to år. Samme rengøringsassistent hver gang, og hjemmet er altid skinnende rent.",
     name: "Camilla Holm",
-    role: "Klinikleder, Klinik Sund",
+    role: "Privatkunde, Hellerup",
     initials: "CH",
   },
 ];
 
-const CLIENT_LOGOS = [
-  { shape: <circle cx="12" cy="12" r="10" />, name: "Nordhavn Group" },
-  { shape: <rect x="3" y="3" width="18" height="18" rx="4" />, name: "Bolig&Co" },
-  { shape: <path d="M12 2l9 5v10l-9 5-9-5V7z" />, name: "Mejlby A/S" },
-  { shape: <path d="M3 12h18M12 3v18" />, name: "Klinik Sund" },
-  { shape: <polygon points="12,2 22,20 2,20" />, name: "Vestas Kontor" },
-  { shape: <circle cx="12" cy="12" r="9" />, name: "Habit Retail" },
-  { shape: <rect x="4" y="4" width="16" height="16" rx="8" />, name: "Nordisk Tech" },
-];
-
 const STATS = [
-  { count: 500, decimals: 0, suffix: "+", label: "Faste erhvervskunder" },
-  { count: 15, decimals: 0, suffix: "", label: "Års erfaring" },
+  { count: 500, decimals: 0, suffix: "+", label: "Faste kunder" },
+  { count: 20, decimals: 0, suffix: "", label: "Års erfaring" },
   { count: 1.8, decimals: 1, suffix: "M", label: "m² rengjort årligt" },
   { count: 4.9, decimals: 1, suffix: "", label: "Trustpilot-score" },
-];
-
-const STEPS = [
-  { n: "TRIN 01", title: "Uforpligtende besøg", desc: "Vi kommer forbi, ser lokalerne og lytter til jeres behov." },
-  { n: "TRIN 02", title: "Skræddersyet tilbud", desc: "I får en fast, gennemsigtig pris inden for 24 timer." },
-  { n: "TRIN 03", title: "Opstart med fast team", desc: "Samme medarbejdere hver gang — oplært i jeres lokaler." },
-  { n: "TRIN 04", title: "Løbende kvalitetstjek", desc: "Vi dokumenterer og følger op, så standarden holder." },
 ];
 
 function StarRow({ count = 5 }: { count?: number }) {
@@ -205,8 +87,6 @@ function StarRow({ count = 5 }: { count?: number }) {
 
 export default function Index(_: Route.ComponentProps) {
   useSiteEffects();
-  const [audience, setAudience] = useState<Audience>("privat");
-  const copy = AUDIENCE_COPY[audience];
 
   return (
     <div className="page">
@@ -214,103 +94,43 @@ export default function Index(_: Route.ComponentProps) {
       <JsonLd data={websiteSchema} />
 
       <main>
-        {/* hero */}
-        <header className="hero">
-          <div className="wrap hero-grid">
-            <div>
-              <div className="aud-toggle reveal" role="tablist" aria-label="Vælg målgruppe">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={audience === "privat"}
-                  className={audience === "privat" ? "sel" : ""}
-                  onClick={() => setAudience("privat")}
-                >
-                  Privat
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={audience === "erhverv"}
-                  className={audience === "erhverv" ? "sel" : ""}
-                  onClick={() => setAudience("erhverv")}
-                >
-                  Erhverv
-                </button>
-              </div>
-              <p className="eyebrow reveal">{copy.eyebrow}</p>
-              <h1 className="reveal d1">
-                {copy.h1Pre}<span className="hl">{copy.h1Hl}</span>{copy.h1Post}
-              </h1>
-              <p className="hero-lead reveal d2">{copy.lead}</p>
-              <div className="hero-cta reveal d3">
-                <Link className="btn btn-primary" to={copy.primaryHref}>
-                  Beregn din pris <Arrow />
-                </Link>
-                <Link className="btn btn-ghost" to={copy.secondaryHref}>
-                  {copy.secondaryLabel}
-                </Link>
-              </div>
-              <div className="trust-marks reveal d4">
-                <span className="tm-label">Certificeret af</span>
-                <span className="trust-mark svane" title="Svanemærket — det nordiske miljømærke">
-                  <span className="tm-ico" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-2 5-6 6-6 11a6 6 0 0012 0c0-5-4-6-6-11z"/></svg>
-                  </span>
-                  Svanemærket
-                </span>
-                <span className="trust-mark servn" title="Medlem af Servicenormen">
-                  <span className="tm-ico" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                  </span>
-                  Servicenormen
-                </span>
-              </div>
-              <div className="hero-rating reveal d4" style={{ marginTop: 20 }}>
-                <StarRow />
-                <span className="rtxt">
-                  <b>4,9/5</b> på Trustpilot · baseret på <b>512</b> anmeldelser
-                </span>
-              </div>
+        {/* splash hero — two audience cards */}
+        <header className="hero hero-splash">
+          <div className="wrap">
+            <div className="splash-head reveal">
+              <p className="eyebrow">Define Cleaning Services</p>
+              <h1>Rengøring du kan stole på — privat og erhverv</h1>
+              <p className="hero-lead">
+                Professionel rengøring i hele Danmark. Fast team, svanemærkede produkter og 20 års erfaring —
+                både i dit hjem og i din virksomhed.
+              </p>
             </div>
-
-            <div className="hero-media reveal d2">
-              <ImageFrame className="hero-img-frame" src={PHOTOS.hero} alt={copy.imageAlt} />
-              <div className="float-card tl">
-                <span className="fc-ico">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                </span>
-                <div>
-                  <div className="fc-big tnum">98%</div>
-                  <div className="fc-sub">fastholder os år efter år</div>
+            <div className="splash-cards">
+              <Link to="/privat" className="splash-card reveal d1">
+                <ImageFrame className="splash-card-img" src={PHOTOS.heroPrivat} alt="Privat rengøring" />
+                <div className="splash-card-body">
+                  <p className="eyebrow">Privat</p>
+                  <h2>Rengøring til dit hjem</h2>
+                  <p>Faste rengøringer, hovedrengøring, flytte og vinduespudsning — til dit hjem.</p>
+                  <span className="splash-card-cta">Se priser og book <Arrow /></span>
                 </div>
-              </div>
-              <div className="float-card br">
-                <div className="fc-big tnum">15 år</div>
-                <div className="fc-sub">i branchen siden 2010</div>
-              </div>
+              </Link>
+              <Link to="/erhverv" className="splash-card reveal d2">
+                <ImageFrame className="splash-card-img" src={PHOTOS.heroErhverv} alt="Erhvervsrengøring" />
+                <div className="splash-card-body">
+                  <p className="eyebrow">Erhverv</p>
+                  <h2>Rengøring til virksomheder</h2>
+                  <p>Kontor, butik, klinik, industri og specialopgaver — INSTA 800-dokumenteret.</p>
+                  <span className="splash-card-cta">Se priser og book <Arrow /></span>
+                </div>
+              </Link>
+            </div>
+            <div className="splash-rating reveal d3">
+              <StarRow />
+              <span className="rtxt"><b>4,9/5</b> på Trustpilot · baseret på <b>512</b> anmeldelser</span>
             </div>
           </div>
         </header>
-
-        {/* logo wall */}
-        <section className="logos" aria-label="Kunder">
-          <p className="logos-label reveal">
-            Betroet af <b>500+ virksomheder</b> — fra startups til børsnoterede
-          </p>
-          <div className="marquee">
-            <div className="marquee-track">
-              {[...CLIENT_LOGOS, ...CLIENT_LOGOS].map((logo, i) => (
-                <span className="clientlogo" key={i}>
-                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">{logo.shape}</svg>
-                  {logo.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* stats band */}
         <section className="statsband" aria-label="Nøgletal">
@@ -327,74 +147,6 @@ export default function Index(_: Route.ComponentProps) {
           </div>
         </section>
 
-        {/* services */}
-        <section className="blk wrap" id="tjenester">
-          <div className="shead reveal">
-            <p className="eyebrow">Vores ydelser</p>
-            <h2>Rengøring til både hjem og erhverv</h2>
-            <p>
-              Fra det daglige kontor og hjemmerengøring til specialopgaver med høje hygiejnekrav.
-              Vi sammensætter en aftale, der passer præcis til dig og dit budget.
-            </p>
-          </div>
-          <div className="svc-grid">
-            {SERVICES.map((svc, i) => (
-              <article key={svc.title} className={`svc reveal${i % 3 ? ` d${i % 3}` : ""}`} data-tilt="4">
-                <div className="svc-ico">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    {svc.icon}
-                  </svg>
-                </div>
-                <h3>{svc.title}</h3>
-                <p>{svc.desc}</p>
-                <Link to="/tjenester" className="more">
-                  Læs mere <Arrow />
-                </Link>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        {/* why + certs */}
-        <section className="blk wrap">
-          <div className="why-grid">
-            <div>
-              <p className="eyebrow reveal">Hvorfor Define</p>
-              <h2 className="reveal d1" style={{ fontSize: "var(--fs-display)", marginTop: 16 }}>
-                En partner I kan stole blindt på
-              </h2>
-              <div className="why-list">
-                {TRUST_POINTS.map((p, i) => (
-                  <div key={p.title} className={`why-item reveal d${i + 1}`}>
-                    <span className="why-ico">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        {p.icon}
-                      </svg>
-                    </span>
-                    <div>
-                      <h4>{p.title}</h4>
-                      <p>{p.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="certs reveal d2">
-              {CERTS.map((c) => (
-                <div className="cert" key={c.title}>
-                  <div className="cert-badge">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      {c.icon}
-                    </svg>
-                  </div>
-                  <b>{c.title}</b>
-                  <span>{c.sub}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* coverage */}
         <section className="blk cover" id="dækning">
           <div className="wrap cover-grid">
@@ -405,7 +157,7 @@ export default function Index(_: Route.ComponentProps) {
               </h2>
               <p className="reveal d2" style={{ fontSize: "var(--fs-lead)", color: "var(--text-dim)", marginTop: 18, lineHeight: 1.5 }}>
                 Med teams fordelt over hele landet er vi aldrig langt væk. Fra hovedstaden til
-                Vestjylland — samme høje standard, uanset hvor I holder til.
+                Vestjylland — samme høje standard, uanset hvor du holder til.
               </p>
               <div className="cities reveal d3">
                 {["København", "Aarhus", "Odense", "Aalborg", "Esbjerg", "+ 90 byer"].map((c) => (
@@ -443,38 +195,19 @@ export default function Index(_: Route.ComponentProps) {
           </div>
         </section>
 
-        {/* process */}
-        <section className="blk wrap">
-          <div className="shead reveal">
-            <p className="eyebrow">Sådan kommer I i gang</p>
-            <h2 style={{ fontSize: "var(--fs-display)" }}>Fra tilbud til rent kontor på 4 trin</h2>
-          </div>
-          <div className="steps">
-            {STEPS.map((s, i) => (
-              <div key={s.n} className={`step reveal${i ? ` d${i}` : ""}`}>
-                <div className="n">{s.n}</div>
-                <h4>{s.title}</h4>
-                <p>{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* CTA band */}
+        {/* dual CTA — both audiences */}
         <section className="blk wrap" id="kontakt">
-          <div className="ctaband reveal">
-            <h2>Klar til et renere arbejdsmiljø?</h2>
-            <p>Få et gratis, uforpligtende tilbud inden for 24 timer. Ingen binding — bare et renere kontor.</p>
-            <div className="row">
-              <a className="btn btn-white" href="tel:+4570123456">Ring 70 12 34 56</a>
-              <a
-                className="btn"
-                style={{ background: "rgba(255,255,255,.14)", color: "#fff", border: "1px solid rgba(255,255,255,.3)" }}
-                href="mailto:info@define-cleaning.dk"
-              >
-                Skriv til os
-              </a>
-            </div>
+          <div className="dual-cta">
+            <Link to="/privat" className="dual-cta-card privat reveal">
+              <h3>Privat</h3>
+              <p>Klar til et renere hjem?</p>
+              <span className="splash-card-cta">Se mere <Arrow /></span>
+            </Link>
+            <Link to="/erhverv" className="dual-cta-card erhverv reveal d1">
+              <h3>Erhverv</h3>
+              <p>Klar til et renere arbejdsmiljø?</p>
+              <span className="splash-card-cta">Se mere <Arrow /></span>
+            </Link>
           </div>
         </section>
       </main>

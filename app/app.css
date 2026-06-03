@@ -675,6 +675,113 @@ html.js .reveal.in { opacity: 1; transform: none; }
   html { scroll-behavior: auto; }
 }
 
+/* ── Splash hero (forsiden) ──────────────────────────────────────────── */
+.hero-splash { padding: clamp(48px, 7vw, 88px) 0 clamp(56px, 7vw, 96px); }
+.splash-head { text-align: center; max-width: 760px; margin: 0 auto 44px; }
+.splash-head h1 { font-size: clamp(2.4rem, 5vw, 4.2rem); letter-spacing: -.035em; line-height: 1.04; }
+.splash-head .hero-lead { font-size: var(--fs-lead); color: var(--text-dim); margin-top: 20px; line-height: 1.5; }
+
+.splash-cards { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px, 3vw, 32px); }
+.splash-card { display: flex; flex-direction: column; background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--radius-3xl); overflow: hidden; text-decoration: none; color: inherit; transition: transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s, border-color .35s; }
+.splash-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: rgba(102,207,49,.4); }
+.splash-card-img { width: 100%; aspect-ratio: 16/9; border-radius: 0 !important; }
+.splash-card-body { padding: clamp(24px, 3vw, 36px); display: flex; flex-direction: column; gap: 14px; flex: 1; }
+.splash-card-body h2 { font-size: clamp(1.5rem, 2.4vw, 2rem); letter-spacing: -.02em; }
+.splash-card-body p { color: var(--text-dim); font-size: var(--fs-sm); line-height: 1.55; }
+.splash-card-cta { display: inline-flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 12px; font-weight: 700; font-size: var(--fs-sm); color: var(--accent-deep); }
+.splash-card-cta svg { width: 16px; height: 16px; transition: transform .25s; }
+.splash-card:hover .splash-card-cta svg { transform: translateX(4px); }
+
+.splash-rating { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 36px; flex-wrap: wrap; }
+.splash-rating .rtxt { font-size: var(--fs-sm); color: var(--text-dim); }
+.splash-rating .rtxt b { color: var(--ink); }
+
+@media (max-width: 760px) {
+  .splash-cards { grid-template-columns: 1fr; }
+}
+
+/* ── Dual CTA (bottom of forside) ────────────────────────────────────── */
+.dual-cta { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px, 3vw, 28px); }
+.dual-cta-card { display: flex; flex-direction: column; justify-content: space-between; padding: clamp(36px, 5vw, 60px); border-radius: var(--radius-3xl); color: #fff; text-decoration: none; transition: transform .25s, box-shadow .25s; min-height: 220px; position: relative; overflow: hidden; }
+.dual-cta-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+.dual-cta-card.privat { background: linear-gradient(135deg, var(--accent-deep), var(--accent)); }
+.dual-cta-card.erhverv { background: linear-gradient(135deg, var(--ink), #0e3e44); }
+.dual-cta-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 15% 20%, rgba(255,255,255,.16), transparent 45%); pointer-events: none; }
+.dual-cta-card h3 { color: #fff; font-size: 1.8rem; letter-spacing: -.02em; position: relative; }
+.dual-cta-card p { color: rgba(255,255,255,.88); font-size: var(--fs-lead); margin-top: 8px; position: relative; }
+.dual-cta-card .splash-card-cta { color: #fff; margin-top: 24px; position: relative; }
+@media (max-width: 760px) { .dual-cta { grid-template-columns: 1fr; } }
+
+/* ── Wizard "Hvad er inkluderet" boxes (step 5) ──────────────────────── */
+.included-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 8px; }
+.included-card { background: var(--surface-2); border: 1px solid var(--hairline); border-radius: var(--radius-xl); padding: 22px 20px; display: flex; flex-direction: column; gap: 14px; }
+.included-ico { width: 42px; height: 42px; border-radius: 11px; background: var(--accent-soft); color: var(--accent-deep); display: grid; place-items: center; }
+.included-ico svg { width: 22px; height: 22px; }
+.included-card h4 { font-size: 1.05rem; letter-spacing: -.01em; color: var(--ink); }
+.included-card ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.included-card li { display: flex; gap: 9px; align-items: flex-start; font-size: var(--fs-sm); color: var(--text-dim); line-height: 1.45; }
+.included-card li .ck { width: 18px; height: 18px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-deep); display: grid; place-items: center; flex: none; margin-top: 1px; }
+.included-card li .ck svg { width: 10px; height: 10px; }
+@media (max-width: 760px) { .included-grid { grid-template-columns: 1fr; } }
+
+/* Wizard form layout */
+.wiz-form .fgrid { margin-top: 0; }
+
+/* ── Service detail page ──────────────────────────────────────────────── */
+.svc-detail-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(32px, 5vw, 64px); align-items: start; }
+.svc-detail-media { position: sticky; top: 100px; display: flex; flex-direction: column; gap: 20px; }
+.svc-detail-img { width: 100%; aspect-ratio: 4/3.2; border-radius: var(--radius-3xl); box-shadow: var(--shadow-md); }
+.svc-price-card { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--radius-2xl); padding: 24px; box-shadow: var(--shadow-sm); }
+.svc-price-label { font-size: var(--fs-meta); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-mute); }
+.svc-price-card strong { display: block; font-size: 1.2rem; font-weight: 800; color: var(--ink); margin-top: 6px; letter-spacing: -.01em; }
+
+.svc-detail-body h2 { font-size: clamp(1.4rem, 2.6vw, 1.85rem); letter-spacing: -.02em; margin-bottom: 16px; }
+.svc-detail-body > h2:first-child { margin-top: 0; }
+.svc-detail-body p { color: var(--text-dim); font-size: 1.0125rem; line-height: 1.65; }
+.svc-section { margin-top: 36px; }
+.svc-section .feat { margin-top: 12px; }
+
+@media (max-width: 880px) {
+  .svc-detail-grid { grid-template-columns: 1fr; }
+  .svc-detail-media { position: static; }
+}
+
+/* ── Footer overhaul (Define-Waters inspired) ────────────────────────── */
+.site-footer { background: var(--ink); color: #bcd9dc; padding: clamp(48px, 7vw, 80px) 0 28px; }
+.site-footer .logo { color: #fff; }
+.site-footer p { color: #8fb3b8; font-size: var(--fs-sm); margin-top: 16px; max-width: 36ch; line-height: 1.6; }
+
+.foot-top { display: grid; grid-template-columns: 1.2fr 2fr; gap: clamp(36px, 5vw, 72px); }
+.foot-brand { display: flex; flex-direction: column; align-items: flex-start; }
+.foot-contact { display: flex; flex-direction: column; gap: 8px; margin-top: 22px; }
+.foot-bigcontact { display: inline-flex; align-items: center; gap: 10px; color: #fff; font-weight: 700; font-size: 1rem; text-decoration: none; padding: 4px 0; transition: color .2s; }
+.foot-bigcontact:hover { color: var(--accent-bright); }
+.foot-bigcontact svg { width: 18px; height: 18px; color: var(--accent-bright); }
+
+.foot-cols { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: clamp(24px, 3vw, 40px); }
+.fcol h5 { color: #fff; font-size: var(--fs-meta); text-transform: uppercase; letter-spacing: .12em; margin: 0 0 16px; }
+.fcol a { display: block; color: #8fb3b8; font-size: var(--fs-sm); padding: 5px 0; transition: color .2s; text-decoration: none; line-height: 1.4; }
+.fcol a:hover { color: #fff; }
+.fcol-wide .fcol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+
+.foot-bot { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 54px; padding-top: 26px; border-top: 1px solid rgba(255,255,255,.1); font-size: var(--fs-meta); color: #7ba2a7; }
+
+@media (max-width: 980px) {
+  .foot-top { grid-template-columns: 1fr; }
+  .foot-cols { grid-template-columns: 1fr 1fr; }
+  .fcol-wide { grid-column: 1 / -1; }
+}
+@media (max-width: 520px) {
+  .foot-cols { grid-template-columns: 1fr; }
+  .fcol-wide .fcol-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Uniform city chips ──────────────────────────────────────────────── */
+.cities { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 26px; }
+.city-chip { display: inline-flex; align-items: center; gap: 8px; justify-content: center; background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--radius-pill); padding: 11px 18px; font-size: var(--fs-sm); font-weight: 600; color: var(--ink); height: 44px; box-sizing: border-box; }
+.city-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+@media (max-width: 520px) { .cities { grid-template-columns: 1fr 1fr; } }
+
 /* ── WordPress Content Styles ──────────────────────────────────────────
    These styles apply to the rendered HTML from WordPress WP-REST API.
    ──────────────────────────────────────────────────────────────────────── */
