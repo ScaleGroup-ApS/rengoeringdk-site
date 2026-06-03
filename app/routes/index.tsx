@@ -2,7 +2,6 @@ import type { Route } from "./+types/index";
 import { Link } from "react-router";
 import { Header } from "~/components/Header";
 import { Footer } from "~/components/Footer";
-import { ImageFrame } from "~/components/ImageFrame";
 import { JsonLd } from "~/components/JsonLd";
 import { useSiteEffects } from "~/hooks/useSiteEffects";
 import { PHOTOS } from "~/lib/photos";
@@ -94,43 +93,41 @@ export default function Index(_: Route.ComponentProps) {
       <JsonLd data={websiteSchema} />
 
       <main>
-        {/* splash hero — two audience cards */}
-        <header className="hero hero-splash">
-          <div className="wrap">
-            <div className="splash-head reveal">
-              <p className="eyebrow">Define Cleaning Services</p>
-              <h1>Rengøring du kan stole på — privat og erhverv</h1>
-              <p className="hero-lead">
-                Professionel rengøring i hele Danmark. Fast team, svanemærkede produkter og 20 års erfaring —
-                både i dit hjem og i din virksomhed.
-              </p>
+        {/* full-screen split hero — Privat / Erhverv */}
+        <section className="splithero" aria-label="Vælg Privat eller Erhverv">
+          <Link to="/privat" className="splithero-half splithero-privat reveal" style={{ backgroundImage: `url(${PHOTOS.heroPrivat})` }}>
+            <div className="splithero-content">
+              <p className="eyebrow">Privat</p>
+              <h2>Rengøring til dit hjem</h2>
+              <p>Faste rengøringer, hovedrengøring, flytte og vinduespudsning — i hele Danmark.</p>
+              <span className="splithero-cta">Se mere <Arrow /></span>
             </div>
-            <div className="splash-cards">
-              <Link to="/privat" className="splash-card reveal d1">
-                <ImageFrame className="splash-card-img" src={PHOTOS.heroPrivat} alt="Privat rengøring" />
-                <div className="splash-card-body">
-                  <p className="eyebrow">Privat</p>
-                  <h2>Rengøring til dit hjem</h2>
-                  <p>Faste rengøringer, hovedrengøring, flytte og vinduespudsning — til dit hjem.</p>
-                  <span className="splash-card-cta">Se priser og book <Arrow /></span>
-                </div>
-              </Link>
-              <Link to="/erhverv" className="splash-card reveal d2">
-                <ImageFrame className="splash-card-img" src={PHOTOS.heroErhverv} alt="Erhvervsrengøring" />
-                <div className="splash-card-body">
-                  <p className="eyebrow">Erhverv</p>
-                  <h2>Rengøring til virksomheder</h2>
-                  <p>Kontor, butik, klinik, industri og specialopgaver — INSTA 800-dokumenteret.</p>
-                  <span className="splash-card-cta">Se priser og book <Arrow /></span>
-                </div>
-              </Link>
+          </Link>
+          <Link to="/erhverv" className="splithero-half splithero-erhverv reveal d1" style={{ backgroundImage: `url(${PHOTOS.heroErhverv})` }}>
+            <div className="splithero-content">
+              <p className="eyebrow">Erhverv</p>
+              <h2>Rengøring til virksomheder</h2>
+              <p>Kontor, butik, klinik, industri og specialopgaver — INSTA 800-dokumenteret.</p>
+              <span className="splithero-cta">Se mere <Arrow /></span>
             </div>
-            <div className="splash-rating reveal d3">
-              <StarRow />
-              <span className="rtxt"><b>4,9/5</b> på Trustpilot · baseret på <b>512</b> anmeldelser</span>
-            </div>
+          </Link>
+        </section>
+
+        {/* intro under hero */}
+        <section className="wrap" style={{ paddingBlock: "clamp(48px, 6vw, 80px)", textAlign: "center" }}>
+          <p className="eyebrow reveal">Define Cleaning Services</p>
+          <h1 className="reveal d1" style={{ fontSize: "var(--fs-display)", maxWidth: "18ch", margin: "16px auto 0", marginInline: "auto" }}>
+            Rengøring du kan stole på — privat og erhverv
+          </h1>
+          <p className="hero-lead reveal d2" style={{ maxWidth: 640, margin: "20px auto 28px" }}>
+            Professionel rengøring i hele Danmark. Fast team, svanemærkede produkter og 20 års erfaring —
+            både i dit hjem og i din virksomhed.
+          </p>
+          <div className="splash-rating reveal d3">
+            <StarRow />
+            <span className="rtxt"><b>4,9/5</b> på Trustpilot · baseret på <b>512</b> anmeldelser</span>
           </div>
-        </header>
+        </section>
 
         {/* stats band */}
         <section className="statsband" aria-label="Nøgletal">
