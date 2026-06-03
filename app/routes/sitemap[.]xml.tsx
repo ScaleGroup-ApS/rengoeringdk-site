@@ -1,15 +1,27 @@
 import type { Route } from "./+types/sitemap[.]xml";
+import { SERVICES } from "~/lib/services";
 
 const SITE_URL = "https://rengoering.dk";
-const TODAY = "2026-05-25";
+const TODAY = "2026-06-03";
 
-const PAGES = [
+const STATIC_PAGES = [
   { loc: SITE_URL, lastmod: TODAY, priority: "1.0", changefreq: "weekly" },
-  { loc: `${SITE_URL}/om-os`, lastmod: TODAY, priority: "0.8", changefreq: "monthly" },
+  { loc: `${SITE_URL}/privat`, lastmod: TODAY, priority: "0.9", changefreq: "monthly" },
+  { loc: `${SITE_URL}/erhverv`, lastmod: TODAY, priority: "0.9", changefreq: "monthly" },
   { loc: `${SITE_URL}/tjenester`, lastmod: TODAY, priority: "0.9", changefreq: "monthly" },
+  { loc: `${SITE_URL}/om-os`, lastmod: TODAY, priority: "0.7", changefreq: "monthly" },
   { loc: `${SITE_URL}/priser`, lastmod: TODAY, priority: "0.8", changefreq: "monthly" },
   { loc: `${SITE_URL}/kontakt`, lastmod: TODAY, priority: "0.7", changefreq: "monthly" },
 ];
+
+const SERVICE_PAGES = SERVICES.map((s) => ({
+  loc: `${SITE_URL}/tjenester/${s.slug}`,
+  lastmod: TODAY,
+  priority: "0.7",
+  changefreq: "monthly",
+}));
+
+const PAGES = [...STATIC_PAGES, ...SERVICE_PAGES];
 
 export function loader(_: Route.LoaderArgs) {
   const xml = [

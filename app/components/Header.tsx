@@ -2,9 +2,10 @@ import { Link, useLocation } from "react-router";
 import { useEffect, useState } from "react";
 
 const NAV_ITEMS = [
+  { label: "Privat", href: "/privat" },
+  { label: "Erhverv", href: "/erhverv" },
   { label: "Tjenester", href: "/tjenester" },
   { label: "Priser", href: "/priser" },
-  { label: "Beregn pris", href: "/priser#beregner" },
   { label: "Om os", href: "/om-os" },
   { label: "Kontakt", href: "/kontakt" },
 ];

@@ -210,9 +210,10 @@ function ContactForm() {
           </div>
           <h3>Tak for din henvendelse!</h3>
           <p>Vi har modtaget din forespørgsel og vender tilbage inden for 24 timer.</p>
-          <button type="button" className="btn btn-ghost" style={{ marginTop: 22 }} onClick={resetForm}>
-            Send en ny
-          </button>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginTop: 22 }}>
+            <a href="/" className="btn btn-primary">Tilbage til forsiden</a>
+            <a href="/tjenester" className="btn btn-ghost">Se vores ydelser</a>
+          </div>
         </div>
       )}
     </div>

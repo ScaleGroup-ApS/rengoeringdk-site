@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
 import type { Route } from "./+types/priser";
 import { Link, useSearchParams } from "react-router";
 import { Header } from "~/components/Header";
 import { Footer } from "~/components/Footer";
 import { JsonLd } from "~/components/JsonLd";
 import { useSiteEffects } from "~/hooks/useSiteEffects";
+import { SERVICES_BY_SLUG, type Audience as ServiceAudience } from "~/lib/services";
 import { buildMeta } from "~/lib/seo";
 
 const SITE_URL = "https://rengoering.dk";
@@ -13,9 +15,9 @@ const PAGE_URL = `${SITE_URL}/priser`;
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Priser & prisberegner — Define Cleaning Services ApS",
+      title: "Priser & beregner — Define Cleaning Services ApS",
       description:
-        "Få din pris på under et minut. Vælg ejendomstype, areal og frekvens — vi viser en gennemsigtig, vejledende pris. Ingen skjulte gebyrer.",
+        "Få en vejledende pris på under et minut — for både privat og erhverv. Privatpriser inkl. moms, erhvervspriser ekskl. moms. Ingen skjulte gebyrer.",
       url: PAGE_URL,
       siteName: "Define Cleaning Services ApS",
       type: "website",
@@ -29,15 +31,8 @@ const pageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
   name: "Priser – Define Cleaning Services ApS",
-  description: "Gennemsigtige priser og interaktiv beregner for erhvervsrengøring.",
+  description: "Gennemsigtige priser og interaktiv beregner for både privat og erhverv.",
   url: PAGE_URL,
-  breadcrumb: {
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Forside", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "Priser", item: PAGE_URL },
-    ],
-  },
 };
 
 const Arrow = () => (
@@ -52,14 +47,13 @@ const Check = () => (
   </svg>
 );
 
-type Audience = "privat" | "erhverv";
-
+type WizAudience = "privat" | "erhverv";
 type PropertyType = { rate: number; name: string; icon: React.ReactNode };
 
 const TYPES_PRIVAT: PropertyType[] = [
-  { rate: 2.4, name: "Lejlighed", icon: <path d="M3 21h18M6 21V7l12-4v18M10 9h0M14 9h0M10 13h0M14 13h0M10 17h0M14 17h0" /> },
+  { rate: 2.4, name: "Lejlighed", icon: <path d="M3 21h18M6 21V7l12-4v18" /> },
   { rate: 2.6, name: "Hus", icon: <><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" /><path d="M9 21v-6h6v6" /></> },
-  { rate: 2.9, name: "Sommerhus", icon: <><path d="M2 22h20M3 22V10l9-7 9 7v12" /><path d="M9 22v-5h6v5" /></> },
+  { rate: 2.9, name: "Sommerhus", icon: <><path d="M2 22h20M3 22V10l9-7 9 7v12" /></> },
   { rate: 3.4, name: "Flytterengøring", icon: <path d="M5 12H3l9-9 9 9h-2v7a2 2 0 01-2 2H7a2 2 0 01-2-2z" /> },
 ];
 
@@ -84,66 +78,64 @@ const FREQS: Freq[] = [
 type Addon = { name: string; add?: number; pct?: number; icon: React.ReactNode; sub: string };
 
 const ADDONS_PRIVAT: Addon[] = [
-  { name: "Vinduespolering", add: 149, sub: "+149 kr./besøg", icon: <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10" /> },
-  { name: "Ovn & hvidevarer", add: 195, sub: "+195 kr./besøg", icon: <><path d="M3 3h18v18H3z" /><path d="M3 9h18M9 21V9" /></> },
-  { name: "Tøjvask & stryg", add: 129, sub: "+129 kr./besøg", icon: <path d="M3 6h18M6 6v14a2 2 0 002 2h8a2 2 0 002-2V6M9 10h6" /> },
-  { name: "Terrasse & udeareal", add: 175, sub: "+175 kr./besøg", icon: <><path d="M12 2L2 12h3v8h14v-8h3z" /></> },
-  { name: "Aften / weekend", pct: 0.15, sub: "+15% tillæg", icon: <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /> },
-  { name: "Grøn rengøring +", add: 129, sub: "+129 kr./besøg", icon: <path d="M11 20A7 7 0 019 6c4-2 9-2 11 0 0 6-4 12-9 14zM4 21c2-5 5-8 8-10" /> },
+  { name: "Vinduespolering", add: 149, sub: "+149 kr.", icon: <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10" /> },
+  { name: "Ovn & hvidevarer", add: 195, sub: "+195 kr.", icon: <><path d="M3 3h18v18H3z" /><path d="M3 9h18M9 21V9" /></> },
+  { name: "Tøjvask & stryg", add: 129, sub: "+129 kr.", icon: <path d="M3 6h18M6 6v14a2 2 0 002 2h8a2 2 0 002-2V6M9 10h6" /> },
+  { name: "Terrasse & udeareal", add: 175, sub: "+175 kr.", icon: <path d="M12 2L2 12h3v8h14v-8h3z" /> },
 ];
 
 const ADDONS_ERHVERV: Addon[] = [
-  { name: "Vinduespolering", add: 149, sub: "+149 kr./besøg", icon: <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10" /> },
-  { name: "Gulvbehandling", add: 199, sub: "+199 kr./besøg", icon: <path d="M3 9h18M3 15h18M9 3v18M15 3v18" /> },
-  { name: "Køkken / kantine", add: 99, sub: "+99 kr./besøg", icon: <path d="M3 2v7c0 1 1 2 2 2s2-1 2-2V2M5 11v11M15 2c-1.5 0-3 2-3 5s1.5 4 3 4v11" /> },
-  { name: "Hygiejnedokumentation", add: 79, sub: "+79 kr./besøg", icon: <><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6M9 14l2 2 4-4" /></> },
-  { name: "Aften / weekend", pct: 0.15, sub: "+15% tillæg", icon: <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /> },
-  { name: "Grøn rengøring +", add: 129, sub: "+129 kr./besøg", icon: <path d="M11 20A7 7 0 019 6c4-2 9-2 11 0 0 6-4 12-9 14zM4 21c2-5 5-8 8-10" /> },
+  { name: "Vinduespolering", add: 149, sub: "+149 kr.", icon: <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10" /> },
+  { name: "Gulvbehandling", add: 199, sub: "+199 kr.", icon: <path d="M3 9h18M3 15h18M9 3v18M15 3v18" /> },
+  { name: "Køkken / kantine", add: 99, sub: "+99 kr.", icon: <path d="M3 2v7c0 1 1 2 2 2s2-1 2-2V2M5 11v11M15 2c-1.5 0-3 2-3 5s1.5 4 3 4v11" /> },
+  { name: "Hygiejnedokumentation", add: 79, sub: "+79 kr.", icon: <><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6M9 14l2 2 4-4" /></> },
 ];
 
-const PLANS = [
+const INCLUDED_PRIVAT = [
   {
-    name: "Basis",
-    desc: "Til mindre kontorer og butikker med fast, enkel rengøring.",
-    price: "Fra 349",
-    features: ["Op til 100 m²", "Gulve, støv & overflader", "Toilet & køkken", "Fleksibel tidsplan"],
-    cta: "Vælg Basis",
+    title: "Gulve & støv",
+    items: ["Støvsugning af alle gulve", "Gulvvask af alle gulve", "Fjernelse af spindelvæv"],
+    icon: <path d="M3 13h18M3 17h18M5 13v6M19 13v6M7 5l5-3 5 3v8H7z" />,
   },
   {
-    name: "Standard",
-    desc: "Vores mest valgte aftale — komplet rengøring til de fleste virksomheder.",
-    price: "Fra 549",
-    features: ["Op til 250 m²", "Alt i Basis", "Vinduespolering indvendigt", "Fast kontaktperson", "Kvalitetstjek hver måned"],
-    cta: "Vælg Standard",
-    hot: true,
+    title: "Overflader & aftørring",
+    items: ["Aftørring af alle vandrette flader", "Kontaktflader (kontakter, håndtag)", "Vinduskarme og fodlister"],
+    icon: <path d="M3 7h18M3 12h18M3 17h18" />,
   },
   {
-    name: "Premium",
-    desc: "Til større erhverv, klinikker og særlige krav til dokumentation.",
-    price: "Fra 849",
-    features: ["Ubegrænset areal", "Alt i Standard", "INSTA 800-dokumentation", "Prioritet ved booking", "Dedikeret kundeansvarlig"],
-    cta: "Vælg Premium",
+    title: "Bad & køkken",
+    items: ["Rengøring af badeværelse", "Toilet, vask og spejle", "Køkken-overflader og vask"],
+    icon: <><path d="M5 4h14v9a3 3 0 01-3 3H8a3 3 0 01-3-3z" /><path d="M8 16v4M14 16v4" /></>,
   },
 ];
 
-const EXTRAS = [
-  { name: "Vinduespolering udvendigt", price: "Fra 295 kr.", icon: <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10" /> },
-  { name: "Flytterengøring", price: "Fra 1.995 kr.", icon: <path d="M5 12H3l9-9 9 9h-2v7a2 2 0 01-2 2H7a2 2 0 01-2-2z" /> },
-  { name: "Gulvbehandling & polish", price: "Fra 595 kr.", icon: <><path d="M12 2L2 7l10 5 10-5z" /><path d="M2 17l10 5 10-5" /></> },
-  { name: "Terrasse & udeareal", price: "Fra 395 kr.", icon: <path d="M3 9h18M9 21V9M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" /> },
-  { name: "Ovn & hvidevarer", price: "Fra 195 kr.", icon: <><path d="M3 3h18v18H3z" /><path d="M3 9h18M9 21V9" /></> },
-  { name: "Industri-specialrengøring", price: "På forespørgsel", icon: <><path d="M12 2L2 7l10 5 10-5z" /><path d="M2 17l10 5 10-5M2 12l10 5 10-5" /></> },
+const INCLUDED_ERHVERV = [
+  {
+    title: "Gulve & støv",
+    items: ["Støvsugning af alle gulve", "Mopning og gulvvask", "Fjernelse af spindelvæv"],
+    icon: <path d="M3 13h18M3 17h18M5 13v6M19 13v6M7 5l5-3 5 3v8H7z" />,
+  },
+  {
+    title: "Overflader & kontaktflader",
+    items: ["Aftørring af skriveborde", "Mødelokaler og fællesarealer", "Dørhåndtag, kontakter, gelænder"],
+    icon: <path d="M3 7h18M3 12h18M3 17h18" />,
+  },
+  {
+    title: "Køkken & sanitet",
+    items: ["Køkken, kaffeområde og kantine", "Toiletter og vådrum", "Affald sorteret og tømt"],
+    icon: <><path d="M5 4h14v9a3 3 0 01-3 3H8a3 3 0 01-3-3z" /><path d="M8 16v4M14 16v4" /></>,
+  },
 ];
 
-const FAQS = [
-  { q: "Hvad er inkluderet i prisen?", a: "Alle priser inkluderer rengøringsmidler, udstyr, fast team og løbende kvalitetstjek. Vi medbringer alt — I skal blot give os adgang til lokalerne.", open: true },
-  { q: "Er beregneren bindende?", a: "Nej. Beregneren giver et vejledende estimat, så I hurtigt kan danne jer et overblik. Den endelige pris fastsættes efter et gratis, uforpligtende besøg, hvor vi ser lokalerne." },
+const FAQS_BASE = [
+  { q: "Hvad er inkluderet i prisen?", a: "Alle priser inkluderer rengøringsmidler, udstyr, fast team og kvalitetstjek. Vi medbringer alt — du skal blot give os adgang.", open: true },
+  { q: "Er beregneren bindende?", a: "Nej. Beregneren giver et vejledende estimat. Den endelige pris fastsættes efter et gratis tilbud, hvor vi ser lokalerne." },
   { q: "Hvor hurtigt kan I starte?", a: "Vi kan i de fleste tilfælde være i gang inden for en uge. Akutte opgaver løser vi ofte hurtigere — ring og hør nærmere." },
   { q: "Kan jeg ændre eller opsige aftalen?", a: "Ja. Faste aftaler kan opsiges med en måneds varsel, og enkelte besøg kan ændres op til 48 timer før uden beregning." },
   { q: "Bruger I miljøvenlige produkter?", a: "Altid. Vi benytter svanemærkede, godkendte midler, der er skånsomme over for mennesker, dyr og natur." },
 ];
 
-const BASE = 199; // udkald/transport pr. besøg
+const BASE = 199;
 
 function kr(n: number, round: number) {
   const rounded = Math.round(n / round) * round;
@@ -151,60 +143,93 @@ function kr(n: number, round: number) {
 }
 
 function m2note(v: number) {
-  if (v < 80) return "≈ lille kontor / klinik";
-  if (v < 200) return "≈ mellemstort kontor";
-  if (v < 500) return "≈ stor etage / butik";
+  if (v < 80) return "≈ lille lejlighed / kontor";
+  if (v < 200) return "≈ hus / mellemstort kontor";
+  if (v < 500) return "≈ stort hus / etage / butik";
   if (v < 1000) return "≈ flere etager";
   return "≈ stort erhvervsareal";
 }
 
 const WIZ_STEPS = [
+  { label: "Hvem" },
   { label: "Type" },
-  { label: "Ejendom" },
   { label: "Areal" },
   { label: "Frekvens" },
-  { label: "Tilvalg" },
+  { label: "Inkluderet" },
   { label: "Pris" },
+  { label: "Tilbud" },
 ] as const;
+
+function findTypeIdx(types: PropertyType[], wantedName?: string) {
+  if (!wantedName) return 0;
+  const i = types.findIndex((t) => t.name === wantedName);
+  return i >= 0 ? i : 0;
+}
 
 function Prisberegner() {
   const [searchParams] = useSearchParams();
-  const initialAudience: Audience = searchParams.get("for") === "erhverv" ? "erhverv" : "privat";
+
+  const urlAudience: WizAudience = searchParams.get("for") === "erhverv" ? "erhverv" : "privat";
+  const urlServiceSlug = searchParams.get("service") || "";
+  const urlService = urlServiceSlug ? SERVICES_BY_SLUG[urlServiceSlug] : undefined;
+
+  const initialAudience: WizAudience = urlService
+    ? urlService.audience === "erhverv" ? "erhverv" : urlService.audience === "privat" ? "privat" : urlAudience
+    : urlAudience;
 
   const [step, setStep] = useState(0);
-  const [audience, setAudience] = useState<Audience>(initialAudience);
-  const [typeIdx, setTypeIdx] = useState(0);
-  const [m2, setM2] = useState(80);
+  const [audience, setAudience] = useState<WizAudience>(initialAudience);
+  const [typeIdx, setTypeIdx] = useState(() => {
+    const types = initialAudience === "privat" ? TYPES_PRIVAT : TYPES_ERHVERV;
+    return findTypeIdx(types, urlService?.wizardType);
+  });
+  const [m2, setM2] = useState(initialAudience === "privat" ? 80 : 150);
   const [freqIdx, setFreqIdx] = useState(2);
   const [selectedAddons, setSelectedAddons] = useState<Set<number>>(new Set());
+  const [serviceSlug, setServiceSlug] = useState<string>(urlServiceSlug);
+
+  const [submitted, setSubmitted] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
+  const [formValues, setFormValues] = useState({
+    navn: "",
+    virksomhed: "",
+    kontaktperson: "",
+    cvr: "",
+    adresse: "",
+    tlf: "",
+    email: "",
+    kommentar: "",
+  });
 
   useEffect(() => {
-    const param = searchParams.get("for");
-    if (param === "privat" || param === "erhverv") {
-      setAudience(param);
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
-    setTypeIdx(0);
+    const types = audience === "privat" ? TYPES_PRIVAT : TYPES_ERHVERV;
+    if (typeIdx >= types.length) setTypeIdx(0);
     setSelectedAddons(new Set());
-    setM2(audience === "privat" ? 80 : 150);
+    setM2((cur) => {
+      const fallback = audience === "privat" ? 80 : 150;
+      return cur && cur > 0 ? cur : fallback;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audience]);
 
   const types = audience === "privat" ? TYPES_PRIVAT : TYPES_ERHVERV;
   const addons = audience === "privat" ? ADDONS_PRIVAT : ADDONS_ERHVERV;
+  const included = audience === "privat" ? INCLUDED_PRIVAT : INCLUDED_ERHVERV;
   const type = types[typeIdx] ?? types[0];
   const freq = FREQS[freqIdx];
 
-  const result = useMemo(() => {
+  const momsLabel = audience === "privat" ? "inkl. moms" : "ekskl. moms";
+  const momsMul = audience === "privat" ? 1.25 : 1;
+
+  const perVisitBase = useMemo(() => {
     const fixedAdd = Array.from(selectedAddons).reduce((sum, i) => sum + (addons[i]?.add ?? 0), 0);
     const pctAddon = Array.from(selectedAddons).map((i) => addons[i]).find((a) => a?.pct !== undefined);
-    let perVisit = (BASE + m2 * type.rate) * freq.mult + fixedAdd;
-    if (pctAddon?.pct) perVisit *= 1 + pctAddon.pct;
-    const oneOff = freq.vpm === 0;
-    const perMonth = oneOff ? perVisit : perVisit * freq.vpm;
-    return { perVisit, perMonth, oneOff };
-  }, [m2, type.rate, freq.mult, freq.vpm, selectedAddons, addons]);
+    let v = (BASE + m2 * type.rate) * freq.mult + fixedAdd;
+    if (pctAddon?.pct) v *= 1 + pctAddon.pct;
+    return v;
+  }, [m2, type.rate, freq.mult, selectedAddons, addons]);
+
+  const perVisit = perVisitBase * momsMul;
 
   const toggleAddon = (i: number) => {
     setSelectedAddons((prev) => {
@@ -220,17 +245,66 @@ function Prisberegner() {
   const goReset = () => {
     setStep(0);
     setSelectedAddons(new Set());
+    setSubmitted(false);
+    setFormValues({ navn: "", virksomhed: "", kontaktperson: "", cvr: "", adresse: "", tlf: "", email: "", kommentar: "" });
   };
+
+  const update = (k: keyof typeof formValues) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormValues((v) => ({ ...v, [k]: e.target.value }));
+    setFormErrors((p) => ({ ...p, [k]: false }));
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const errs: Record<string, boolean> = {};
+    const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(formValues.email.trim());
+    if (audience === "privat") {
+      if (!formValues.navn.trim()) errs.navn = true;
+    } else {
+      if (!formValues.virksomhed.trim()) errs.virksomhed = true;
+      if (!formValues.kontaktperson.trim()) errs.kontaktperson = true;
+    }
+    if (!formValues.adresse.trim()) errs.adresse = true;
+    if (formValues.tlf.trim().length < 6) errs.tlf = true;
+    if (!emailOk) errs.email = true;
+    setFormErrors(errs);
+    if (Object.keys(errs).length === 0) {
+      setSubmitted(true);
+    }
+  };
+
+  const serviceLabel = serviceSlug && SERVICES_BY_SLUG[serviceSlug]
+    ? SERVICES_BY_SLUG[serviceSlug].title
+    : type.name;
+
+  if (submitted) {
+    return (
+      <div className="calc reveal">
+        <div className="wiz-body" style={{ textAlign: "center", padding: "clamp(40px, 6vw, 80px)" }}>
+          <div style={{ width: 78, height: 78, borderRadius: "50%", background: "var(--accent-soft)", color: "var(--accent-deep)", display: "grid", placeItems: "center", margin: "0 auto 22px" }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 38, height: 38 }}>
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+          </div>
+          <h3 className="wiz-title">Tak for din henvendelse!</h3>
+          <p style={{ color: "var(--text-dim)", maxWidth: 480, margin: "12px auto 0" }}>
+            Vi har modtaget din forespørgsel og vender tilbage inden for 24 timer.
+          </p>
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap", marginTop: 28 }}>
+            <Link to="/" className="btn btn-primary">Tilbage til forsiden</Link>
+            <Link to="/tjenester" className="btn btn-ghost">Se vores ydelser</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="calc reveal">
       <div className="wiz-head">
         <div className="wiz-steps" aria-label="Trin">
           {WIZ_STEPS.map((s, i) => (
-            <div
-              key={s.label}
-              className={`wiz-step${i === step ? " active" : ""}${i < step ? " done" : ""}`}
-            >
+            <div key={s.label} className={`wiz-step${i === step ? " active" : ""}${i < step ? " done" : ""}`}>
               <div className="wiz-dot" aria-hidden="true"><span>{i + 1}</span></div>
               <div className="wiz-label">{s.label}</div>
             </div>
@@ -244,14 +318,9 @@ function Prisberegner() {
         {step === 0 && (
           <>
             <h3 className="wiz-title">Hvem er du?</h3>
-            <p className="wiz-sub">Vi tilpasser priser og tilvalg efter, om det er til hjemmet eller virksomheden.</p>
+            <p className="wiz-sub">Vi tilpasser priser, pakker og tilbud efter, om det er til hjemmet eller virksomheden.</p>
             <div className="aud-grid">
-              <button
-                type="button"
-                className={`aud-card${audience === "privat" ? " sel" : ""}`}
-                onClick={() => setAudience("privat")}
-                aria-pressed={audience === "privat"}
-              >
+              <button type="button" className={`aud-card${audience === "privat" ? " sel" : ""}`} onClick={() => setAudience("privat")} aria-pressed={audience === "privat"}>
                 <span className="aud-ico">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
@@ -259,21 +328,16 @@ function Prisberegner() {
                   </svg>
                 </span>
                 <b>Privat</b>
-                <span>Hjem, lejlighed, sommerhus</span>
+                <span>Hjem, lejlighed, sommerhus · priser inkl. moms</span>
               </button>
-              <button
-                type="button"
-                className={`aud-card${audience === "erhverv" ? " sel" : ""}`}
-                onClick={() => setAudience("erhverv")}
-                aria-pressed={audience === "erhverv"}
-              >
+              <button type="button" className={`aud-card${audience === "erhverv" ? " sel" : ""}`} onClick={() => setAudience("erhverv")} aria-pressed={audience === "erhverv"}>
                 <span className="aud-ico">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" />
                   </svg>
                 </span>
                 <b>Erhverv</b>
-                <span>Kontor, butik, klinik, ejendom</span>
+                <span>Kontor, butik, klinik, ejendom · priser ekskl. moms</span>
               </button>
             </div>
           </>
@@ -289,7 +353,10 @@ function Prisberegner() {
                   key={t.name}
                   type="button"
                   className={`type-card${i === typeIdx ? " sel" : ""}`}
-                  onClick={() => setTypeIdx(i)}
+                  onClick={() => {
+                    setTypeIdx(i);
+                    setServiceSlug("");
+                  }}
                   aria-pressed={i === typeIdx}
                 >
                   <span className="ti">
@@ -307,7 +374,7 @@ function Prisberegner() {
         {step === 2 && (
           <>
             <h3 className="wiz-title">Hvor stort er arealet?</h3>
-            <p className="wiz-sub">Justér skyderen — vi viser en omtrentlig størrelseskategori for at hjælpe.</p>
+            <p className="wiz-sub">Justér skyderen — vi viser en omtrentlig størrelseskategori.</p>
             <div className="m2row">
               <span className="m2val tnum">{m2.toLocaleString("da-DK")}</span>
               <span className="m2unit">m²</span>
@@ -333,13 +400,7 @@ function Prisberegner() {
             <p className="wiz-sub">De fleste vælger ugentligt eller hver 14. dag. Du kan altid ændre det senere.</p>
             <div className="seg">
               {FREQS.map((f, i) => (
-                <button
-                  key={f.name}
-                  type="button"
-                  className={i === freqIdx ? "sel" : ""}
-                  onClick={() => setFreqIdx(i)}
-                  aria-pressed={i === freqIdx}
-                >
+                <button key={f.name} type="button" className={i === freqIdx ? "sel" : ""} onClick={() => setFreqIdx(i)} aria-pressed={i === freqIdx}>
                   {f.name}
                 </button>
               ))}
@@ -349,17 +410,29 @@ function Prisberegner() {
 
         {step === 4 && (
           <>
-            <h3 className="wiz-title">Tilvalg <span style={{ fontWeight: 600, color: "var(--text-mute)", fontSize: ".75em" }}>(valgfrit)</span></h3>
-            <p className="wiz-sub">Læg ekstra ydelser oveni — eller spring videre, hvis du ikke har brug for nogen.</p>
+            <h3 className="wiz-title">Hvad er inkluderet</h3>
+            <p className="wiz-sub">Følgende er altid en del af vores rengøring — du kan tilføje ekstra ydelser nedenfor.</p>
+            <div className="included-grid">
+              {included.map((box) => (
+                <div key={box.title} className="included-card">
+                  <div className="included-ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      {box.icon}
+                    </svg>
+                  </div>
+                  <h4>{box.title}</h4>
+                  <ul>
+                    {box.items.map((it) => (
+                      <li key={it}><span className="ck"><Check /></span>{it}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            <h4 style={{ marginTop: 32, marginBottom: 16 }}>Valgfri tilvalg (lægges til prisen)</h4>
             <div className="addons">
               {addons.map((a, i) => (
-                <button
-                  key={a.name}
-                  type="button"
-                  className={`addon${selectedAddons.has(i) ? " sel" : ""}`}
-                  onClick={() => toggleAddon(i)}
-                  aria-pressed={selectedAddons.has(i)}
-                >
+                <button key={a.name} type="button" className={`addon${selectedAddons.has(i) ? " sel" : ""}`} onClick={() => toggleAddon(i)} aria-pressed={selectedAddons.has(i)}>
                   <span className="ai">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       {a.icon}
@@ -381,71 +454,132 @@ function Prisberegner() {
         )}
 
         {step === 5 && (
-          <aside className="calc-side" style={{ margin: "0 -1px", borderRadius: 16 }}>
+          <aside className="calc-side" style={{ borderRadius: 16, marginInline: "-1px" }}>
             <p className="res-eyebrow">Estimeret pris · {audience === "privat" ? "Privat" : "Erhverv"}</p>
-            <div className="res-price tnum">{kr(result.oneOff ? result.perVisit : result.perMonth, result.oneOff ? 5 : 10)}</div>
-            <p className="res-per">{result.oneOff ? "engangspris · ekskl. moms" : "pr. måned · ekskl. moms"}</p>
+            <div className="res-price tnum">{kr(perVisit, 5)}</div>
+            <p className="res-per">pr. besøg · {momsLabel}</p>
 
-            <div className="res-visit">
-              <div>
-                <div className="rv tnum">{kr(result.perVisit, 5)}</div>
-                <span>pr. besøg</span>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <div className="rv tnum">
-                  {result.oneOff ? "1" : freq.vpm.toLocaleString("da-DK", { maximumFractionDigits: 1 })}
-                </div>
-                <span>besøg / måned</span>
-              </div>
-            </div>
-
-            <div className="res-break">
+            <div className="res-break" style={{ marginTop: 30 }}>
               <div className="rb"><span>Type</span><span>{type.name}</span></div>
               <div className="rb"><span>Areal</span><span>{m2.toLocaleString("da-DK")} m²</span></div>
               <div className="rb"><span>Frekvens</span><span>{freq.name}</span></div>
               {selectedAddons.size > 0 && (
-                <div className="rb"><span>Tilvalg</span><span>{selectedAddons.size} valgt</span></div>
+                <div className="rb"><span>Tilvalg</span><span>{selectedAddons.size} valgt — inkluderet i prisen</span></div>
               )}
             </div>
 
-            <div className="res-cta">
-              <Link className="btn btn-white btn-lg" to="/kontakt">
-                Få præcist tilbud <Arrow />
-              </Link>
-              <a
-                className="btn btn-lg"
-                style={{ background: "rgba(255,255,255,.14)", color: "#fff", border: "1px solid rgba(255,255,255,.3)" }}
-                href="tel:+4570123456"
-              >
-                Ring 70 12 34 56
-              </a>
-            </div>
-            <p className="res-note">
+            <p className="res-note" style={{ marginTop: 24 }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 16v-4M12 8h.01" />
               </svg>
-              Vejledende estimat. Endelig pris fastsættes efter et gratis besøg og afhænger af lokalernes tilstand.
+              Alle tilvalg er allerede regnet med i prisen pr. besøg. Vejledende estimat — endelig pris fastsættes efter aftale.
             </p>
           </aside>
+        )}
+
+        {step === 6 && (
+          <>
+            <h3 className="wiz-title">Få et gratis tilbud</h3>
+            <p className="wiz-sub">
+              Udfyld formularen — så vender vi tilbage med et skræddersyet tilbud inden for 24 timer. Vi har noteret <strong>{serviceLabel}</strong>.
+            </p>
+            <form onSubmit={handleSubmit} noValidate className="wiz-form">
+              {audience === "privat" ? (
+                <div className="fgrid">
+                  <div className={`field${formErrors.navn ? " invalid" : ""}`}>
+                    <label htmlFor="navn">Navn <span className="req">*</span></label>
+                    <input id="navn" type="text" autoComplete="name" value={formValues.navn} onChange={update("navn")} className={formErrors.navn ? "err" : ""} />
+                    <span className="msg">Skriv venligst dit navn.</span>
+                  </div>
+                  <div className={`field${formErrors.adresse ? " invalid" : ""}`}>
+                    <label htmlFor="adresse">Adresse <span className="req">*</span></label>
+                    <input id="adresse" type="text" autoComplete="street-address" value={formValues.adresse} onChange={update("adresse")} className={formErrors.adresse ? "err" : ""} />
+                    <span className="msg">Skriv venligst en adresse.</span>
+                  </div>
+                  <div className={`field${formErrors.tlf ? " invalid" : ""}`}>
+                    <label htmlFor="tlf">Telefon <span className="req">*</span></label>
+                    <input id="tlf" type="tel" autoComplete="tel" value={formValues.tlf} onChange={update("tlf")} className={formErrors.tlf ? "err" : ""} />
+                    <span className="msg">Skriv venligst et telefonnummer.</span>
+                  </div>
+                  <div className={`field${formErrors.email ? " invalid" : ""}`}>
+                    <label htmlFor="email">E-mail <span className="req">*</span></label>
+                    <input id="email" type="email" autoComplete="email" value={formValues.email} onChange={update("email")} className={formErrors.email ? "err" : ""} />
+                    <span className="msg">Skriv venligst en gyldig e-mail.</span>
+                  </div>
+                  <div className="field full">
+                    <label htmlFor="kommentar">Kommentar</label>
+                    <textarea id="kommentar" value={formValues.kommentar} onChange={update("kommentar")} placeholder="Særlige ønsker eller spørgsmål..." />
+                    <span className="msg">&nbsp;</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="fgrid">
+                  <div className={`field${formErrors.virksomhed ? " invalid" : ""}`}>
+                    <label htmlFor="virksomhed">Virksomhedsnavn <span className="req">*</span></label>
+                    <input id="virksomhed" type="text" autoComplete="organization" value={formValues.virksomhed} onChange={update("virksomhed")} className={formErrors.virksomhed ? "err" : ""} />
+                    <span className="msg">Skriv venligst et virksomhedsnavn.</span>
+                  </div>
+                  <div className={`field${formErrors.kontaktperson ? " invalid" : ""}`}>
+                    <label htmlFor="kontaktperson">Kontaktperson <span className="req">*</span></label>
+                    <input id="kontaktperson" type="text" autoComplete="name" value={formValues.kontaktperson} onChange={update("kontaktperson")} className={formErrors.kontaktperson ? "err" : ""} />
+                    <span className="msg">Skriv venligst kontaktperson.</span>
+                  </div>
+                  <div className="field">
+                    <label htmlFor="cvr">CVR (valgfrit)</label>
+                    <input id="cvr" type="text" inputMode="numeric" value={formValues.cvr} onChange={update("cvr")} />
+                    <span className="msg">&nbsp;</span>
+                  </div>
+                  <div className={`field${formErrors.adresse ? " invalid" : ""}`}>
+                    <label htmlFor="adresse">Adresse <span className="req">*</span></label>
+                    <input id="adresse" type="text" autoComplete="street-address" value={formValues.adresse} onChange={update("adresse")} className={formErrors.adresse ? "err" : ""} />
+                    <span className="msg">Skriv venligst en adresse.</span>
+                  </div>
+                  <div className={`field${formErrors.tlf ? " invalid" : ""}`}>
+                    <label htmlFor="tlf">Telefon <span className="req">*</span></label>
+                    <input id="tlf" type="tel" autoComplete="tel" value={formValues.tlf} onChange={update("tlf")} className={formErrors.tlf ? "err" : ""} />
+                    <span className="msg">Skriv venligst et telefonnummer.</span>
+                  </div>
+                  <div className={`field${formErrors.email ? " invalid" : ""}`}>
+                    <label htmlFor="email">E-mail <span className="req">*</span></label>
+                    <input id="email" type="email" autoComplete="email" value={formValues.email} onChange={update("email")} className={formErrors.email ? "err" : ""} />
+                    <span className="msg">Skriv venligst en gyldig e-mail.</span>
+                  </div>
+                  <div className="field full">
+                    <label htmlFor="kommentar">Kommentar</label>
+                    <textarea id="kommentar" value={formValues.kommentar} onChange={update("kommentar")} placeholder="Særlige ønsker eller spørgsmål..." />
+                    <span className="msg">&nbsp;</span>
+                  </div>
+                </div>
+              )}
+              <input type="hidden" name="ydelse" value={serviceLabel} />
+              <input type="hidden" name="estimat" value={kr(perVisit, 5)} />
+              <input type="hidden" name="audience" value={audience} />
+
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginTop: 20 }}>
+                <span style={{ fontSize: "var(--fs-meta)", color: "var(--text-mute)" }}>
+                  Valgt ydelse: <strong style={{ color: "var(--ink)" }}>{serviceLabel}</strong> · estimeret pris <strong style={{ color: "var(--ink)" }}>{kr(perVisit, 5)}</strong>
+                </span>
+                <button type="submit" className="btn btn-primary btn-lg">Send forespørgsel <Arrow /></button>
+              </div>
+            </form>
+          </>
         )}
       </div>
 
       <div className="wiz-nav">
-        {step > 0 ? (
-          <button type="button" className="btn btn-ghost" onClick={goBack}>
-            ← Tilbage
-          </button>
+        {step > 0 && step < 6 ? (
+          <button type="button" className="btn btn-ghost" onClick={goBack}>← Tilbage</button>
+        ) : step === 6 ? (
+          <button type="button" className="btn btn-ghost" onClick={goBack}>← Justér beregning</button>
         ) : <span />}
         <span className="spacer" />
-        {step < WIZ_STEPS.length - 1 ? (
-          <button type="button" className="btn btn-primary" onClick={goNext}>
-            Næste <Arrow />
-          </button>
-        ) : (
-          <button type="button" className="btn btn-ghost" onClick={goReset}>
-            Start forfra
-          </button>
+        {step < 5 ? (
+          <button type="button" className="btn btn-primary" onClick={goNext}>Næste <Arrow /></button>
+        ) : step === 5 ? (
+          <button type="button" className="btn btn-primary" onClick={goNext}>Få et gratis tilbud <Arrow /></button>
+        ) : step === 6 ? null : (
+          <button type="button" className="btn btn-ghost" onClick={goReset}>Start forfra</button>
         )}
       </div>
     </div>
@@ -471,88 +605,25 @@ export default function Priser(_: Route.ComponentProps) {
             <p className="eyebrow reveal">Priser & beregner</p>
             <h1 className="reveal d1">Få din pris på under et minut</h1>
             <p className="lead reveal d2">
-              Ingen skjulte gebyrer, ingen overraskelser. Vælg din ejendomstype, justér arealet og
-              se en vejledende pris med det samme — eller få et præcist, uforpligtende tilbud.
+              Ingen skjulte gebyrer, ingen overraskelser. Vi viser priser inkl. moms for private kunder og
+              ekskl. moms for erhverv — vælg selv i første trin.
             </p>
           </div>
         </header>
 
-        {/* PRISBEREGNER */}
         <section className="wrap" id="beregner" style={{ paddingBottom: "var(--pad-section)", scrollMarginTop: 120 }}>
           <Prisberegner />
         </section>
 
-        {/* packages */}
         <section className="blk wrap" style={{ paddingTop: 0 }}>
-          <div className="shead center reveal">
-            <p className="eyebrow">Faste pakker</p>
-            <h2>Vælg en pakke — eller få den skræddersyet</h2>
-            <p>Alle pakker inkluderer midler, udstyr, fast team og kvalitetstjek. Priser er ekskl. moms.</p>
-          </div>
-          <div className="plans">
-            {PLANS.map((plan, i) => (
-              <div key={plan.name} className={`plan reveal${i ? ` d${i}` : ""}${plan.hot ? " hot" : ""}`}>
-                {plan.hot && <span className="plan-badge">Mest populær</span>}
-                <h3>{plan.name}</h3>
-                <p className="pd">{plan.desc}</p>
-                <div className="price">
-                  <b>{plan.price}</b>
-                  <span>kr./besøg</span>
-                </div>
-                <ul>
-                  {plan.features.map((f) => (
-                    <li key={f}>
-                      <span className="pk"><Check /></span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link className={plan.hot ? "btn btn-white" : "btn btn-ghost"} to="/kontakt">
-                  {plan.cta}
-                </Link>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* extras */}
-        <section className="blk" style={{ background: "var(--bg-sunken)", paddingBlock: "var(--pad-section)" }}>
-          <div className="wrap">
-            <div className="shead center reveal">
-              <p className="eyebrow">Tillægstjenester</p>
-              <h2>Tilføj efter behov</h2>
-            </div>
-            <div className="extras reveal d1">
-              {EXTRAS.map((e) => (
-                <div className="extra" key={e.name}>
-                  <span className="en">
-                    <span className="ei">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        {e.icon}
-                      </svg>
-                    </span>
-                    {e.name}
-                  </span>
-                  <span className="ep">{e.price}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* faq */}
-        <section className="blk wrap">
           <div className="shead center reveal">
             <p className="eyebrow">Spørgsmål & svar</p>
             <h2>Ofte stillede spørgsmål</h2>
           </div>
           <div className="faq reveal d1">
-            {FAQS.map((f) => (
+            {FAQS_BASE.map((f) => (
               <details className="qa" key={f.q} open={f.open}>
-                <summary>
-                  {f.q}
-                  <span className="pl" />
-                </summary>
+                <summary>{f.q}<span className="pl" /></summary>
                 <div className="qa-body">{f.a}</div>
               </details>
             ))}
@@ -562,14 +633,10 @@ export default function Priser(_: Route.ComponentProps) {
         <section className="blk wrap" style={{ paddingTop: 0 }}>
           <div className="ctaband reveal">
             <h2>Klar til at komme i gang?</h2>
-            <p>Få et gratis og uforpligtende tilbud inden for 24 timer — skræddersyet til netop jeres lokaler.</p>
+            <p>Få et gratis og uforpligtende tilbud inden for 24 timer — skræddersyet til netop dine behov.</p>
             <div className="row">
               <Link className="btn btn-white btn-lg" to="/kontakt">Få et gratis tilbud</Link>
-              <a
-                className="btn btn-lg"
-                style={{ background: "rgba(255,255,255,.14)", color: "#fff", border: "1px solid rgba(255,255,255,.3)" }}
-                href="tel:+4570123456"
-              >
+              <a className="btn btn-lg" style={{ background: "rgba(255,255,255,.14)", color: "#fff", border: "1px solid rgba(255,255,255,.3)" }} href="tel:+4570123456">
                 Ring 70 12 34 56
               </a>
             </div>

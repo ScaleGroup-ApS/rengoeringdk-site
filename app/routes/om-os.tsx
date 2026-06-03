@@ -16,7 +16,7 @@ export function meta(_: Route.MetaArgs) {
     ...buildMeta({
       title: "Om os — Define Cleaning Services ApS",
       description:
-        "15 år med rent arbejde og glade kunder. Vi er et landsdækkende rengøringsfirma med fast team, INSTA 800-kvalitet og svanemærkede produkter.",
+        "20 års erfaring med rent arbejde og glade kunder. Vi er et landsdækkende rengøringsfirma med fast team, INSTA 800-kvalitet og svanemærkede produkter.",
       url: PAGE_URL,
       siteName: "Define Cleaning Services ApS",
       type: "website",
@@ -42,7 +42,7 @@ const pageSchema = {
 };
 
 const STATS = [
-  { count: 2010, decimals: 0, suffix: "", label: "Grundlagt" },
+  { count: 20, decimals: 0, suffix: "", label: "Års erfaring" },
   { count: 500, decimals: 0, suffix: "+", label: "Faste kunder" },
   { count: 65, decimals: 0, suffix: "", label: "Medarbejdere" },
   { count: 95, decimals: 0, suffix: "+", label: "Byer dækket" },
@@ -98,11 +98,11 @@ export default function OmOs(_: Route.ComponentProps) {
               <b>Om os</b>
             </nav>
             <p className="eyebrow reveal">Om os</p>
-            <h1 className="reveal d1">15 år med rent arbejde — og glade kunder</h1>
+            <h1 className="reveal d1">20 års erfaring med rent arbejde — og glade kunder</h1>
             <p className="lead reveal d2">
-              Siden 2010 har vi hjulpet danske virksomheder med at tage sig godt ud. Vi startede med
-              ét team og én varevogn. I dag rengør vi for over 500 kunder i hele landet — men
-              ambitionen er den samme: at gøre det grundigt, og at gøre det ordentligt.
+              Vi har hjulpet danske virksomheder og privatkunder med at tage sig godt ud i to årtier.
+              Vi startede med ét team og én varevogn. I dag rengør vi for over 500 kunder i hele landet —
+              men ambitionen er den samme: at gøre det grundigt, og at gøre det ordentligt.
             </p>
           </div>
         </header>
