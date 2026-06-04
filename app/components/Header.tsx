@@ -42,7 +42,7 @@ export function Header() {
       <nav className={`bar${scrolled ? " scrolled" : ""}`}>
         <div className="wrap">
           <Link className="logo" to="/" aria-label="Define Cleaning Services — Forside">
-            <img src="/logo.svg" alt="Define Cleaning Services" className="logo-img" />
+            <img src="/logo.png" alt="Define Cleaning Services" className="logo-img" width={493} height={282} />
           </Link>
 
           <div className="navlinks">

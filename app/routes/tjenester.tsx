@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Route } from "./+types/tjenester";
 import { Link } from "react-router";
 import { Header } from "~/components/Header";
@@ -52,6 +52,7 @@ type Filter = "alle" | Audience;
 export default function Tjenester(_: Route.ComponentProps) {
   useSiteEffects();
   const [filter, setFilter] = useState<Filter>("alle");
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const filtered = SERVICES.filter((s) => {
     if (filter === "alle") return true;
@@ -59,6 +60,15 @@ export default function Tjenester(_: Route.ComponentProps) {
     if (filter === "erhverv") return s.audience === "erhverv" || s.audience === "both";
     return true;
   });
+
+  // The global reveal observer only runs once on mount, so cards added when the
+  // filter changes never get the `in` class and would stay hidden. Reveal the
+  // current set of cards on every filter change (and on first mount).
+  useEffect(() => {
+    gridRef.current
+      ?.querySelectorAll<HTMLElement>(".svc.reveal")
+      .forEach((el) => el.classList.add("in"));
+  }, [filter]);
 
   return (
     <div className="page">
@@ -113,7 +123,7 @@ export default function Tjenester(_: Route.ComponentProps) {
         </header>
 
         <section className="wrap" style={{ paddingBottom: "var(--pad-section)" }}>
-          <div className="svc-grid">
+          <div className="svc-grid" ref={gridRef}>
             {filtered.map((svc, i) => (
               <Link
                 key={svc.slug}

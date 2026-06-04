@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import type { Route } from "./+types/priser";
 import { Link, useSearchParams } from "react-router";
@@ -190,6 +190,10 @@ function Prisberegner() {
 
   const [submitted, setSubmitted] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
+  type CvrStatus = "idle" | "loading" | "ok" | "notfound" | "error";
+  const [cvrStatus, setCvrStatus] = useState<CvrStatus>("idle");
+  const [cvrCompany, setCvrCompany] = useState("");
+  const lastCvrLookup = useRef("");
   const [formValues, setFormValues] = useState({
     navn: "",
     virksomhed: "",
@@ -247,6 +251,54 @@ function Prisberegner() {
     setSelectedAddons(new Set());
     setSubmitted(false);
     setFormValues({ navn: "", virksomhed: "", kontaktperson: "", cvr: "", adresse: "", tlf: "", email: "", kommentar: "" });
+    setCvrStatus("idle");
+    setCvrCompany("");
+    lastCvrLookup.current = "";
+  };
+
+  // Look up Danish company details from a CVR number via the server-side proxy
+  // and prefill the form (without overwriting anything the user already typed).
+  const lookupCvr = async (raw: string) => {
+    const cvr = raw.replace(/\D/g, "");
+    if (cvr.length !== 8 || lastCvrLookup.current === cvr) return;
+    lastCvrLookup.current = cvr;
+    setCvrStatus("loading");
+    try {
+      const res = await fetch(`/api/cvr?cvr=${cvr}`);
+      const data = await res.json();
+      if (!res.ok || !data.found) {
+        setCvrStatus("notfound");
+        return;
+      }
+      const fullAddress = [data.address, [data.zipcode, data.city].filter(Boolean).join(" ")]
+        .filter(Boolean)
+        .join(", ");
+      setCvrCompany(data.name || "");
+      setFormValues((v) => ({
+        ...v,
+        virksomhed: data.name || v.virksomhed,
+        adresse: fullAddress || v.adresse,
+        tlf: v.tlf || data.phone || "",
+        email: v.email || data.email || "",
+      }));
+      setFormErrors((p) => ({ ...p, virksomhed: false, adresse: false }));
+      setCvrStatus("ok");
+    } catch {
+      setCvrStatus("error");
+    }
+  };
+
+  const onCvrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormValues((v) => ({ ...v, cvr: val }));
+    const digits = val.replace(/\D/g, "");
+    if (digits.length === 8) {
+      lookupCvr(digits);
+    } else {
+      setCvrStatus("idle");
+      setCvrCompany("");
+      lastCvrLookup.current = "";
+    }
   };
 
   const update = (k: keyof typeof formValues) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -526,9 +578,30 @@ function Prisberegner() {
                     <span className="msg">Skriv venligst kontaktperson.</span>
                   </div>
                   <div className="field">
-                    <label htmlFor="cvr">CVR (valgfrit)</label>
-                    <input id="cvr" type="text" inputMode="numeric" value={formValues.cvr} onChange={update("cvr")} />
-                    <span className="msg">&nbsp;</span>
+                    <label htmlFor="cvr">
+                      CVR <span style={{ color: "var(--text-mute)", fontWeight: 400 }}>(valgfrit — henter firmadata)</span>
+                    </label>
+                    <div className="cvr-wrap">
+                      <input
+                        id="cvr"
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={11}
+                        autoComplete="off"
+                        placeholder="8 cifre"
+                        value={formValues.cvr}
+                        onChange={onCvrChange}
+                        onBlur={() => lookupCvr(formValues.cvr)}
+                      />
+                      {cvrStatus === "loading" && <span className="cvr-spin" aria-hidden="true" />}
+                    </div>
+                    <span className="cvr-status" aria-live="polite" data-state={cvrStatus}>
+                      {cvrStatus === "loading" && "Henter virksomhedsdata…"}
+                      {cvrStatus === "ok" && `✓ ${cvrCompany || "Virksomhed fundet"} — felter udfyldt`}
+                      {cvrStatus === "notfound" && "Intet match — udfyld felterne manuelt."}
+                      {cvrStatus === "error" && "Kunne ikke hente data lige nu — udfyld manuelt."}
+                      {cvrStatus === "idle" && " "}
+                    </span>
                   </div>
                   <div className={`field${formErrors.adresse ? " invalid" : ""}`}>
                     <label htmlFor="adresse">Adresse <span className="req">*</span></label>
@@ -555,6 +628,7 @@ function Prisberegner() {
               <input type="hidden" name="ydelse" value={serviceLabel} />
               <input type="hidden" name="estimat" value={kr(perVisit, 5)} />
               <input type="hidden" name="audience" value={audience} />
+              {audience === "erhverv" && <input type="hidden" name="cvr" value={formValues.cvr.replace(/\D/g, "")} />}
 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginTop: 20 }}>
                 <span style={{ fontSize: "var(--fs-meta)", color: "var(--text-mute)" }}>

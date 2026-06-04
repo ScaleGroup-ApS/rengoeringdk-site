@@ -38,7 +38,7 @@ export function Footer() {
         <div className="foot-top">
           <div className="foot-brand">
             <Link className="logo" to="/" aria-label="Define Cleaning Services — Forside">
-              <img src="/logo.svg" alt="Define Cleaning Services" className="logo-img" />
+              <img src="/logo.png" alt="Define Cleaning Services" className="logo-img" width={493} height={282} />
             </Link>
             <p>
               Professionel rengøring i hele Danmark — til private hjem og virksomheder.

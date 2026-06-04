@@ -97,18 +97,18 @@ export default function Index(_: Route.ComponentProps) {
         <section className="splithero" aria-label="Vælg Privat eller Erhverv">
           <Link to="/privat" className="splithero-half splithero-privat reveal" style={{ backgroundImage: `url(${PHOTOS.heroPrivat})` }}>
             <div className="splithero-content">
-              <p className="eyebrow">Privat</p>
-              <h2>Rengøring til dit hjem</h2>
-              <p>Faste rengøringer, hovedrengøring, flytte og vinduespudsning — i hele Danmark.</p>
-              <span className="splithero-cta">Se mere <Arrow /></span>
+              <p className="eyebrow">Til private hjem</p>
+              <h2>Kom hjem til rent</h2>
+              <p>Fast rengøring, hovedrengøring, fraflytning og vinduespudsning — udført af et fast, trygt team i hele Danmark.</p>
+              <span className="splithero-cta">Se privatløsninger <Arrow /></span>
             </div>
           </Link>
           <Link to="/erhverv" className="splithero-half splithero-erhverv reveal d1" style={{ backgroundImage: `url(${PHOTOS.heroErhverv})` }}>
             <div className="splithero-content">
-              <p className="eyebrow">Erhverv</p>
-              <h2>Rengøring til virksomheder</h2>
-              <p>Kontor, butik, klinik, industri og specialopgaver — INSTA 800-dokumenteret.</p>
-              <span className="splithero-cta">Se mere <Arrow /></span>
+              <p className="eyebrow">Til virksomheder</p>
+              <h2>Rene rammer for forretning</h2>
+              <p>Kontor, butik, klinik og industri — INSTA 800-dokumenteret rengøring, der løfter jeres indtryk hver dag.</p>
+              <span className="splithero-cta">Se erhvervsløsninger <Arrow /></span>
             </div>
           </Link>
         </section>
@@ -276,18 +276,18 @@ function DKMap() {
           cx={d.x.toFixed(1)}
           cy={d.y.toFixed(1)}
           r={2.4}
-          fill="rgba(8,106,119,0.20)"
+          fill="rgba(75,147,99,0.22)"
           style={{ animationDelay: `${((i * 53) % 100) / 100 * 4.2}s` }}
         />
       ))}
       {cities.map((c, i) => (
         <g key={c.name}>
-          <circle className="dk-ring" cx={c.x} cy={c.y} r={5} fill="#0EA5B7" opacity={0}>
+          <circle className="dk-ring" cx={c.x} cy={c.y} r={5} fill="#4b9363" opacity={0}>
             <animate attributeName="r" values="5;24;24" dur="2.8s" begin={`${i * 0.4}s`} repeatCount="indefinite" />
             <animate attributeName="opacity" values="0.55;0;0" dur="2.8s" begin={`${i * 0.4}s`} repeatCount="indefinite" />
           </circle>
-          <circle className="dk-city-glow" cx={c.x} cy={c.y} r={9} fill="#0EA5B7" style={{ animationDelay: `${i * 0.4}s` }} />
-          <circle cx={c.x} cy={c.y} r={5} fill="#0EA5B7" />
+          <circle className="dk-city-glow" cx={c.x} cy={c.y} r={9} fill="#4b9363" style={{ animationDelay: `${i * 0.4}s` }} />
+          <circle cx={c.x} cy={c.y} r={5} fill="#3f7e54" />
           <text
             x={c.x + 12}
             y={c.y + 4}

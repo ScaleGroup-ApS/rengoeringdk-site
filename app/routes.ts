@@ -8,6 +8,7 @@ export default [
   route("tjenester", "routes/tjenester.tsx"),
   route("tjenester/:slug", "routes/tjenester.$slug.tsx"),
   route("priser", "routes/priser.tsx"),
+  route("api/cvr", "routes/api.cvr.tsx"),
   route("kontakt", "routes/kontakt.tsx"),
   route("robots.txt", "routes/robots[.]txt.tsx"),
   route("sitemap.xml", "routes/sitemap[.]xml.tsx"),
