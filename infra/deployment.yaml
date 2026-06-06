@@ -64,16 +64,7 @@ spec:
             - name: DB_SSL_CA
               value: "/etc/ssl/mariadb-ca/ca.crt"
             # Mail
-            - name: SMTP_HOST
-              value: "mailserver"
-            - name: SMTP_PORT
-              value: "587"
-            - name: SMTP_USER
-              valueFrom:
-                secretKeyRef:
-                  name: mail-secrets
-                  key: relay-username
-            - name: SMTP_PASS
+            - name: RESEND_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: mail-secrets

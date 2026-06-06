@@ -1,15 +1,9 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import type { ContactData } from "~/lib/contact-schema";
 
-function getTransport() {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST ?? "mailserver",
-    port: Number(process.env.SMTP_PORT ?? 587),
-    secure: false,
-    auth: process.env.SMTP_USER
-      ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-      : undefined,
-  });
+let _resend: Resend | undefined;
+function getResend() {
+  return (_resend ??= new Resend(process.env.RESEND_API_KEY));
 }
 
 export async function sendContactMail(data: ContactData) {
@@ -25,11 +19,13 @@ export async function sendContactMail(data: ContactData) {
     data.besked ? `\nBesked:\n${data.besked}` : null,
   ].filter(Boolean);
 
-  await getTransport().sendMail({
+  const { error } = await getResend().emails.send({
     from,
     to,
     replyTo: data.email,
     subject: `Ny forespørgsel fra ${data.navn}${data.virksomhed ? ` (${data.virksomhed})` : ""}`,
     text: lines.join("\n"),
   });
+
+  if (error) throw new Error(`Resend error: ${error.message}`);
 }
