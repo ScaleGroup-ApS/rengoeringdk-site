@@ -43,6 +43,45 @@ spec:
               value: "3000"
             - name: WP_API_URL
               value: "http://wordpress:80/wp-json"
+            # Database
+            - name: DB_HOST
+              value: "mariadb.rengoeringdk.svc.cluster.local"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_USER
+              value: "rengoeringdk_user"
+            - name: DB_NAME
+              value: "rengoeringdk_wp"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-secrets
+                  key: PASSWORD
+            - name: DB_SSL_CERT
+              value: "/etc/ssl/mariadb-client/tls.crt"
+            - name: DB_SSL_KEY
+              value: "/etc/ssl/mariadb-client/tls.key"
+            - name: DB_SSL_CA
+              value: "/etc/ssl/mariadb-ca/ca.crt"
+            # Mail
+            - name: SMTP_HOST
+              value: "mailserver"
+            - name: SMTP_PORT
+              value: "587"
+            - name: SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mail-secrets
+                  key: relay-username
+            - name: SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mail-secrets
+                  key: relay-password
+            - name: MAIL_FROM
+              value: "kontakt@rengoering.dk"
+            - name: MAIL_TO
+              value: "info@define-cleaning.dk"
 
           livenessProbe:
             httpGet:
@@ -69,6 +108,22 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
+
+          volumeMounts:
+            - name: mariadb-client-cert
+              mountPath: /etc/ssl/mariadb-client
+              readOnly: true
+            - name: mariadb-ca
+              mountPath: /etc/ssl/mariadb-ca
+              readOnly: true
+
+      volumes:
+        - name: mariadb-client-cert
+          secret:
+            secretName: mariadb-client-cert
+        - name: mariadb-ca
+          secret:
+            secretName: mariadb-ca-bundle
 
       imagePullSecrets:
         - name: registry-credentials

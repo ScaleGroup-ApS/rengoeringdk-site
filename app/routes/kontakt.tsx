@@ -1,5 +1,5 @@
-import { useState } from "react";
-import type { FormEvent } from "react";
+import { useFetcher } from "react-router";
+import { safeParse, flatten } from "valibot";
 import type { Route } from "./+types/kontakt";
 import { Link } from "react-router";
 import { Header } from "~/components/Header";
@@ -7,6 +7,7 @@ import { Footer } from "~/components/Footer";
 import { JsonLd } from "~/components/JsonLd";
 import { useSiteEffects } from "~/hooks/useSiteEffects";
 import { buildMeta } from "~/lib/seo";
+import { ContactSchema } from "~/lib/contact-schema";
 
 const SITE_URL = "https://rengoering.dk";
 const PAGE_URL = `${SITE_URL}/kontakt`;
@@ -24,6 +25,54 @@ export function meta(_: Route.MetaArgs) {
     }),
     { tagName: "link", rel: "canonical", href: PAGE_URL },
   ];
+}
+
+export async function action({ request }: Route.ActionArgs) {
+  const form = await request.formData();
+
+  const raw = {
+    navn: String(form.get("navn") ?? "").trim(),
+    virksomhed: String(form.get("virksomhed") ?? "").trim() || undefined,
+    email: String(form.get("email") ?? "").trim(),
+    tlf: String(form.get("tlf") ?? "").trim(),
+    type: String(form.get("type") ?? "").trim() || undefined,
+    besked: String(form.get("besked") ?? "").trim() || undefined,
+  };
+
+  const result = safeParse(ContactSchema, raw);
+
+  if (!result.success) {
+    return {
+      success: false as const,
+      errors: flatten<typeof ContactSchema>(result.issues).nested,
+    };
+  }
+
+  const data = result.output;
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    request.headers.get("x-real-ip") ??
+    undefined;
+
+  try {
+    const [{ getDb }, { sendContactMail }, { contactSubmissions }] = await Promise.all([
+      import("~/lib/db.server"),
+      import("~/lib/mail.server"),
+      import("~/db/schema"),
+    ]);
+
+    await getDb()!.insert(contactSubmissions).values({ ...data, ip });
+    await sendContactMail(data);
+  } catch (err) {
+    console.error("[kontakt] submission failed:", err);
+    return {
+      success: false as const,
+      serverError: true,
+      errors: {} as Record<string, [string, ...string[]]>,
+    };
+  }
+
+  return { success: true as const };
 }
 
 const pageSchema = {
@@ -58,61 +107,50 @@ const SERVICE_OPTIONS = [
   "Andet",
 ];
 
-type Errors = Partial<Record<"navn" | "email" | "tlf", boolean>>;
+type FieldErrors = Record<string, [string, ...string[]] | undefined>;
+
+function fieldErr(errors: FieldErrors, key: string): string | undefined {
+  return errors[key]?.[0];
+}
 
 function ContactForm() {
-  const [errors, setErrors] = useState<Errors>({});
-  const [sent, setSent] = useState(false);
-  const [values, setValues] = useState({
-    navn: "",
-    virksomhed: "",
-    email: "",
-    tlf: "",
-    type: SERVICE_OPTIONS[0],
-    besked: "",
-  });
+  const fetcher = useFetcher<typeof action>();
+  const sent = fetcher.data?.success === true;
+  const serverError = fetcher.data && "serverError" in fetcher.data && fetcher.data.serverError;
+  const errors: FieldErrors = (fetcher.data && !fetcher.data.success ? fetcher.data.errors : {}) ?? {};
+  const submitting = fetcher.state !== "idle";
 
-  const update = (k: keyof typeof values) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setValues((v) => ({ ...v, [k]: e.target.value }));
-    if (k === "navn" || k === "email" || k === "tlf") {
-      setErrors((prev) => ({ ...prev, [k]: false }));
-    }
-  };
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(values.email.trim());
-    const next: Errors = {
-      navn: values.navn.trim() === "",
-      email: !emailOk,
-      tlf: values.tlf.trim().length < 6,
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const form = e.currentTarget;
+    const raw = {
+      navn: (form.elements.namedItem("navn") as HTMLInputElement).value,
+      virksomhed: (form.elements.namedItem("virksomhed") as HTMLInputElement).value,
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      tlf: (form.elements.namedItem("tlf") as HTMLInputElement).value,
     };
-    setErrors(next);
-    if (next.navn || next.email || next.tlf) {
-      const first = (Object.keys(next) as Array<keyof Errors>).find((k) => next[k]);
-      if (first) {
-        const el = document.getElementById(first) as HTMLInputElement | null;
-        el?.focus();
-      }
-      return;
-    }
-    setSent(true);
-  };
 
-  const resetForm = () => {
-    setSent(false);
-    setValues({ navn: "", virksomhed: "", email: "", tlf: "", type: SERVICE_OPTIONS[0], besked: "" });
-    setErrors({});
+    const result = safeParse(ContactSchema, raw);
+    if (!result.success) {
+      e.preventDefault();
+      const nested = flatten<typeof ContactSchema>(result.issues).nested ?? {};
+      const firstKey = (["navn", "email", "tlf"] as const).find((k) => nested[k]);
+      if (firstKey) (form.elements.namedItem(firstKey) as HTMLInputElement)?.focus();
+    }
   };
 
   return (
     <div className="formcard reveal">
       {!sent && (
-        <form onSubmit={handleSubmit} noValidate>
+        <fetcher.Form method="post" onSubmit={handleSubmit} noValidate>
           <h2>Få et gratis tilbud</h2>
           <p className="sub">Udfyld formularen, så kontakter vi dig hurtigst muligt.</p>
+          {serverError && (
+            <p className="sub" style={{ color: "var(--clr-accent, #e00)" }}>
+              Der opstod en fejl — prøv igen eller ring til os direkte.
+            </p>
+          )}
           <div className="fgrid">
-            <div className={`field${errors.navn ? " invalid" : ""}`}>
+            <div className={`field${fieldErr(errors, "navn") ? " invalid" : ""}`}>
               <label htmlFor="navn">Navn <span className="req">*</span></label>
               <input
                 type="text"
@@ -120,11 +158,9 @@ function ContactForm() {
                 name="navn"
                 autoComplete="name"
                 placeholder="Dit fulde navn"
-                value={values.navn}
-                onChange={update("navn")}
-                className={errors.navn ? "err" : ""}
+                className={fieldErr(errors, "navn") ? "err" : ""}
               />
-              <span className="msg">Skriv venligst dit navn.</span>
+              <span className="msg">{fieldErr(errors, "navn") ?? "Skriv venligst dit navn."}</span>
             </div>
             <div className="field">
               <label htmlFor="virksomhed">Virksomhed</label>
@@ -134,12 +170,10 @@ function ContactForm() {
                 name="virksomhed"
                 autoComplete="organization"
                 placeholder="Firmanavn"
-                value={values.virksomhed}
-                onChange={update("virksomhed")}
               />
               <span className="msg">&nbsp;</span>
             </div>
-            <div className={`field${errors.email ? " invalid" : ""}`}>
+            <div className={`field${fieldErr(errors, "email") ? " invalid" : ""}`}>
               <label htmlFor="email">E-mail <span className="req">*</span></label>
               <input
                 type="email"
@@ -147,13 +181,11 @@ function ContactForm() {
                 name="email"
                 autoComplete="email"
                 placeholder="dig@firma.dk"
-                value={values.email}
-                onChange={update("email")}
-                className={errors.email ? "err" : ""}
+                className={fieldErr(errors, "email") ? "err" : ""}
               />
-              <span className="msg">Skriv venligst en gyldig e-mail.</span>
+              <span className="msg">{fieldErr(errors, "email") ?? "Skriv venligst en gyldig e-mail."}</span>
             </div>
-            <div className={`field${errors.tlf ? " invalid" : ""}`}>
+            <div className={`field${fieldErr(errors, "tlf") ? " invalid" : ""}`}>
               <label htmlFor="tlf">Telefon <span className="req">*</span></label>
               <input
                 type="tel"
@@ -161,15 +193,13 @@ function ContactForm() {
                 name="tlf"
                 autoComplete="tel"
                 placeholder="+45 .."
-                value={values.tlf}
-                onChange={update("tlf")}
-                className={errors.tlf ? "err" : ""}
+                className={fieldErr(errors, "tlf") ? "err" : ""}
               />
-              <span className="msg">Skriv venligst et telefonnummer.</span>
+              <span className="msg">{fieldErr(errors, "tlf") ?? "Skriv venligst et telefonnummer."}</span>
             </div>
             <div className="field full">
               <label htmlFor="type">Hvad drejer det sig om?</label>
-              <select id="type" name="type" value={values.type} onChange={update("type")}>
+              <select id="type" name="type">
                 {SERVICE_OPTIONS.map((o) => (
                   <option key={o}>{o}</option>
                 ))}
@@ -182,15 +212,13 @@ function ContactForm() {
                 id="besked"
                 name="besked"
                 placeholder="Fortæl os kort om jeres lokaler, areal og ønsker .."
-                value={values.besked}
-                onChange={update("besked")}
               />
               <span className="msg">&nbsp;</span>
             </div>
           </div>
           <div className="form-foot">
-            <button type="submit" className="btn btn-primary btn-lg">
-              Send forespørgsel <Arrow />
+            <button type="submit" className="btn btn-primary btn-lg" disabled={submitting}>
+              {submitting ? "Sender …" : <><span>Send forespørgsel</span> <Arrow /></>}
             </button>
             <span className="note">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -199,7 +227,7 @@ function ContactForm() {
               Vi svarer inden for 24 timer
             </span>
           </div>
-        </form>
+        </fetcher.Form>
       )}
       {sent && (
         <div className="success show">

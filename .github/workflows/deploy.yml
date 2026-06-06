@@ -89,10 +89,35 @@ jobs:
           chmod 600 $HOME/.kube/config
 
       - name: Prepare manifests
+        env:
+          SHORT_SHA: ${{ needs.build-and-push.outputs.short-sha }}
         run: |
-          sed -i "s/{{NAMESPACE}}/$NAMESPACE/g" infra/deployment.yaml
-          sed -i "s/{{CUSTOMER_SLUG}}/$NAMESPACE/g" infra/deployment.yaml
-          sed -i "s/{{CUSTOMER_ID}}/${NAMESPACE}/g" infra/deployment.yaml
+          sed -i "s/{{NAMESPACE}}/$NAMESPACE/g"       infra/deployment.yaml infra/migrate-job.yaml
+          sed -i "s/{{CUSTOMER_SLUG}}/$NAMESPACE/g"   infra/deployment.yaml infra/migrate-job.yaml
+          sed -i "s/{{CUSTOMER_ID}}/${NAMESPACE}/g"   infra/deployment.yaml infra/migrate-job.yaml
+          sed -i "s/{{SHORT_SHA}}/${SHORT_SHA}/g"     infra/migrate-job.yaml
+
+      - name: Run database migrations
+        env:
+          SHORT_SHA: ${{ needs.build-and-push.outputs.short-sha }}
+        run: |
+          # Delete any previous job for this SHA (idempotent re-runs)
+          kubectl delete job "customer-site-migrate-${SHORT_SHA}" -n "$NAMESPACE" --ignore-not-found
+
+          kubectl apply -f infra/migrate-job.yaml
+
+          echo "Waiting for migration job to complete..."
+          kubectl wait job "customer-site-migrate-${SHORT_SHA}" \
+            -n "$NAMESPACE" \
+            --for=condition=complete \
+            --timeout=3m \
+            || {
+              echo "--- Migration job logs ---"
+              kubectl logs -l "app=customer-site,component=migrate" -n "$NAMESPACE" --tail=100
+              exit 1
+            }
+
+          echo "Migrations complete"
 
       - name: Apply Kubernetes manifests
         run: |
