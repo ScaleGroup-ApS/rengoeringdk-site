@@ -1,22 +1,20 @@
-import nodemailer from "nodemailer";
+import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 import type { ContactData } from "~/lib/contact-schema";
 
-let _transport: nodemailer.Transporter | undefined;
-function getTransport() {
-  return (_transport ??= nodemailer.createTransport({
-    host: process.env.SMTP_HOST ?? "mailserver.rengoeringdk.svc.cluster.local",
-    port: Number(process.env.SMTP_PORT ?? 587),
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER ?? "noreply@rengoering.dk",
-      pass: process.env.SMTP_PASS,
+let _ses: SESv2Client | undefined;
+function getSes() {
+  return (_ses ??= new SESv2Client({
+    region: process.env.AWS_SES_REGION ?? "eu-west-1",
+    credentials: {
+      accessKeyId: process.env.AWS_SES_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SES_SECRET_ACCESS_KEY!,
     },
   }));
 }
 
 export async function sendContactMail(data: ContactData) {
   const to = process.env.MAIL_TO ?? "info@define-cleaning.dk";
-  const from = process.env.MAIL_FROM ?? "kontakt@rengoering.dk";
+  const from = process.env.MAIL_FROM ?? "noreply@define-cleaning.dk";
 
   const lines = [
     `Navn: ${data.navn}`,
@@ -27,11 +25,15 @@ export async function sendContactMail(data: ContactData) {
     data.besked ? `\nBesked:\n${data.besked}` : null,
   ].filter(Boolean);
 
-  await getTransport().sendMail({
-    from,
-    to,
-    replyTo: data.email,
-    subject: `Ny forespørgsel fra ${data.navn}${data.virksomhed ? ` (${data.virksomhed})` : ""}`,
-    text: lines.join("\n"),
-  });
+  await getSes().send(new SendEmailCommand({
+    FromEmailAddress: from,
+    ReplyToAddresses: [data.email],
+    Destination: { ToAddresses: [to] },
+    Content: {
+      Simple: {
+        Subject: { Data: `Ny forespørgsel fra ${data.navn}${data.virksomhed ? ` (${data.virksomhed})` : ""}`, Charset: "UTF-8" },
+        Body: { Text: { Data: lines.join("\n"), Charset: "UTF-8" } },
+      },
+    },
+  }));
 }

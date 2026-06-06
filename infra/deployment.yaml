@@ -63,20 +63,21 @@ spec:
               value: "/etc/ssl/mariadb-client/tls.key"
             - name: DB_SSL_CA
               value: "/etc/ssl/mariadb-ca/ca.crt"
-            # Mail — via customer mailserver with SASL auth
-            - name: SMTP_HOST
-              value: "mailserver.rengoeringdk.svc.cluster.local"
-            - name: SMTP_PORT
-              value: "587"
-            - name: SMTP_USER
-              value: "noreply@rengoering.dk"
-            - name: SMTP_PASS
+            # Mail — via AWS SES SDK (HTTPS, not SMTP — bypasses Hetzner port blocks)
+            - name: AWS_SES_REGION
+              value: "eu-west-1"
+            - name: AWS_SES_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: mail-secrets
-                  key: smtp-password
+                  name: ses-api-secret
+                  key: access-key-id
+            - name: AWS_SES_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ses-api-secret
+                  key: secret-access-key
             - name: MAIL_FROM
-              value: "noreply@rengoering.dk"
+              value: "noreply@define-cleaning.dk"
             - name: MAIL_TO
               value: "info@define-cleaning.dk"
 
