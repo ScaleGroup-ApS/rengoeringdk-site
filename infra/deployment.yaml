@@ -63,14 +63,20 @@ spec:
               value: "/etc/ssl/mariadb-client/tls.key"
             - name: DB_SSL_CA
               value: "/etc/ssl/mariadb-ca/ca.crt"
-            # Mail
-            - name: RESEND_API_KEY
+            # Mail — via customer mailserver with SASL auth
+            - name: SMTP_HOST
+              value: "mailserver.rengoeringdk.svc.cluster.local"
+            - name: SMTP_PORT
+              value: "587"
+            - name: SMTP_USER
+              value: "noreply@rengoering.dk"
+            - name: SMTP_PASS
               valueFrom:
                 secretKeyRef:
                   name: mail-secrets
-                  key: relay-password
+                  key: smtp-password
             - name: MAIL_FROM
-              value: "kontakt@rengoering.dk"
+              value: "noreply@rengoering.dk"
             - name: MAIL_TO
               value: "info@define-cleaning.dk"
 

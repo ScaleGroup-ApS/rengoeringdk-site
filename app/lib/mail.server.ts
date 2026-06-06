@@ -1,9 +1,17 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import type { ContactData } from "~/lib/contact-schema";
 
-let _resend: Resend | undefined;
-function getResend() {
-  return (_resend ??= new Resend(process.env.RESEND_API_KEY));
+let _transport: nodemailer.Transporter | undefined;
+function getTransport() {
+  return (_transport ??= nodemailer.createTransport({
+    host: process.env.SMTP_HOST ?? "mailserver.rengoeringdk.svc.cluster.local",
+    port: Number(process.env.SMTP_PORT ?? 587),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER ?? "noreply@rengoering.dk",
+      pass: process.env.SMTP_PASS,
+    },
+  }));
 }
 
 export async function sendContactMail(data: ContactData) {
@@ -19,13 +27,11 @@ export async function sendContactMail(data: ContactData) {
     data.besked ? `\nBesked:\n${data.besked}` : null,
   ].filter(Boolean);
 
-  const { error } = await getResend().emails.send({
+  await getTransport().sendMail({
     from,
     to,
     replyTo: data.email,
     subject: `Ny forespørgsel fra ${data.navn}${data.virksomhed ? ` (${data.virksomhed})` : ""}`,
     text: lines.join("\n"),
   });
-
-  if (error) throw new Error(`Resend error: ${error.message}`);
 }
