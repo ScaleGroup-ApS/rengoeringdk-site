@@ -63,19 +63,14 @@ spec:
               value: "/etc/ssl/mariadb-client/tls.key"
             - name: DB_SSL_CA
               value: "/etc/ssl/mariadb-ca/ca.crt"
-            # Mail — via AWS SES SDK (HTTPS, not SMTP — bypasses Hetzner port blocks)
-            - name: AWS_SES_REGION
-              value: "eu-west-1"
-            - name: AWS_SES_ACCESS_KEY_ID
+            # Mail — relayed via CRM backend (HTTPS to SES, bypasses Hetzner SMTP blocks)
+            - name: CRM_INTERNAL_URL
+              value: "http://crm-backend.crm-system.svc.cluster.local"
+            - name: CRM_INTERNAL_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: ses-api-secret
-                  key: access-key-id
-            - name: AWS_SES_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ses-api-secret
-                  key: secret-access-key
+                  name: crm-internal-secret
+                  key: token
             - name: MAIL_FROM
               value: "noreply@define-cleaning.dk"
             - name: MAIL_TO
