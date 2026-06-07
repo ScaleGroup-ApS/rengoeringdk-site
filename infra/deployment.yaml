@@ -65,7 +65,7 @@ spec:
               value: "/etc/ssl/mariadb-ca/ca.crt"
             # Mail — relayed via CRM backend (HTTPS to SES, bypasses Hetzner SMTP blocks)
             - name: CRM_INTERNAL_URL
-              value: "http://crm-backend.crm-system.svc.cluster.local"
+              value: "http://crm-backend.crm-system.svc.cluster.local:5000"
             - name: CRM_INTERNAL_SECRET
               valueFrom:
                 secretKeyRef:
