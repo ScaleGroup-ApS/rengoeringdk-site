@@ -1,10 +1,10 @@
 import type { ContactData } from "~/lib/contact-schema";
 
 export async function sendContactMail(data: ContactData) {
-  const to = process.env.MAIL_TO ?? "info@define-cleaning.dk";
-  const from = process.env.MAIL_FROM ?? "noreply@define-cleaning.dk";
-  const crmUrl = process.env.CRM_INTERNAL_URL ?? "http://crm-backend.crm-system.svc.cluster.local:5000";
-  const crmSecret = process.env.CRM_INTERNAL_SECRET ?? "";
+  const to = process.env.MAIL_TO!;
+  const from = process.env.MAIL_FROM!;
+  const crmUrl = process.env.CRM_INTERNAL_URL!;
+  const crmSecret = process.env.CRM_INTERNAL_SECRET!;
 
   const lines = [
     `Navn: ${data.navn}`,
