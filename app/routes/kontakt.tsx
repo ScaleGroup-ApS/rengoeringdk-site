@@ -30,6 +30,12 @@ export function meta(_: Route.MetaArgs) {
 export async function action({ request }: Route.ActionArgs) {
   const form = await request.formData();
 
+  // Honeypot — a hidden field real users never see/fill. Bots that fill every
+  // input get a silent success and we store/send nothing.
+  if (String(form.get("company_url") ?? "").trim() !== "") {
+    return { success: true as const };
+  }
+
   const raw = {
     navn: String(form.get("navn") ?? "").trim(),
     virksomhed: String(form.get("virksomhed") ?? "").trim() || undefined,
@@ -61,8 +67,10 @@ export async function action({ request }: Route.ActionArgs) {
       import("~/db/schema"),
     ]);
 
+    // Dual-write: keep a local copy in the site's own DB as a backup, and forward
+    // to the CRM (the source of truth for viewing + resending submissions).
     await getDb()!.insert(contactSubmissions).values({ ...data, ip });
-    await sendContactMail(data);
+    await sendContactMail(data, { sourceUrl: PAGE_URL, ip });
   } catch (err) {
     console.error("[kontakt] submission failed:", err);
     return {
@@ -142,6 +150,15 @@ function ContactForm() {
     <div className="formcard reveal">
       {!sent && (
         <fetcher.Form method="post" onSubmit={handleSubmit} noValidate>
+          {/* Honeypot — hidden from real users; bots that fill it are silently dropped. */}
+          <input
+            type="text"
+            name="company_url"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+          />
           <h2>Få et gratis tilbud</h2>
           <p className="sub">Udfyld formularen, så kontakter vi dig hurtigst muligt.</p>
           {serverError && (
