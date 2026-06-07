@@ -9,7 +9,7 @@ import { PHOTOS } from "~/lib/photos";
 import { servicesFor } from "~/lib/services";
 import { buildMeta } from "~/lib/seo";
 
-const SITE_URL = "https://rengoering.dk";
+const SITE_URL = "https://define-cleaning.dk";
 const PAGE_URL = `${SITE_URL}/erhverv`;
 
 export function meta(_: Route.MetaArgs) {

@@ -11,7 +11,7 @@ import type { Route } from "./+types/root";
 import { JsonLd } from "~/components/JsonLd";
 import "./app.css";
 
-const SITE_URL = "https://rengoering.dk";
+const SITE_URL = "https://define-cleaning.dk";
 
 const organizationSchema = {
   "@context": "https://schema.org",

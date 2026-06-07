@@ -1,6 +1,6 @@
 import type { Route } from "./+types/robots[.]txt";
 
-const SITE_URL = "https://rengoering.dk";
+const SITE_URL = "https://define-cleaning.dk";
 
 export function loader(_: Route.LoaderArgs) {
   const robotsTxt = [

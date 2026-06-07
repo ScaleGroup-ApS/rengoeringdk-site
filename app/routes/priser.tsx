@@ -9,7 +9,7 @@ import { useSiteEffects } from "~/hooks/useSiteEffects";
 import { SERVICES_BY_SLUG, type Audience as ServiceAudience } from "~/lib/services";
 import { buildMeta } from "~/lib/seo";
 
-const SITE_URL = "https://rengoering.dk";
+const SITE_URL = "https://define-cleaning.dk";
 const PAGE_URL = `${SITE_URL}/priser`;
 
 export function meta(_: Route.MetaArgs) {

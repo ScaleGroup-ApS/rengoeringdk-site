@@ -9,7 +9,7 @@ import { useSiteEffects } from "~/hooks/useSiteEffects";
 import { buildMeta } from "~/lib/seo";
 import { ContactSchema } from "~/lib/contact-schema";
 
-const SITE_URL = "https://rengoering.dk";
+const SITE_URL = "https://define-cleaning.dk";
 const PAGE_URL = `${SITE_URL}/kontakt`;
 
 export function meta(_: Route.MetaArgs) {

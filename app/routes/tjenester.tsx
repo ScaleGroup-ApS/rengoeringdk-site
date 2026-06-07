@@ -8,7 +8,7 @@ import { useSiteEffects } from "~/hooks/useSiteEffects";
 import { SERVICES, type Audience } from "~/lib/services";
 import { buildMeta } from "~/lib/seo";
 
-const SITE_URL = "https://rengoering.dk";
+const SITE_URL = "https://define-cleaning.dk";
 const PAGE_URL = `${SITE_URL}/tjenester`;
 
 export function meta(_: Route.MetaArgs) {

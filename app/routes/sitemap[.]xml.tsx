@@ -1,7 +1,7 @@
 import type { Route } from "./+types/sitemap[.]xml";
 import { SERVICES } from "~/lib/services";
 
-const SITE_URL = "https://rengoering.dk";
+const SITE_URL = "https://define-cleaning.dk";
 const TODAY = "2026-06-03";
 
 const STATIC_PAGES = [

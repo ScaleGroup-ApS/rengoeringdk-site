@@ -19,7 +19,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     const res = await fetch(`https://cvrapi.dk/api?search=${cvr}&country=dk`, {
       headers: {
         // cvrapi.dk asks for an app name + contact in the User-Agent.
-        "User-Agent": "Define Cleaning Services (rengoering.dk) - info@define-cleaning.dk",
+        "User-Agent": "Define Cleaning Services (define-cleaning.dk) - info@define-cleaning.dk",
         Accept: "application/json",
       },
       signal: AbortSignal.timeout(7000),

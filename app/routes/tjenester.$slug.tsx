@@ -9,7 +9,7 @@ import { PHOTOS } from "~/lib/photos";
 import { SERVICES_BY_SLUG, type Service } from "~/lib/services";
 import { buildMeta } from "~/lib/seo";
 
-const SITE_URL = "https://rengoering.dk";
+const SITE_URL = "https://define-cleaning.dk";
 
 export function loader({ params }: Route.LoaderArgs) {
   const service = SERVICES_BY_SLUG[params.slug];
