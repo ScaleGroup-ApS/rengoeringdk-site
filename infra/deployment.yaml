@@ -63,7 +63,9 @@ spec:
               value: "/etc/ssl/mariadb-client/tls.key"
             - name: DB_SSL_CA
               value: "/etc/ssl/mariadb-ca/ca.crt"
-            # Mail — relayed via CRM backend (HTTPS to SES, bypasses Hetzner SMTP blocks)
+            # Contact form — submissions are forwarded to the CRM, which stores them
+            # centrally and emails the customer's chosen recipient (managed in the CRM,
+            # no redeploy). MAIL_TO/MAIL_FROM below are no longer used for routing.
             - name: CRM_INTERNAL_URL
               value: "http://crm-backend.crm-system.svc.cluster.local:5000"
             - name: CRM_INTERNAL_SECRET
@@ -71,6 +73,8 @@ spec:
                 secretKeyRef:
                   name: crm-internal-secret
                   key: token
+            - name: CRM_CUSTOMER_SLUG
+              value: "{{CUSTOMER_SLUG}}"
             - name: MAIL_FROM
               value: "noreply@define-cleaning.dk"
             - name: MAIL_TO
