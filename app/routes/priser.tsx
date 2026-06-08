@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import type { Route } from "./+types/priser";
-import { Link, useSearchParams } from "react-router";
+import { Link, useFetcher, useSearchParams } from "react-router";
+import { safeParse, flatten } from "valibot";
 import { Header } from "~/components/Header";
 import { Footer } from "~/components/Footer";
 import { JsonLd } from "~/components/JsonLd";
 import { useSiteEffects } from "~/hooks/useSiteEffects";
 import { SERVICES_BY_SLUG, type Audience as ServiceAudience } from "~/lib/services";
 import { buildMeta } from "~/lib/seo";
+import { ContactSchema } from "~/lib/contact-schema";
 
 const SITE_URL = "https://define-cleaning.dk";
 const PAGE_URL = `${SITE_URL}/priser`;
@@ -25,6 +27,91 @@ export function meta(_: Route.MetaArgs) {
     }),
     { tagName: "link", rel: "canonical", href: PAGE_URL },
   ];
+}
+
+export async function action({ request }: Route.ActionArgs) {
+  const form = await request.formData();
+
+  // Honeypot — a hidden field real users never see/fill. Bots that fill every
+  // input get a silent success and we store/send nothing.
+  if (String(form.get("company_url") ?? "").trim() !== "") {
+    return { success: true as const };
+  }
+
+  const isErhverv = String(form.get("audience") ?? "").trim() === "erhverv";
+
+  const virksomhed = String(form.get("virksomhed") ?? "").trim();
+  const kontaktperson = String(form.get("kontaktperson") ?? "").trim();
+  const navnPrivat = String(form.get("navn") ?? "").trim();
+  const cvr = String(form.get("cvr") ?? "").trim();
+  const adresse = String(form.get("adresse") ?? "").trim();
+  const ydelse = String(form.get("ydelse") ?? "").trim();
+  const estimat = String(form.get("estimat") ?? "").trim();
+  const ejendomstype = String(form.get("type") ?? "").trim();
+  const areal = String(form.get("areal") ?? "").trim();
+  const frekvens = String(form.get("frekvens") ?? "").trim();
+  const tilvalg = String(form.get("tilvalg") ?? "").trim();
+  const kommentar = String(form.get("kommentar") ?? "").trim();
+
+  // Fold the calculator context (which the CRM has no dedicated fields for) into
+  // a readable message, so the team sees the full request in the submission.
+  const lines: string[] = ["Forespørgsel via prisberegner.", ""];
+  lines.push(`Kundetype: ${isErhverv ? "Erhverv" : "Privat"}`);
+  if (ydelse) lines.push(`Ydelse: ${ydelse}`);
+  if (ejendomstype) lines.push(`Ejendomstype: ${ejendomstype}`);
+  if (areal) lines.push(`Areal: ${areal} m²`);
+  if (frekvens) lines.push(`Frekvens: ${frekvens}`);
+  lines.push(`Tilvalg: ${tilvalg || "Ingen"}`);
+  if (estimat) lines.push(`Estimeret pris: ${estimat} pr. besøg`);
+  if (adresse) lines.push(`Adresse: ${adresse}`);
+  if (isErhverv && cvr) lines.push(`CVR: ${cvr}`);
+  lines.push("", "Kommentar:", kommentar || "—");
+
+  const raw = {
+    navn: isErhverv ? kontaktperson : navnPrivat,
+    virksomhed: isErhverv ? virksomhed || undefined : undefined,
+    email: String(form.get("email") ?? "").trim(),
+    tlf: String(form.get("tlf") ?? "").trim(),
+    type: ydelse || undefined,
+    besked: lines.join("\n"),
+  };
+
+  const result = safeParse(ContactSchema, raw);
+
+  if (!result.success) {
+    return {
+      success: false as const,
+      errors: flatten<typeof ContactSchema>(result.issues).nested,
+    };
+  }
+
+  const data = result.output;
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    request.headers.get("x-real-ip") ??
+    undefined;
+
+  try {
+    const [{ getDb }, { sendContactMail }, { contactSubmissions }] = await Promise.all([
+      import("~/lib/db.server"),
+      import("~/lib/mail.server"),
+      import("~/db/schema"),
+    ]);
+
+    // Dual-write: keep a local copy in the site's own DB as a backup, and forward
+    // to the CRM (the source of truth for viewing + resending submissions).
+    await getDb()!.insert(contactSubmissions).values({ ...data, ip });
+    await sendContactMail(data, { sourceUrl: PAGE_URL, ip });
+  } catch (err) {
+    console.error("[priser] submission failed:", err);
+    return {
+      success: false as const,
+      serverError: true,
+      errors: {} as Record<string, [string, ...string[]]>,
+    };
+  }
+
+  return { success: true as const };
 }
 
 const pageSchema = {
@@ -188,7 +275,10 @@ function Prisberegner() {
   const [selectedAddons, setSelectedAddons] = useState<Set<number>>(new Set());
   const [serviceSlug, setServiceSlug] = useState<string>(urlServiceSlug);
 
-  const [submitted, setSubmitted] = useState(false);
+  const fetcher = useFetcher<typeof action>();
+  const sent = fetcher.data?.success === true;
+  const submitFailed = fetcher.data?.success === false;
+  const submitting = fetcher.state !== "idle";
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   type CvrStatus = "idle" | "loading" | "ok" | "notfound" | "error";
   const [cvrStatus, setCvrStatus] = useState<CvrStatus>("idle");
@@ -249,7 +339,6 @@ function Prisberegner() {
   const goReset = () => {
     setStep(0);
     setSelectedAddons(new Set());
-    setSubmitted(false);
     setFormValues({ navn: "", virksomhed: "", kontaktperson: "", cvr: "", adresse: "", tlf: "", email: "", kommentar: "" });
     setCvrStatus("idle");
     setCvrCompany("");
@@ -307,7 +396,6 @@ function Prisberegner() {
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
     const errs: Record<string, boolean> = {};
     const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(formValues.email.trim());
     if (audience === "privat") {
@@ -320,8 +408,10 @@ function Prisberegner() {
     if (formValues.tlf.trim().length < 6) errs.tlf = true;
     if (!emailOk) errs.email = true;
     setFormErrors(errs);
-    if (Object.keys(errs).length === 0) {
-      setSubmitted(true);
+    // Block the post only when validation fails; otherwise let the fetcher submit
+    // to the action (which saves to the DB + forwards to the CRM).
+    if (Object.keys(errs).length > 0) {
+      e.preventDefault();
     }
   };
 
@@ -329,7 +419,7 @@ function Prisberegner() {
     ? SERVICES_BY_SLUG[serviceSlug].title
     : type.name;
 
-  if (submitted) {
+  if (sent) {
     return (
       <div className="calc reveal">
         <div className="wiz-body" style={{ textAlign: "center", padding: "clamp(40px, 6vw, 80px)" }}>
@@ -536,32 +626,46 @@ function Prisberegner() {
             <p className="wiz-sub">
               Udfyld formularen — så vender vi tilbage med et skræddersyet tilbud inden for 24 timer. Vi har noteret <strong>{serviceLabel}</strong>.
             </p>
-            <form onSubmit={handleSubmit} noValidate className="wiz-form">
+            <fetcher.Form method="post" onSubmit={handleSubmit} noValidate className="wiz-form">
+              {/* Honeypot — hidden from real users; bots that fill it are silently dropped. */}
+              <input
+                type="text"
+                name="company_url"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+              />
+              {submitFailed && (
+                <p className="wiz-sub" style={{ color: "var(--clr-accent, #e00)", marginBottom: 16 }}>
+                  Der opstod en fejl — prøv igen eller ring til os direkte.
+                </p>
+              )}
               {audience === "privat" ? (
                 <div className="fgrid">
                   <div className={`field${formErrors.navn ? " invalid" : ""}`}>
                     <label htmlFor="navn">Navn <span className="req">*</span></label>
-                    <input id="navn" type="text" autoComplete="name" value={formValues.navn} onChange={update("navn")} className={formErrors.navn ? "err" : ""} />
+                    <input id="navn" name="navn" type="text" autoComplete="name" value={formValues.navn} onChange={update("navn")} className={formErrors.navn ? "err" : ""} />
                     <span className="msg">Skriv venligst dit navn.</span>
                   </div>
                   <div className={`field${formErrors.adresse ? " invalid" : ""}`}>
                     <label htmlFor="adresse">Adresse <span className="req">*</span></label>
-                    <input id="adresse" type="text" autoComplete="street-address" value={formValues.adresse} onChange={update("adresse")} className={formErrors.adresse ? "err" : ""} />
+                    <input id="adresse" name="adresse" type="text" autoComplete="street-address" value={formValues.adresse} onChange={update("adresse")} className={formErrors.adresse ? "err" : ""} />
                     <span className="msg">Skriv venligst en adresse.</span>
                   </div>
                   <div className={`field${formErrors.tlf ? " invalid" : ""}`}>
                     <label htmlFor="tlf">Telefon <span className="req">*</span></label>
-                    <input id="tlf" type="tel" autoComplete="tel" value={formValues.tlf} onChange={update("tlf")} className={formErrors.tlf ? "err" : ""} />
+                    <input id="tlf" name="tlf" type="tel" autoComplete="tel" value={formValues.tlf} onChange={update("tlf")} className={formErrors.tlf ? "err" : ""} />
                     <span className="msg">Skriv venligst et telefonnummer.</span>
                   </div>
                   <div className={`field${formErrors.email ? " invalid" : ""}`}>
                     <label htmlFor="email">E-mail <span className="req">*</span></label>
-                    <input id="email" type="email" autoComplete="email" value={formValues.email} onChange={update("email")} className={formErrors.email ? "err" : ""} />
+                    <input id="email" name="email" type="email" autoComplete="email" value={formValues.email} onChange={update("email")} className={formErrors.email ? "err" : ""} />
                     <span className="msg">Skriv venligst en gyldig e-mail.</span>
                   </div>
                   <div className="field full">
                     <label htmlFor="kommentar">Kommentar</label>
-                    <textarea id="kommentar" value={formValues.kommentar} onChange={update("kommentar")} placeholder="Særlige ønsker eller spørgsmål..." />
+                    <textarea id="kommentar" name="kommentar" value={formValues.kommentar} onChange={update("kommentar")} placeholder="Særlige ønsker eller spørgsmål..." />
                     <span className="msg">&nbsp;</span>
                   </div>
                 </div>
@@ -569,12 +673,12 @@ function Prisberegner() {
                 <div className="fgrid">
                   <div className={`field${formErrors.virksomhed ? " invalid" : ""}`}>
                     <label htmlFor="virksomhed">Virksomhedsnavn <span className="req">*</span></label>
-                    <input id="virksomhed" type="text" autoComplete="organization" value={formValues.virksomhed} onChange={update("virksomhed")} className={formErrors.virksomhed ? "err" : ""} />
+                    <input id="virksomhed" name="virksomhed" type="text" autoComplete="organization" value={formValues.virksomhed} onChange={update("virksomhed")} className={formErrors.virksomhed ? "err" : ""} />
                     <span className="msg">Skriv venligst et virksomhedsnavn.</span>
                   </div>
                   <div className={`field${formErrors.kontaktperson ? " invalid" : ""}`}>
                     <label htmlFor="kontaktperson">Kontaktperson <span className="req">*</span></label>
-                    <input id="kontaktperson" type="text" autoComplete="name" value={formValues.kontaktperson} onChange={update("kontaktperson")} className={formErrors.kontaktperson ? "err" : ""} />
+                    <input id="kontaktperson" name="kontaktperson" type="text" autoComplete="name" value={formValues.kontaktperson} onChange={update("kontaktperson")} className={formErrors.kontaktperson ? "err" : ""} />
                     <span className="msg">Skriv venligst kontaktperson.</span>
                   </div>
                   <div className="field">
@@ -605,22 +709,22 @@ function Prisberegner() {
                   </div>
                   <div className={`field${formErrors.adresse ? " invalid" : ""}`}>
                     <label htmlFor="adresse">Adresse <span className="req">*</span></label>
-                    <input id="adresse" type="text" autoComplete="street-address" value={formValues.adresse} onChange={update("adresse")} className={formErrors.adresse ? "err" : ""} />
+                    <input id="adresse" name="adresse" type="text" autoComplete="street-address" value={formValues.adresse} onChange={update("adresse")} className={formErrors.adresse ? "err" : ""} />
                     <span className="msg">Skriv venligst en adresse.</span>
                   </div>
                   <div className={`field${formErrors.tlf ? " invalid" : ""}`}>
                     <label htmlFor="tlf">Telefon <span className="req">*</span></label>
-                    <input id="tlf" type="tel" autoComplete="tel" value={formValues.tlf} onChange={update("tlf")} className={formErrors.tlf ? "err" : ""} />
+                    <input id="tlf" name="tlf" type="tel" autoComplete="tel" value={formValues.tlf} onChange={update("tlf")} className={formErrors.tlf ? "err" : ""} />
                     <span className="msg">Skriv venligst et telefonnummer.</span>
                   </div>
                   <div className={`field${formErrors.email ? " invalid" : ""}`}>
                     <label htmlFor="email">E-mail <span className="req">*</span></label>
-                    <input id="email" type="email" autoComplete="email" value={formValues.email} onChange={update("email")} className={formErrors.email ? "err" : ""} />
+                    <input id="email" name="email" type="email" autoComplete="email" value={formValues.email} onChange={update("email")} className={formErrors.email ? "err" : ""} />
                     <span className="msg">Skriv venligst en gyldig e-mail.</span>
                   </div>
                   <div className="field full">
                     <label htmlFor="kommentar">Kommentar</label>
-                    <textarea id="kommentar" value={formValues.kommentar} onChange={update("kommentar")} placeholder="Særlige ønsker eller spørgsmål..." />
+                    <textarea id="kommentar" name="kommentar" value={formValues.kommentar} onChange={update("kommentar")} placeholder="Særlige ønsker eller spørgsmål..." />
                     <span className="msg">&nbsp;</span>
                   </div>
                 </div>
@@ -628,15 +732,25 @@ function Prisberegner() {
               <input type="hidden" name="ydelse" value={serviceLabel} />
               <input type="hidden" name="estimat" value={kr(perVisit, 5)} />
               <input type="hidden" name="audience" value={audience} />
+              <input type="hidden" name="type" value={type.name} />
+              <input type="hidden" name="areal" value={String(m2)} />
+              <input type="hidden" name="frekvens" value={freq.name} />
+              <input
+                type="hidden"
+                name="tilvalg"
+                value={Array.from(selectedAddons).map((i) => addons[i]?.name).filter(Boolean).join(", ")}
+              />
               {audience === "erhverv" && <input type="hidden" name="cvr" value={formValues.cvr.replace(/\D/g, "")} />}
 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginTop: 20 }}>
                 <span style={{ fontSize: "var(--fs-meta)", color: "var(--text-mute)" }}>
                   Valgt ydelse: <strong style={{ color: "var(--ink)" }}>{serviceLabel}</strong> · estimeret pris <strong style={{ color: "var(--ink)" }}>{kr(perVisit, 5)}</strong>
                 </span>
-                <button type="submit" className="btn btn-primary btn-lg">Send forespørgsel <Arrow /></button>
+                <button type="submit" className="btn btn-primary btn-lg" disabled={submitting}>
+                  {submitting ? "Sender …" : <>Send forespørgsel <Arrow /></>}
+                </button>
               </div>
-            </form>
+            </fetcher.Form>
           </>
         )}
       </div>
