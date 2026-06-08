@@ -9,6 +9,7 @@ import {
 import type { ReactNode } from "react";
 import type { Route } from "./+types/root";
 import { JsonLd } from "~/components/JsonLd";
+import { FloatingContact } from "~/components/FloatingContact";
 import "./app.css";
 
 const SITE_URL = "https://define-cleaning.dk";
@@ -20,17 +21,20 @@ const organizationSchema = {
   url: SITE_URL,
   logo: `${SITE_URL}/logo.svg`,
   email: "info@define-cleaning.dk",
-  telephone: "+4570123456",
+  telephone: "+4571151606",
   taxID: "DK40681086",
   vatID: "DK40681086",
   address: {
     "@type": "PostalAddress",
+    streetAddress: "Boeslunde Byvej 76",
+    postalCode: "4242",
+    addressLocality: "Boeslunde",
     addressCountry: "DK",
   },
   contactPoint: {
     "@type": "ContactPoint",
     email: "info@define-cleaning.dk",
-    telephone: "+4570123456",
+    telephone: "+4571151606",
     contactType: "customer service",
     availableLanguage: "Danish",
   },
@@ -74,6 +78,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <body className="min-h-screen bg-surface text-text antialiased">
         <JsonLd data={organizationSchema} />
         {children}
+        <FloatingContact />
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -125,7 +130,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
         </div>
         <a
           href="/"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-semibold hover:bg-primary-dark transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-secondary rounded-full font-semibold hover:bg-primary-light transition-colors"
         >
           ← Gå til forsiden
         </a>

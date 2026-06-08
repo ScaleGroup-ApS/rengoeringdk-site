@@ -210,8 +210,8 @@ export default function Erhverv(_: Route.ComponentProps) {
             <p>Få et gratis, uforpligtende tilbud inden for 24 timer. Ingen binding — bare et renere kontor.</p>
             <div className="row">
               <Link className="btn btn-white btn-lg" to="/priser?for=erhverv#beregner">Beregn din pris <Arrow /></Link>
-              <a className="btn btn-lg" style={{ background: "rgba(255,255,255,.14)", color: "#fff", border: "1px solid rgba(255,255,255,.3)" }} href="tel:+4570123456">
-                Ring 70 12 34 56
+              <a className="btn btn-lg" style={{ background: "rgba(255,255,255,.14)", color: "#fff", border: "1px solid rgba(255,255,255,.3)" }} href="tel:+4571151606">
+                Ring 71 15 16 06
               </a>
             </div>
           </div>

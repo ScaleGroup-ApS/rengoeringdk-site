@@ -152,9 +152,9 @@ export default function Tjenester(_: Route.ComponentProps) {
               <a
                 className="btn btn-lg"
                 style={{ background: "rgba(255,255,255,.14)", color: "#fff", border: "1px solid rgba(255,255,255,.3)" }}
-                href="tel:+4570123456"
+                href="tel:+4571151606"
               >
-                Ring 70 12 34 56
+                Ring 71 15 16 06
               </a>
             </div>
           </div>

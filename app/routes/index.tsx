@@ -276,18 +276,18 @@ function DKMap() {
           cx={d.x.toFixed(1)}
           cy={d.y.toFixed(1)}
           r={2.4}
-          fill="rgba(75,147,99,0.22)"
+          fill="rgba(110,219,55,0.22)"
           style={{ animationDelay: `${((i * 53) % 100) / 100 * 4.2}s` }}
         />
       ))}
       {cities.map((c, i) => (
         <g key={c.name}>
-          <circle className="dk-ring" cx={c.x} cy={c.y} r={5} fill="#4b9363" opacity={0}>
+          <circle className="dk-ring" cx={c.x} cy={c.y} r={5} fill="#6edb37" opacity={0}>
             <animate attributeName="r" values="5;24;24" dur="2.8s" begin={`${i * 0.4}s`} repeatCount="indefinite" />
             <animate attributeName="opacity" values="0.55;0;0" dur="2.8s" begin={`${i * 0.4}s`} repeatCount="indefinite" />
           </circle>
-          <circle className="dk-city-glow" cx={c.x} cy={c.y} r={9} fill="#4b9363" style={{ animationDelay: `${i * 0.4}s` }} />
-          <circle cx={c.x} cy={c.y} r={5} fill="#3f7e54" />
+          <circle className="dk-city-glow" cx={c.x} cy={c.y} r={9} fill="#6edb37" style={{ animationDelay: `${i * 0.4}s` }} />
+          <circle cx={c.x} cy={c.y} r={5} fill="#2e7a12" />
           <text
             x={c.x + 12}
             y={c.y + 4}

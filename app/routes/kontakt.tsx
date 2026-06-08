@@ -300,7 +300,7 @@ export default function Kontakt(_: Route.ComponentProps) {
                   </span>
                   <div>
                     <div className="il">Ring til os</div>
-                    <div className="iv"><a href="tel:+4570123456">+45 70 12 34 56</a></div>
+                    <div className="iv"><a href="tel:+4571151606">+45 71 15 16 06</a></div>
                   </div>
                 </div>
                 <div className="iitem">
@@ -336,7 +336,7 @@ export default function Kontakt(_: Route.ComponentProps) {
                   </span>
                   <div>
                     <div className="il">Hovedkontor</div>
-                    <div className="iv">Erhvervsvej 12, 2600 Glostrup</div>
+                    <div className="iv">Boeslunde Byvej 76, 4242 Boeslunde</div>
                   </div>
                 </div>
               </div>

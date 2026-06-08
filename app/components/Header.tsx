@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { label: "Kontakt", href: "/kontakt" },
 ];
 
-const PHONE_HREF = "tel:+4570123456";
+const PHONE_HREF = "tel:+4571151606";
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -42,7 +42,7 @@ export function Header() {
       <nav className={`bar${scrolled ? " scrolled" : ""}`}>
         <div className="wrap">
           <Link className="logo" to="/" aria-label="Define Cleaning Services — Forside">
-            <img src="/logo.png" alt="Define Cleaning Services" className="logo-img" width={493} height={282} />
+            <img src="/logo.png" alt="Define Cleaning Services" className="logo-img" width={482} height={262} />
           </Link>
 
           <div className="navlinks">
@@ -62,7 +62,7 @@ export function Header() {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
               </svg>
-              70 12 34 56
+              71 15 16 06
             </a>
             <Link className="btn btn-primary" to="/priser#beregner">
               Beregn din pris
