@@ -601,7 +601,14 @@ function Prisberegner() {
             <div className="res-price tnum">{kr(perVisit, 5)}</div>
             <p className="res-per">pr. besøg · {momsLabel}</p>
 
-            <div className="res-break" style={{ marginTop: 30 }}>
+            <div className="res-nobind">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 13l4 4L19 7" />
+              </svg>
+              Ingen binding — du kan opsige når som helst
+            </div>
+
+            <div className="res-break" style={{ marginTop: 26 }}>
               <div className="rb"><span>Type</span><span>{type.name}</span></div>
               <div className="rb"><span>Areal</span><span>{m2.toLocaleString("da-DK")} m²</span></div>
               <div className="rb"><span>Frekvens</span><span>{freq.name}</span></div>
@@ -609,6 +616,24 @@ function Prisberegner() {
                 <div className="rb"><span>Tilvalg</span><span>{selectedAddons.size} valgt — inkluderet i prisen</span></div>
               )}
             </div>
+
+            {audience === "privat" && (
+              <div className="res-fradrag">
+                <div className="rf-head">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="3" />
+                    <path d="M8.5 15.5l7-7M9 9.5h.01M15 14.5h.01" />
+                  </svg>
+                  Husk dit servicefradrag
+                </div>
+                <p>
+                  Som privatkunde kan du trække udgiften til rengøring fra i skat via
+                  servicefradraget. Det giver typisk en besparelse på ca. 26% af lønnen —
+                  altså omkring <b>{kr(perVisit * 0.26, 5)} pr. besøg</b>. Du får fradraget
+                  via din årsopgørelse, op til årets loft (se gældende grænse på skat.dk).
+                </p>
+              </div>
+            )}
 
             <p className="res-note" style={{ marginTop: 24 }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

@@ -123,9 +123,22 @@ export default function Index(_: Route.ComponentProps) {
             Professionel rengøring i hele Danmark. Fast team, svanemærkede produkter og 20 års erfaring —
             både i dit hjem og i din virksomhed.
           </p>
-          <div className="splash-rating reveal d3">
-            <StarRow />
-            <span className="rtxt"><b>4,9/5</b> på Trustpilot · baseret på <b>512</b> anmeldelser</span>
+          <div className="trust-badges reveal d3">
+            <a
+              className="trust-badge"
+              href="https://dk.trustpilot.com/review/define-cleaning.dk"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Se vores anmeldelser på Trustpilot"
+            >
+              <img src="/reviews.png" alt="Trustpilot — 4,9/5" loading="lazy" />
+            </a>
+            <span className="trust-badge">
+              <img src="/svanemaerket.png" alt="Svanemærket" loading="lazy" />
+            </span>
+            <span className="trust-badge">
+              <img src="/servicenormen.png" alt="Servicenormen" loading="lazy" />
+            </span>
           </div>
         </section>
 

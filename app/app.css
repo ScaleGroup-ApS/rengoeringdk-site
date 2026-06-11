@@ -531,6 +531,17 @@ input[type=range].rng::-moz-range-thumb { width: 22px; height: 22px; border-radi
 .res-note { font-size: var(--fs-meta); color: rgba(255,255,255,.7); margin-top: 16px; line-height: 1.5; display: flex; gap: 8px; }
 .res-note svg { width: 15px; height: 15px; flex: none; margin-top: 1px; }
 
+/* no-binding badge — highlighted right at the price */
+.res-nobind { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; padding: 9px 15px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.4); border-radius: var(--radius-pill); font-size: var(--fs-meta); font-weight: 800; letter-spacing: .02em; color: #fff; line-height: 1.2; }
+.res-nobind svg { width: 16px; height: 16px; flex: none; }
+
+/* servicefradrag info (private customers only) */
+.res-fradrag { margin-top: 22px; padding: 14px 16px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 12px; }
+.res-fradrag .rf-head { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: var(--fs-sm); color: #fff; }
+.res-fradrag .rf-head svg { width: 17px; height: 17px; flex: none; }
+.res-fradrag p { margin-top: 8px; font-size: var(--fs-meta); color: rgba(255,255,255,.85); line-height: 1.55; }
+.res-fradrag b { color: #fff; font-weight: 700; }
+
 /* ── priser: plans ────────────────────────────────────────────────────── */
 .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; align-items: start; }
 .plan { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--radius-2xl); padding: 32px; display: flex; flex-direction: column; transition: transform .3s, box-shadow .3s; position: relative; }
@@ -761,6 +772,14 @@ html.js .reveal.in { opacity: 1; transform: none; }
 .splash-rating .rtxt { font-size: var(--fs-sm); color: var(--text-dim); }
 .splash-rating .rtxt b { color: var(--ink); }
 
+/* trust badges row — replaces the rating line on the homepage intro */
+.trust-badges { display: flex; align-items: center; justify-content: center; gap: clamp(24px, 4vw, 48px); margin-top: 36px; flex-wrap: wrap; }
+.trust-badge { display: inline-flex; align-items: center; justify-content: center; }
+.trust-badge img { height: 80px; width: auto; object-fit: contain; }
+.trust-badge img[alt="Svanemærket"] { height: 108px; }
+a.trust-badge { transition: opacity .2s, transform .2s; }
+a.trust-badge:hover { opacity: .8; transform: translateY(-2px); }
+
 @media (max-width: 760px) {
   .splash-cards { grid-template-columns: 1fr; }
 }
@@ -823,11 +842,11 @@ html.js .reveal.in { opacity: 1; transform: none; }
 .foot-bigcontact:hover { color: var(--accent-bright); }
 .foot-bigcontact svg { width: 18px; height: 18px; color: var(--accent-bright); }
 
-.foot-cols { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: clamp(24px, 3vw, 40px); }
+.foot-cols { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: clamp(24px, 3vw, 44px); }
 .fcol h5 { color: #fff; font-size: var(--fs-meta); text-transform: uppercase; letter-spacing: .12em; margin: 0 0 16px; }
 .fcol a { display: block; color: #8fb3b8; font-size: var(--fs-sm); padding: 5px 0; transition: color .2s; text-decoration: none; line-height: 1.4; }
 .fcol a:hover { color: #fff; }
-.fcol-wide .fcol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+.fcol-wide .fcol-grid { display: grid; grid-template-columns: 1fr; }
 
 .foot-bot { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 54px; padding-top: 26px; border-top: 1px solid rgba(255,255,255,.1); font-size: var(--fs-meta); color: #7ba2a7; }
 
@@ -835,6 +854,8 @@ html.js .reveal.in { opacity: 1; transform: none; }
   .foot-top { grid-template-columns: 1fr; }
   .foot-cols { grid-template-columns: 1fr 1fr; }
   .fcol-wide { grid-column: 1 / -1; }
+  /* spans the full width here, so 2 columns reads better than one tall list */
+  .fcol-wide .fcol-grid { grid-template-columns: 1fr 1fr; gap: 0 32px; }
 }
 @media (max-width: 520px) {
   .foot-cols { grid-template-columns: 1fr; }
