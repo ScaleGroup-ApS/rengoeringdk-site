@@ -14,11 +14,11 @@ const PAGE_URL = `${SITE_URL}/om-os`;
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Om os — Define Cleaning Services ApS",
+      title: "Om os — Define Cleaning A/S",
       description:
         "20 års erfaring med rent arbejde og glade kunder. Vi er et landsdækkende rengøringsfirma med fast team, INSTA 800-kvalitet og svanemærkede produkter.",
       url: PAGE_URL,
-      siteName: "Define Cleaning Services ApS",
+      siteName: "Define Cleaning A/S",
       type: "website",
       locale: "da_DK",
     }),
@@ -29,8 +29,8 @@ export function meta(_: Route.MetaArgs) {
 const pageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "Om os – Define Cleaning Services ApS",
-  description: "Lær Define Cleaning Services ApS at kende.",
+  name: "Om os – Define Cleaning A/S",
+  description: "Lær Define Cleaning A/S at kende.",
   url: PAGE_URL,
   breadcrumb: {
     "@type": "BreadcrumbList",
@@ -117,7 +117,7 @@ export default function OmOs(_: Route.ComponentProps) {
               <p className="eyebrow">Vores historie</p>
               <h2 style={{ marginTop: 14 }}>Bygget på tillid, ét rent lokale ad gangen</h2>
               <p>
-                Define Cleaning Services blev grundlagt af to fagfolk med en simpel idé: rengøring skal være
+                Define Cleaning blev grundlagt af to fagfolk med en simpel idé: rengøring skal være
                 til at stole på. Ingen skjulte gebyrer, ingen udskiftning af personale hver uge —
                 bare et fast team, der kender jeres lokaler og leverer samme høje standard hver gang.
               </p>

@@ -17,7 +17,7 @@ const SITE_URL = "https://define-cleaning.dk";
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": ["Organization", "LocalBusiness"],
-  name: "Define Cleaning Services ApS",
+  name: "Define Cleaning A/S",
   url: SITE_URL,
   logo: `${SITE_URL}/logo.svg`,
   email: "info@define-cleaning.dk",

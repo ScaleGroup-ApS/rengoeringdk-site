@@ -22,7 +22,7 @@ export function loader({ params }: Route.LoaderArgs) {
 export function meta({ data }: Route.MetaArgs) {
   if (!data) {
     return [
-      { title: "Ikke fundet — Define Cleaning Services ApS" },
+      { title: "Ikke fundet — Define Cleaning A/S" },
       { name: "robots", content: "noindex" },
     ];
   }
@@ -32,7 +32,7 @@ export function meta({ data }: Route.MetaArgs) {
       title: data.service.metaTitle,
       description: data.service.metaDesc,
       url,
-      siteName: "Define Cleaning Services ApS",
+      siteName: "Define Cleaning A/S",
       type: "website",
       locale: "da_DK",
     }),
@@ -78,7 +78,7 @@ export default function ServiceDetail({ loaderData }: Route.ComponentProps) {
     description: svc.metaDesc,
     provider: {
       "@type": "Organization",
-      name: "Define Cleaning Services ApS",
+      name: "Define Cleaning A/S",
       url: SITE_URL,
     },
     areaServed: {

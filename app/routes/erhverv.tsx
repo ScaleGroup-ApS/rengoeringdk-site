@@ -15,11 +15,11 @@ const PAGE_URL = `${SITE_URL}/erhverv`;
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Erhvervsrengøring — Define Cleaning Services ApS",
+      title: "Erhvervsrengøring — Define Cleaning A/S",
       description:
         "Professionel erhvervsrengøring i hele Danmark. Kontor, butik, klinik, industri, hotel og restaurant. INSTA 800-dokumenteret, fast team og fleksible aftaler.",
       url: PAGE_URL,
-      siteName: "Define Cleaning Services ApS",
+      siteName: "Define Cleaning A/S",
       type: "website",
       locale: "da_DK",
     }),
@@ -30,7 +30,7 @@ export function meta(_: Route.MetaArgs) {
 const pageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "Erhvervsrengøring – Define Cleaning Services ApS",
+  name: "Erhvervsrengøring – Define Cleaning A/S",
   description: "Professionel erhvervsrengøring til virksomheder i hele Danmark.",
   url: PAGE_URL,
   breadcrumb: {

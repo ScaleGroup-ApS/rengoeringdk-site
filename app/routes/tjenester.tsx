@@ -14,11 +14,11 @@ const PAGE_URL = `${SITE_URL}/tjenester`;
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Alle ydelser — Define Cleaning Services ApS",
+      title: "Alle ydelser — Define Cleaning A/S",
       description:
         "Se hele vores udvalg af rengøringsydelser. Fra kontor og butik til hjemmerengøring, flytte- og hovedrengøring. 18 specialiserede kategorier i hele Danmark.",
       url: PAGE_URL,
-      siteName: "Define Cleaning Services ApS",
+      siteName: "Define Cleaning A/S",
       type: "website",
       locale: "da_DK",
     }),
@@ -29,7 +29,7 @@ export function meta(_: Route.MetaArgs) {
 const pageSchema = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
-  name: "Alle ydelser – Define Cleaning Services ApS",
+  name: "Alle ydelser – Define Cleaning A/S",
   description: "Professionel rengøring for både privat og erhverv.",
   url: PAGE_URL,
   breadcrumb: {

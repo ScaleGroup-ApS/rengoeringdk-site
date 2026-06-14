@@ -15,11 +15,11 @@ const PAGE_URL = `${SITE_URL}/privat`;
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Hjemmerengøring til private — Define Cleaning Services ApS",
+      title: "Hjemmerengøring til private — Define Cleaning A/S",
       description:
         "Professionel hjemmerengøring i hele Danmark. Faste rengøringer, hovedrengøring, flytterengøring og vinduespudsning for private hjem. Svanemærkede produkter, fast personale.",
       url: PAGE_URL,
-      siteName: "Define Cleaning Services ApS",
+      siteName: "Define Cleaning A/S",
       type: "website",
       locale: "da_DK",
     }),
@@ -30,7 +30,7 @@ export function meta(_: Route.MetaArgs) {
 const pageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "Hjemmerengøring til private – Define Cleaning Services ApS",
+  name: "Hjemmerengøring til private – Define Cleaning A/S",
   description: "Professionel hjemmerengøring til private hjem.",
   url: PAGE_URL,
   breadcrumb: {

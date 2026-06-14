@@ -15,11 +15,11 @@ const PAGE_URL = `${SITE_URL}/kontakt`;
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Kontakt — Define Cleaning Services ApS",
+      title: "Kontakt — Define Cleaning A/S",
       description:
         "Få et gratis, uforpligtende tilbud inden for 24 timer. Skriv eller ring — vi vender tilbage hurtigst muligt.",
       url: PAGE_URL,
-      siteName: "Define Cleaning Services ApS",
+      siteName: "Define Cleaning A/S",
       type: "website",
       locale: "da_DK",
     }),
@@ -86,7 +86,7 @@ export async function action({ request }: Route.ActionArgs) {
 const pageSchema = {
   "@context": "https://schema.org",
   "@type": "ContactPage",
-  name: "Kontakt – Define Cleaning Services ApS",
+  name: "Kontakt – Define Cleaning A/S",
   description: "Kontakt os for et gratis tilbud på erhvervsrengøring.",
   url: PAGE_URL,
   breadcrumb: {

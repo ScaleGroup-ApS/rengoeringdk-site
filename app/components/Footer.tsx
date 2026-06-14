@@ -37,8 +37,8 @@ export function Footer() {
       <div className="wrap">
         <div className="foot-top">
           <div className="foot-brand">
-            <Link className="logo" to="/" aria-label="Define Cleaning Services — Forside">
-              <img src="/logo.png" alt="Define Cleaning Services" className="logo-img" width={482} height={262} />
+            <Link className="logo" to="/" aria-label="Define Cleaning — Forside">
+              <img src="/logo.png" alt="Define Cleaning" className="logo-img" width={482} height={262} />
             </Link>
             <p>
               Professionel rengøring i hele Danmark — til private hjem og virksomheder.
@@ -90,7 +90,7 @@ export function Footer() {
         </div>
 
         <div className="foot-bot">
-          <span>© {year} Define Cleaning Services ApS · CVR 40 68 10 86 · Alle rettigheder forbeholdes.</span>
+          <span>© {year} Define Cleaning A/S · CVR 40 68 10 86 · Alle rettigheder forbeholdes.</span>
           <span>Handelsbetingelser · Privatlivspolitik · Cookies</span>
         </div>
       </div>

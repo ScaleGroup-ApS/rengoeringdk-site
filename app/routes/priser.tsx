@@ -17,11 +17,11 @@ const PAGE_URL = `${SITE_URL}/priser`;
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Priser & beregner — Define Cleaning Services ApS",
+      title: "Priser & beregner — Define Cleaning A/S",
       description:
         "Få en vejledende pris på under et minut — for både privat og erhverv. Privatpriser inkl. moms, erhvervspriser ekskl. moms. Ingen skjulte gebyrer.",
       url: PAGE_URL,
-      siteName: "Define Cleaning Services ApS",
+      siteName: "Define Cleaning A/S",
       type: "website",
       locale: "da_DK",
     }),
@@ -117,7 +117,7 @@ export async function action({ request }: Route.ActionArgs) {
 const pageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "Priser – Define Cleaning Services ApS",
+  name: "Priser – Define Cleaning A/S",
   description: "Gennemsigtige priser og interaktiv beregner for både privat og erhverv.",
   url: PAGE_URL,
 };

@@ -12,11 +12,11 @@ const SITE_URL = "https://define-cleaning.dk";
 export function meta(_: Route.MetaArgs) {
   return [
     ...buildMeta({
-      title: "Define Cleaning Services ApS — Rengøring for privat & erhverv",
+      title: "Define Cleaning A/S — Rengøring for privat & erhverv",
       description:
         "Professionel rengøring i hele Danmark — til både private hjem og virksomheder. Fast team, fleksible aftaler og svanemærkede produkter.",
       url: SITE_URL,
-      siteName: "Define Cleaning Services ApS",
+      siteName: "Define Cleaning A/S",
       type: "website",
       locale: "da_DK",
     }),
@@ -27,7 +27,7 @@ export function meta(_: Route.MetaArgs) {
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "Define Cleaning Services ApS",
+  name: "Define Cleaning A/S",
   url: SITE_URL,
   potentialAction: {
     "@type": "SearchAction",
@@ -115,7 +115,7 @@ export default function Index(_: Route.ComponentProps) {
 
         {/* intro under hero */}
         <section className="wrap" style={{ paddingBlock: "clamp(48px, 6vw, 80px)", textAlign: "center" }}>
-          <p className="eyebrow reveal">Define Cleaning Services</p>
+          <p className="eyebrow reveal">Define Cleaning</p>
           <h1 className="reveal d1" style={{ fontSize: "var(--fs-display)", maxWidth: "18ch", margin: "16px auto 0", marginInline: "auto" }}>
             Rengøring du kan stole på — privat og erhverv
           </h1>
