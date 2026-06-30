@@ -12,4 +12,24 @@ export default [
   route("kontakt", "routes/kontakt.tsx"),
   route("robots.txt", "routes/robots[.]txt.tsx"),
   route("sitemap.xml", "routes/sitemap[.]xml.tsx"),
+
+  // ── define-app (app.define-cleaning.dk) ──────────────────────────────
+  route("app", "routes/app/layout.tsx", [
+    index("routes/app/index.tsx"),
+    route("login", "routes/app/login.tsx"),
+    route("logout", "routes/app/logout.tsx"),
+    route("register", "routes/app/register.tsx"),
+    route("profil", "routes/app/profil.tsx"),
+    route("bookinger", "routes/app/bookinger.tsx"),
+    route("book", "routes/app/book.tsx"),
+    route("kvittering", "routes/app/kvittering.tsx"),
+    route("admin", "routes/app/admin/layout.tsx", [
+      index("routes/app/admin/index.tsx"),
+      route("kalender", "routes/app/admin/kalender.tsx"),
+      route("bookinger", "routes/app/admin/bookinger.tsx"),
+      route("ny", "routes/app/admin/ny.tsx"),
+      route("priser", "routes/app/admin/priser.tsx"),
+      route("kunder", "routes/app/admin/kunder.tsx"),
+    ]),
+  ]),
 ] satisfies RouteConfig;
