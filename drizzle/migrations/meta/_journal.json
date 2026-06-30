@@ -15,6 +15,13 @@
       "when": 1782833358585,
       "tag": "0001_daffy_killer_shrike",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1782834485545,
+      "tag": "0002_luxuriant_ezekiel",
+      "breakpoints": true
     }
   ]
 }

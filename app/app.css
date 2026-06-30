@@ -1206,3 +1206,42 @@ a.trust-badge:hover { opacity: .8; transform: translateY(-2px); }
 .admin-pricing-row input:disabled { opacity: .6; }
 .admin-pricing-save { position: sticky; bottom: 86px; display: flex; justify-content: flex-end; }
 @media (min-width: 860px) { .admin-pricing-save { bottom: 16px; } }
+
+/* ── Recurring series UI ───────────────────────────────────────────────── */
+.app-badge-series { background: #e0e7ff; color: #3730a3; margin-left: 6px; }
+.app-series-list { list-style: none; margin: 8px 0 12px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.app-series-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: var(--fs-sm); padding: 8px 12px; background: var(--surface-2); border-radius: var(--radius-md); }
+.app-linkbtn { background: none; border: none; padding: 0; font-weight: 700; font-size: var(--fs-meta); cursor: pointer; color: var(--accent-deep); }
+
+/* ── Dashboard quick link ──────────────────────────────────────────────── */
+.app-quicklink { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.app-quicklink:hover { border-color: var(--mint); box-shadow: var(--shadow-md); }
+.app-quicklink-title { font-weight: 800; color: var(--ink); }
+.app-quicklink svg { width: 22px; height: 22px; color: var(--accent-deep); flex: 0 0 auto; }
+
+/* ── Receipt / servicefradrag ──────────────────────────────────────────── */
+.receipt { display: flex; flex-direction: column; gap: 20px; }
+.receipt-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--hairline); padding-bottom: 16px; }
+.receipt-logo { height: 44px; width: auto; }
+.receipt-meta { display: flex; flex-direction: column; gap: 1px; text-align: right; font-size: var(--fs-meta); color: var(--text-dim); }
+.receipt-parties { display: grid; grid-template-columns: 1fr auto; gap: 16px; font-size: var(--fs-sm); }
+.receipt-parties div > div { color: var(--text-dim); }
+.receipt-period { text-align: right; }
+.receipt-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.receipt-table th { text-align: left; font-size: var(--fs-meta); text-transform: uppercase; letter-spacing: .06em; color: var(--text-mute); padding: 8px 0; border-bottom: 1px solid var(--hairline); }
+.receipt-table th.num, .receipt-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.receipt-table td { padding: 9px 0; border-bottom: 1px solid var(--hairline); }
+.receipt-table tfoot td { font-weight: 700; color: var(--ink); border-bottom: none; padding-top: 12px; }
+.receipt-grand td { font-size: 1.05rem; }
+.receipt-fradrag { background: var(--accent-soft); border: 1px solid var(--mint); border-radius: var(--radius-lg); padding: 16px 18px; }
+.receipt-fradrag-num { font-size: 1.8rem; font-weight: 800; color: var(--accent-deep); letter-spacing: -.03em; }
+.receipt-note { border-top: 1px solid var(--hairline); padding-top: 14px; }
+
+/* ── Print ─────────────────────────────────────────────────────────────── */
+@media print {
+  .app-topbar, .app-tabbar, .no-print, .app-quicklink { display: none !important; }
+  .app-main { padding: 0 !important; }
+  .appshell { background: #fff; }
+  .app-card, .receipt { box-shadow: none; border: none; }
+  .receipt-fradrag { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

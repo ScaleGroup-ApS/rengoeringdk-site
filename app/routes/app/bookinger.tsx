@@ -10,6 +10,8 @@ import {
   recurrenceLabel,
   statusLabel,
 } from "~/lib/bookings";
+import { cancelSeries, topUpActiveSeries } from "~/lib/series.server";
+import { isRecurring } from "~/lib/recurrence";
 
 export function meta() {
   return [{ title: "Mine bookinger — Define Cleaning" }, { name: "robots", content: "noindex" }];
@@ -17,13 +19,17 @@ export function meta() {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
+  // Keep this customer's recurring agreements topped up.
+  await topUpActiveSeries(user.id);
+
   const db = getDb();
   const bookings = await db
     .select()
     .from(appBookings)
     .where(eq(appBookings.userId, user.id))
     .orderBy(desc(appBookings.createdAt));
-  return { bookings };
+  const today = new Date().toISOString().slice(0, 10);
+  return { bookings, today };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -50,6 +56,16 @@ export async function action({ request }: Route.ActionArgs) {
     return { ok: true };
   }
 
+  if (intent === "cancel-series") {
+    const [row] = await db
+      .select({ seriesId: appBookings.seriesId })
+      .from(appBookings)
+      .where(and(eq(appBookings.id, id), eq(appBookings.userId, user.id)))
+      .limit(1);
+    await cancelSeries(row?.seriesId ?? id, user.id);
+    return { ok: true };
+  }
+
   if (intent === "change") {
     const note = String(form.get("customerNote") ?? "").trim() || null;
     const newDate = String(form.get("requestedDate") ?? "").trim();
@@ -65,13 +81,37 @@ export async function action({ request }: Route.ActionArgs) {
   return { error: "Ukendt handling." };
 }
 
+type BookingRow = Route.ComponentProps["loaderData"]["bookings"][number];
+
 export default function MineBookinger({ loaderData }: Route.ComponentProps) {
-  const { bookings } = loaderData;
+  const { bookings, today } = loaderData;
   const [params] = useSearchParams();
   const justBooked = params.get("ny") === "1";
 
-  const active = bookings.filter((b) => isActiveBooking(b.status));
-  const past = bookings.filter((b) => !isActiveBooking(b.status));
+  // Split into recurring agreements (series) and one-off bookings.
+  const singles = bookings.filter((b) => b.seriesId == null);
+  const seriesMap = new Map<number, BookingRow[]>();
+  for (const b of bookings) {
+    if (b.seriesId != null) {
+      const list = seriesMap.get(b.seriesId) ?? [];
+      list.push(b);
+      seriesMap.set(b.seriesId, list);
+    }
+  }
+
+  const activeSingles = singles.filter((b) => isActiveBooking(b.status));
+  const pastSingles = singles.filter((b) => !isActiveBooking(b.status));
+
+  const series = [...seriesMap.values()].map((occ) => {
+    const upcoming = occ
+      .filter((o) => isActiveBooking(o.status) && (o.confirmedDate ?? o.requestedDate) >= today)
+      .sort((a, b) => String(a.confirmedDate ?? a.requestedDate).localeCompare(String(b.confirmedDate ?? b.requestedDate)));
+    const completed = occ.filter((o) => o.status === "completed").length;
+    return { occ, upcoming, completed };
+  });
+  const activeSeries = series.filter((s) => s.upcoming.length > 0);
+
+  const hasNothing = bookings.length === 0;
 
   return (
     <div className="app-page">
@@ -84,20 +124,35 @@ export default function MineBookinger({ loaderData }: Route.ComponentProps) {
         <p className="app-success">Tak! Din forespørgsel er sendt — vi bekræfter tiden hurtigst muligt.</p>
       )}
 
-      {bookings.length === 0 ? (
+      {hasNothing ? (
         <div className="app-card app-empty-card">
           <p className="app-empty">Du har ingen bookinger endnu.</p>
           <Link to="/app/book" className="btn btn-primary">Book din første rengøring</Link>
         </div>
       ) : (
         <>
-          {active.map((b) => (
-            <BookingCard key={b.id} b={b} editable />
-          ))}
-          {past.length > 0 && (
+          {activeSeries.length > 0 && (
+            <>
+              <h2 className="app-h2">Faste aftaler</h2>
+              {activeSeries.map((s) => (
+                <SeriesCard key={s.occ[0].seriesId} upcoming={s.upcoming} completed={s.completed} />
+              ))}
+            </>
+          )}
+
+          {activeSingles.length > 0 && (
+            <>
+              <h2 className="app-h2 app-section-gap">Enkelt-bookinger</h2>
+              {activeSingles.map((b) => (
+                <BookingCard key={b.id} b={b} editable />
+              ))}
+            </>
+          )}
+
+          {pastSingles.length > 0 && (
             <>
               <h2 className="app-h2 app-section-gap">Tidligere</h2>
-              {past.map((b) => (
+              {pastSingles.map((b) => (
                 <BookingCard key={b.id} b={b} editable={false} />
               ))}
             </>
@@ -108,7 +163,52 @@ export default function MineBookinger({ loaderData }: Route.ComponentProps) {
   );
 }
 
-type BookingRow = Route.ComponentProps["loaderData"]["bookings"][number];
+function SeriesCard({ upcoming, completed }: { upcoming: BookingRow[]; completed: number }) {
+  const next = upcoming[0];
+  const rest = upcoming.slice(1);
+  return (
+    <div className="app-card app-booking">
+      <div className="app-booking-head">
+        <div>
+          <p className="app-booking-service">
+            {next.service} <span className="app-badge app-badge-series">Fast aftale</span>
+          </p>
+          <p className="app-booking-date">
+            Næste: {formatDanishDate(next.confirmedDate ?? next.requestedDate)}
+            {(next.confirmedTime ?? next.requestedTime) && ` · kl. ${next.confirmedTime ?? next.requestedTime}`}
+          </p>
+        </div>
+        <span className={`app-badge status-${next.status}`}>{statusLabel(next.status)}</span>
+      </div>
+
+      <div className="app-booking-meta">
+        <span>{recurrenceLabel(next.recurrence)}</span>
+        <span>{upcoming.length} kommende</span>
+        {completed > 0 ? <span>{completed} gennemført</span> : null}
+        {next.estimatedPrice ? <span>≈ {next.estimatedPrice.toLocaleString("da-DK")} kr./besøg</span> : null}
+      </div>
+
+      <details className="app-booking-edit">
+        <summary>Se alle besøg &amp; aflys</summary>
+        <ul className="app-series-list">
+          {upcoming.map((o) => (
+            <li key={o.id}>
+              <span>{formatDanishDate(o.confirmedDate ?? o.requestedDate)}{(o.confirmedTime ?? o.requestedTime) ? ` · ${o.confirmedTime ?? o.requestedTime}` : ""}</span>
+              <Form method="post">
+                <input type="hidden" name="id" value={o.id} />
+                <button type="submit" name="intent" value="cancel" className="app-linkbtn app-danger">Aflys</button>
+              </Form>
+            </li>
+          ))}
+        </ul>
+        <Form method="post" className="app-form-tight">
+          <input type="hidden" name="id" value={next.id} />
+          <button type="submit" name="intent" value="cancel-series" className="btn btn-ghost btn-sm app-danger">Aflys hele aftalen</button>
+        </Form>
+      </details>
+    </div>
+  );
+}
 
 function BookingCard({ b, editable }: { b: BookingRow; editable: boolean }) {
   const dateShown = b.confirmedDate ?? b.requestedDate;

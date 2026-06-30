@@ -60,29 +60,39 @@ export const appUsers = mysqlTable(
 // status lifecycle: requested → confirmed → completed
 //                                ↘ rescheduled ↗
 //                   (any) → cancelled
-export const appBookings = mysqlTable("app_bookings", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("user_id")
-    .notNull()
-    .references(() => appUsers.id),
-  status: varchar("status", { length: 20 }).notNull().default("requested"),
-  service: varchar("service", { length: 120 }).notNull(),
-  audience: varchar("audience", { length: 10 }).notNull(),
-  requestedDate: date("requested_date", { mode: "string" }).notNull(),
-  requestedTime: varchar("requested_time", { length: 5 }), // "HH:MM"
-  confirmedDate: date("confirmed_date", { mode: "string" }),
-  confirmedTime: varchar("confirmed_time", { length: 5 }),
-  recurrence: varchar("recurrence", { length: 20 }).notNull().default("once"), // once|weekly|biweekly|monthly
-  address: varchar("address", { length: 500 }),
-  postnr: varchar("postnr", { length: 10 }),
-  by: varchar("by", { length: 120 }),
-  m2: int("m2"),
-  estimatedPrice: int("estimated_price"), // kr snapshot at request time
-  customerNote: text("customer_note"),
-  adminNote: text("admin_note"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-});
+export const appBookings = mysqlTable(
+  "app_bookings",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("user_id")
+      .notNull()
+      .references(() => appUsers.id),
+    status: varchar("status", { length: 20 }).notNull().default("requested"),
+    service: varchar("service", { length: 120 }).notNull(),
+    audience: varchar("audience", { length: 10 }).notNull(),
+    requestedDate: date("requested_date", { mode: "string" }).notNull(),
+    requestedTime: varchar("requested_time", { length: 5 }), // "HH:MM"
+    confirmedDate: date("confirmed_date", { mode: "string" }),
+    confirmedTime: varchar("confirmed_time", { length: 5 }),
+    recurrence: varchar("recurrence", { length: 20 }).notNull().default("once"), // once|weekly|biweekly|monthly
+    // Recurring agreements: the originating (parent) booking has series_id = its
+    // own id; auto-generated occurrences point series_id at that parent. NULL for
+    // one-off bookings. No DB FK (self-reference) — relationship is logical.
+    seriesId: int("series_id"),
+    address: varchar("address", { length: 500 }),
+    postnr: varchar("postnr", { length: 10 }),
+    by: varchar("by", { length: 120 }),
+    m2: int("m2"),
+    estimatedPrice: int("estimated_price"), // kr snapshot at request time
+    customerNote: text("customer_note"),
+    adminNote: text("admin_note"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  },
+  // Prevents duplicate occurrences in a series (same series + same visit date).
+  // NULL series_id rows (one-offs) are exempt — MySQL treats NULLs as distinct.
+  (t) => [uniqueIndex("app_bookings_series_date_unique").on(t.seriesId, t.confirmedDate)],
+);
 
 // ── define-app: editable prisberegner config ───────────────────────────
 // One row per audience: holds BASE price + VAT multiplier.

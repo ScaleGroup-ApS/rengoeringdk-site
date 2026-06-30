@@ -4,6 +4,7 @@ import type { Route } from "./+types/index";
 import { requireUser } from "~/lib/auth/guards.server";
 import { getDb } from "~/lib/db.server";
 import { appBookings } from "~/db/schema";
+import { topUpActiveSeries } from "~/lib/series.server";
 import {
   formatDanishDate,
   isActiveBooking,
@@ -18,6 +19,7 @@ export function meta() {
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
   if (user.role === "admin") throw redirect("/app/admin");
+  await topUpActiveSeries(user.id);
 
   const db = getDb();
   const bookings = await db
@@ -91,6 +93,14 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
         <Link to="/app/book" className="btn btn-primary btn-lg">Book ny rengøring</Link>
         <Link to="/app/bookinger" className="btn btn-ghost btn-lg">Se alle bookinger</Link>
       </div>
+
+      <Link to="/app/kvittering" className="app-card app-quicklink">
+        <div>
+          <p className="app-quicklink-title">Kvittering &amp; servicefradrag</p>
+          <p className="app-meta">Se din årsoversigt og estimeret fradrag — klar til skat.dk.</p>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+      </Link>
     </div>
   );
 }

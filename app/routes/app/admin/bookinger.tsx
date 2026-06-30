@@ -4,6 +4,8 @@ import type { Route } from "./+types/bookinger";
 import { requireAdmin } from "~/lib/auth/guards.server";
 import { getDb } from "~/lib/db.server";
 import { appBookings, appUsers } from "~/db/schema";
+import { cancelSeries, startOrTopUpSeries, topUpActiveSeries } from "~/lib/series.server";
+import { isRecurring } from "~/lib/recurrence";
 import {
   formatDanishDate,
   recurrenceLabel,
@@ -21,6 +23,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const status = url.searchParams.get("status");
 
+  // Keep recurring agreements topped up to the horizon (cron-free scheduler).
+  await topUpActiveSeries();
+
   const db = getDb();
   const rows = await db
     .select({
@@ -33,6 +38,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       confirmedDate: appBookings.confirmedDate,
       confirmedTime: appBookings.confirmedTime,
       recurrence: appBookings.recurrence,
+      seriesId: appBookings.seriesId,
       address: appBookings.address,
       postnr: appBookings.postnr,
       by: appBookings.by,
@@ -67,6 +73,17 @@ export async function action({ request }: Route.ActionArgs) {
     await db.update(appBookings).set({ status: "cancelled", adminNote }).where(eq(appBookings.id, id));
     return { ok: true };
   }
+  if (intent === "cancel-series") {
+    // Cancel this and all future occurrences of the agreement.
+    const [row] = await db
+      .select({ seriesId: appBookings.seriesId })
+      .from(appBookings)
+      .where(eq(appBookings.id, id))
+      .limit(1);
+    const seriesId = row?.seriesId ?? id;
+    await cancelSeries(seriesId);
+    return { ok: true };
+  }
   if (intent === "complete") {
     await db.update(appBookings).set({ status: "completed", adminNote }).where(eq(appBookings.id, id));
     return { ok: true };
@@ -84,6 +101,15 @@ export async function action({ request }: Route.ActionArgs) {
         adminNote,
       })
       .where(eq(appBookings.id, id));
+    // Recurring agreement → mark as series parent and generate upcoming visits.
+    const [updated] = await db
+      .select({ recurrence: appBookings.recurrence })
+      .from(appBookings)
+      .where(eq(appBookings.id, id))
+      .limit(1);
+    if (updated && isRecurring(updated.recurrence)) {
+      await startOrTopUpSeries(id);
+    }
     return { ok: true };
   }
   return { error: "Ukendt handling." };
@@ -122,7 +148,10 @@ export default function AdminBookinger({ loaderData }: Route.ComponentProps) {
           <div key={b.id} className="app-card admin-booking">
             <div className="admin-booking-top">
               <div>
-                <p className="app-booking-service">{b.service} <span className="app-meta">· {b.audience}</span></p>
+                <p className="app-booking-service">
+                  {b.service} <span className="app-meta">· {b.audience}</span>
+                  {b.seriesId ? <span className="app-badge app-badge-series">Fast aftale</span> : null}
+                </p>
                 <p className="app-meta">{b.customerName} · {b.customerEmail}{b.customerPhone ? ` · ${b.customerPhone}` : ""}</p>
               </div>
               <span className={`app-badge status-${b.status}`}>{statusLabel(b.status)}</span>
@@ -162,6 +191,9 @@ export default function AdminBookinger({ loaderData }: Route.ComponentProps) {
                   <button type="submit" name="intent" value="reschedule" className="btn btn-ghost btn-sm">Foreslå ny tid</button>
                   <button type="submit" name="intent" value="complete" className="btn btn-ghost btn-sm">Markér udført</button>
                   <button type="submit" name="intent" value="cancel" className="btn btn-ghost btn-sm app-danger">Aflys</button>
+                  {isRecurring(b.recurrence) && (
+                    <button type="submit" name="intent" value="cancel-series" className="btn btn-ghost btn-sm app-danger">Aflys hele aftalen</button>
+                  )}
                 </div>
               </Form>
             </details>

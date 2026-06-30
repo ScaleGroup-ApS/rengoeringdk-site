@@ -22,6 +22,7 @@ export default [
     route("profil", "routes/app/profil.tsx"),
     route("bookinger", "routes/app/bookinger.tsx"),
     route("book", "routes/app/book.tsx"),
+    route("kvittering", "routes/app/kvittering.tsx"),
     route("admin", "routes/app/admin/layout.tsx", [
       index("routes/app/admin/index.tsx"),
       route("bookinger", "routes/app/admin/bookinger.tsx"),
