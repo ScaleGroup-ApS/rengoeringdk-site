@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 
 let _db: ReturnType<typeof drizzle> | undefined;
 
-export function getDb() {
+export function getDb(): ReturnType<typeof drizzle> {
   if (_db) return _db;
 
   const sslConfig =
@@ -29,5 +29,5 @@ export function getDb() {
 
   // @ts-expect-error — mysql2/promise Pool is compatible at runtime; type mismatch is a drizzle-orm typedef gap
   _db = drizzle({ client: pool });
-  return _db;
+  return _db!;
 }

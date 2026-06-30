@@ -10,6 +10,14 @@ import { useSiteEffects } from "~/hooks/useSiteEffects";
 import { SERVICES_BY_SLUG, type Audience as ServiceAudience } from "~/lib/services";
 import { buildMeta } from "~/lib/seo";
 import { ContactSchema } from "~/lib/contact-schema";
+import { getPricingConfig } from "~/lib/pricing.server";
+import { addonSubLabel, calcPerVisit, kr, m2note, type AudiencePricing, type PricingConfig } from "~/lib/pricing";
+import { pricingIcon } from "~/lib/pricing-icons";
+
+export async function loader() {
+  const pricing = await getPricingConfig();
+  return { pricing };
+}
 
 const SITE_URL = "https://define-cleaning.dk";
 const PAGE_URL = `${SITE_URL}/priser`;
@@ -135,49 +143,6 @@ const Check = () => (
 );
 
 type WizAudience = "privat" | "erhverv";
-type PropertyType = { rate: number; name: string; icon: React.ReactNode };
-
-const TYPES_PRIVAT: PropertyType[] = [
-  { rate: 2.4, name: "Lejlighed", icon: <path d="M3 21h18M6 21V7l12-4v18" /> },
-  { rate: 2.6, name: "Hus", icon: <><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" /><path d="M9 21v-6h6v6" /></> },
-  { rate: 2.9, name: "Sommerhus", icon: <><path d="M2 22h20M3 22V10l9-7 9 7v12" /></> },
-  { rate: 3.4, name: "Flytterengøring", icon: <path d="M5 12H3l9-9 9 9h-2v7a2 2 0 01-2 2H7a2 2 0 01-2-2z" /> },
-];
-
-const TYPES_ERHVERV: PropertyType[] = [
-  { rate: 2.2, name: "Kontor", icon: <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" /> },
-  { rate: 2.4, name: "Butik", icon: <path d="M3 9l1-5h16l1 5M4 9v11h16V9M4 9h16M9 20v-6h6v6" /> },
-  { rate: 3.2, name: "Klinik", icon: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M12 8v6M9 11h6" /></> },
-  { rate: 1.6, name: "Lager / industri", icon: <path d="M12 2L2 7l10 5 10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /> },
-  { rate: 2.0, name: "Ejendom / trappe", icon: <path d="M3 9h18M9 21V9M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" /> },
-];
-
-type Freq = { mult: number; vpm: number; name: string };
-const FREQS: Freq[] = [
-  { mult: 0.78, vpm: 21.7, name: "Dagligt" },
-  { mult: 0.85, vpm: 8.66, name: "2× om ugen" },
-  { mult: 0.9, vpm: 4.33, name: "Ugentligt" },
-  { mult: 1, vpm: 2.17, name: "Hver 14. dag" },
-  { mult: 1.08, vpm: 1, name: "Månedligt" },
-  { mult: 1.35, vpm: 0, name: "Engangs" },
-];
-
-type Addon = { name: string; add?: number; pct?: number; icon: React.ReactNode; sub: string };
-
-const ADDONS_PRIVAT: Addon[] = [
-  { name: "Vinduespolering", add: 149, sub: "+149 kr.", icon: <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10" /> },
-  { name: "Ovn & hvidevarer", add: 195, sub: "+195 kr.", icon: <><path d="M3 3h18v18H3z" /><path d="M3 9h18M9 21V9" /></> },
-  { name: "Tøjvask & stryg", add: 129, sub: "+129 kr.", icon: <path d="M3 6h18M6 6v14a2 2 0 002 2h8a2 2 0 002-2V6M9 10h6" /> },
-  { name: "Terrasse & udeareal", add: 175, sub: "+175 kr.", icon: <path d="M12 2L2 12h3v8h14v-8h3z" /> },
-];
-
-const ADDONS_ERHVERV: Addon[] = [
-  { name: "Vinduespolering", add: 149, sub: "+149 kr.", icon: <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M12 7v10" /> },
-  { name: "Gulvbehandling", add: 199, sub: "+199 kr.", icon: <path d="M3 9h18M3 15h18M9 3v18M15 3v18" /> },
-  { name: "Køkken / kantine", add: 99, sub: "+99 kr.", icon: <path d="M3 2v7c0 1 1 2 2 2s2-1 2-2V2M5 11v11M15 2c-1.5 0-3 2-3 5s1.5 4 3 4v11" /> },
-  { name: "Hygiejnedokumentation", add: 79, sub: "+79 kr.", icon: <><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6M9 14l2 2 4-4" /></> },
-];
-
 const INCLUDED_PRIVAT = [
   {
     title: "Gulve & støv",
@@ -222,21 +187,6 @@ const FAQS_BASE = [
   { q: "Bruger I miljøvenlige produkter?", a: "Altid. Vi benytter svanemærkede, godkendte midler, der er skånsomme over for mennesker, dyr og natur." },
 ];
 
-const BASE = 199;
-
-function kr(n: number, round: number) {
-  const rounded = Math.round(n / round) * round;
-  return rounded.toLocaleString("da-DK") + " kr.";
-}
-
-function m2note(v: number) {
-  if (v < 80) return "≈ lille lejlighed / kontor";
-  if (v < 200) return "≈ hus / mellemstort kontor";
-  if (v < 500) return "≈ stort hus / etage / butik";
-  if (v < 1000) return "≈ flere etager";
-  return "≈ stort erhvervsareal";
-}
-
 const WIZ_STEPS = [
   { label: "Hvem" },
   { label: "Type" },
@@ -247,13 +197,13 @@ const WIZ_STEPS = [
   { label: "Tilbud" },
 ] as const;
 
-function findTypeIdx(types: PropertyType[], wantedName?: string) {
+function findTypeIdx(types: { name: string }[], wantedName?: string) {
   if (!wantedName) return 0;
   const i = types.findIndex((t) => t.name === wantedName);
   return i >= 0 ? i : 0;
 }
 
-function Prisberegner() {
+function Prisberegner({ pricing }: { pricing: PricingConfig }) {
   const [searchParams] = useSearchParams();
 
   const urlAudience: WizAudience = searchParams.get("for") === "erhverv" ? "erhverv" : "privat";
@@ -267,7 +217,7 @@ function Prisberegner() {
   const [step, setStep] = useState(0);
   const [audience, setAudience] = useState<WizAudience>(initialAudience);
   const [typeIdx, setTypeIdx] = useState(() => {
-    const types = initialAudience === "privat" ? TYPES_PRIVAT : TYPES_ERHVERV;
+    const types = (initialAudience === "privat" ? pricing.privat : pricing.erhverv).propertyTypes;
     return findTypeIdx(types, urlService?.wizardType);
   });
   const [m2, setM2] = useState(initialAudience === "privat" ? 80 : 150);
@@ -295,8 +245,10 @@ function Prisberegner() {
     kommentar: "",
   });
 
+  const aud: AudiencePricing = audience === "privat" ? pricing.privat : pricing.erhverv;
+
   useEffect(() => {
-    const types = audience === "privat" ? TYPES_PRIVAT : TYPES_ERHVERV;
+    const types = aud.propertyTypes;
     if (typeIdx >= types.length) setTypeIdx(0);
     setSelectedAddons(new Set());
     setM2((cur) => {
@@ -306,24 +258,28 @@ function Prisberegner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audience]);
 
-  const types = audience === "privat" ? TYPES_PRIVAT : TYPES_ERHVERV;
-  const addons = audience === "privat" ? ADDONS_PRIVAT : ADDONS_ERHVERV;
+  const types = aud.propertyTypes;
+  const addons = aud.addons;
+  const freqs = pricing.frequencies;
   const included = audience === "privat" ? INCLUDED_PRIVAT : INCLUDED_ERHVERV;
   const type = types[typeIdx] ?? types[0];
-  const freq = FREQS[freqIdx];
+  const freq = freqs[freqIdx] ?? freqs[0];
 
   const momsLabel = audience === "privat" ? "inkl. moms" : "ekskl. moms";
-  const momsMul = audience === "privat" ? 1.25 : 1;
 
-  const perVisitBase = useMemo(() => {
+  const perVisit = useMemo(() => {
     const fixedAdd = Array.from(selectedAddons).reduce((sum, i) => sum + (addons[i]?.add ?? 0), 0);
-    const pctAddon = Array.from(selectedAddons).map((i) => addons[i]).find((a) => a?.pct !== undefined);
-    let v = (BASE + m2 * type.rate) * freq.mult + fixedAdd;
-    if (pctAddon?.pct) v *= 1 + pctAddon.pct;
-    return v;
-  }, [m2, type.rate, freq.mult, selectedAddons, addons]);
-
-  const perVisit = perVisitBase * momsMul;
+    const pctAddon = Array.from(selectedAddons).map((i) => addons[i]).find((a) => a?.pct);
+    return calcPerVisit({
+      basePrice: aud.basePrice,
+      m2,
+      rate: type?.rate ?? 0,
+      freqMultiplier: freq?.multiplier ?? 1,
+      addonFlat: fixedAdd,
+      addonPct: pctAddon?.pct,
+      vatMultiplier: aud.vatMultiplier,
+    });
+  }, [aud, m2, type, freq, selectedAddons, addons]);
 
   const toggleAddon = (i: number) => {
     setSelectedAddons((prev) => {
@@ -503,7 +459,7 @@ function Prisberegner() {
                 >
                   <span className="ti">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      {t.icon}
+                      {pricingIcon(t.iconKey)}
                     </svg>
                   </span>
                   <b>{t.name.split(" / ")[0]}</b>
@@ -541,7 +497,7 @@ function Prisberegner() {
             <h3 className="wiz-title">Hvor ofte skal vi komme?</h3>
             <p className="wiz-sub">De fleste vælger ugentligt eller hver 14. dag. Du kan altid ændre det senere.</p>
             <div className="seg">
-              {FREQS.map((f, i) => (
+              {freqs.map((f, i) => (
                 <button key={f.name} type="button" className={i === freqIdx ? "sel" : ""} onClick={() => setFreqIdx(i)} aria-pressed={i === freqIdx}>
                   {f.name}
                 </button>
@@ -577,12 +533,12 @@ function Prisberegner() {
                 <button key={a.name} type="button" className={`addon${selectedAddons.has(i) ? " sel" : ""}`} onClick={() => toggleAddon(i)} aria-pressed={selectedAddons.has(i)}>
                   <span className="ai">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      {a.icon}
+                      {pricingIcon(a.iconKey)}
                     </svg>
                   </span>
                   <span className="atxt">
                     <b>{a.name}</b>
-                    <span>{a.sub}</span>
+                    <span>{addonSubLabel(a)}</span>
                   </span>
                   <span className="chk">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -799,8 +755,9 @@ function Prisberegner() {
   );
 }
 
-export default function Priser(_: Route.ComponentProps) {
+export default function Priser({ loaderData }: Route.ComponentProps) {
   useSiteEffects();
+  const { pricing } = loaderData;
 
   return (
     <div className="page">
@@ -825,7 +782,7 @@ export default function Priser(_: Route.ComponentProps) {
         </header>
 
         <section className="wrap" id="beregner" style={{ paddingBottom: "var(--pad-section)", scrollMarginTop: 120 }}>
-          <Prisberegner />
+          <Prisberegner pricing={pricing} />
         </section>
 
         <section className="blk wrap" style={{ paddingTop: 0 }}>

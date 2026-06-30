@@ -1,0 +1,84 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  # One-shot seed. Apply MANUALLY once after the first migration —
+  # NOT part of the deploy pipeline. The seed is idempotent, but it should not
+  # run on every rollout.
+  #   kubectl apply -f infra/seed-job.yaml   (after substituting {{...}})
+  name: customer-site-seed
+  namespace: {{NAMESPACE}}
+  labels:
+    app: customer-site
+    customer: "{{CUSTOMER_ID}}"
+    component: seed
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: customer-site
+        component: seed
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: seed
+          image: registry.scaleweb.dk/{{NAMESPACE}}-site:latest
+          imagePullPolicy: Always
+          command: ["node", "scripts/seed.mjs"]
+
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DB_HOST
+              value: "mariadb.rengoeringdk.svc.cluster.local"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_USER
+              value: "rengoeringdk_user"
+            - name: DB_NAME
+              value: "rengoeringdk_wp"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-secrets
+                  key: PASSWORD
+            - name: DB_SSL_CERT
+              value: "/etc/ssl/mariadb-client/tls.crt"
+            - name: DB_SSL_KEY
+              value: "/etc/ssl/mariadb-client/tls.key"
+            - name: DB_SSL_CA
+              value: "/etc/ssl/mariadb-ca/ca.crt"
+            # First admin — provide via a temporary secret, then rotate the
+            # password in-app and delete the secret.
+            - name: SEED_ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: SEED_ADMIN_EMAIL
+                  optional: true
+            - name: SEED_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: SEED_ADMIN_PASSWORD
+                  optional: true
+
+          volumeMounts:
+            - name: mariadb-client-cert
+              mountPath: /etc/ssl/mariadb-client
+              readOnly: true
+            - name: mariadb-ca
+              mountPath: /etc/ssl/mariadb-ca
+              readOnly: true
+
+      volumes:
+        - name: mariadb-client-cert
+          secret:
+            secretName: mariadb-client-cert
+        - name: mariadb-ca
+          secret:
+            secretName: mariadb-ca-bundle
+
+      imagePullSecrets:
+        - name: registry-credentials

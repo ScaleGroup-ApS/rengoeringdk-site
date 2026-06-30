@@ -79,6 +79,12 @@ spec:
               value: "noreply@define-cleaning.dk"
             - name: MAIL_TO
               value: "info@define-cleaning.dk"
+            # define-app — signs the customer/admin login cookie. Required.
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: SESSION_SECRET
 
           livenessProbe:
             httpGet:

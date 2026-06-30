@@ -1,0 +1,20 @@
+{
+  "name": "Define Cleaning",
+  "short_name": "Define",
+  "description": "Book og styr din rengøring hos Define Cleaning A/S.",
+  "lang": "da",
+  "start_url": "/app",
+  "scope": "/app",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6fbfb",
+  "theme_color": "#06262b",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
