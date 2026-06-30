@@ -22,6 +22,13 @@
       "when": 1782834485545,
       "tag": "0002_luxuriant_ezekiel",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1782838808347,
+      "tag": "0003_fuzzy_lucky_pierre",
+      "breakpoints": true
     }
   ]
 }

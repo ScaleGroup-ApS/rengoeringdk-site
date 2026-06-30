@@ -110,6 +110,16 @@ Open:
 3. You'll see the yearly receipt, totals, the **estimated servicefradrag**
    (private customers), and a **Print / gem som PDF** button.
 
+### E. Admin extras
+- **Kalender** (admin sidebar): month view of every booking. Click an entry to
+  jump to it on the Bookinger page; click **Rute** on a day to open that day's
+  stops in Google Maps.
+- **Ny aftale**: create a booking manually for an existing customer, or tick
+  **Ny kunde** to add a new customer on the spot.
+- **Betaling**: on each booking under **Håndtér**, set *Ikke betalt /
+  Faktureret / Betalt* and the paid amount. The dashboard shows total
+  **Udestående betaling** across delivered visits.
+
 ---
 
 ## 7. Resetting

@@ -7,6 +7,7 @@ import { appBookings } from "~/db/schema";
 import {
   formatDanishDate,
   isActiveBooking,
+  paymentLabel,
   recurrenceLabel,
   statusLabel,
 } from "~/lib/bookings";
@@ -230,6 +231,9 @@ function BookingCard({ b, editable }: { b: BookingRow; editable: boolean }) {
         <span>{recurrenceLabel(b.recurrence)}</span>
         {b.m2 ? <span>{b.m2} m²</span> : null}
         {b.estimatedPrice ? <span>≈ {b.estimatedPrice.toLocaleString("da-DK")} kr./besøg</span> : null}
+        {b.paymentStatus === "paid" || b.paymentStatus === "invoiced" ? (
+          <span className={`app-badge pay-${b.paymentStatus}`}>{paymentLabel(b.paymentStatus)}</span>
+        ) : null}
       </div>
 
       {b.adminNote && <p className="app-booking-adminnote">💬 {b.adminNote}</p>}

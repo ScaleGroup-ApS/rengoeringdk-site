@@ -1245,3 +1245,36 @@ a.trust-badge:hover { opacity: .8; transform: translateY(-2px); }
   .app-card, .receipt { box-shadow: none; border: none; }
   .receipt-fradrag { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* ── Payment badges ────────────────────────────────────────────────────── */
+.pay-unpaid { background: var(--surface-3); color: var(--text-dim); }
+.pay-invoiced { background: #fef3c7; color: #92600a; }
+.pay-paid { background: var(--accent-soft); color: var(--accent-deep); }
+.app-badge-manual { background: #ede9fe; color: #6d28d9; margin-left: 6px; }
+
+.admin-booking-badges { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.admin-payment-form { border-top: 1px dashed var(--hairline-2); margin-top: 10px; padding-top: 12px; }
+.admin-headactions { display: flex; gap: 8px; flex-wrap: wrap; }
+.admin-pipeline-row { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 720px) { .admin-pipeline-row { grid-template-columns: 1fr 1fr; } }
+
+/* ── Calendar ──────────────────────────────────────────────────────────── */
+.cal-nav { display: flex; align-items: center; gap: 12px; }
+.cal-month { font-size: 1.15rem; color: var(--ink); text-transform: capitalize; min-width: 170px; }
+.cal-today { margin-left: auto; }
+.cal-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(110px, 1fr)); gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); border-radius: var(--radius-lg); overflow: hidden; min-width: 760px; }
+.cal-weekday { background: var(--surface-2); text-align: center; padding: 8px 4px; font-size: var(--fs-meta); font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--text-mute); }
+.cal-cell { background: var(--surface); min-height: 104px; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+.cal-cell.out { background: var(--surface-2); }
+.cal-cell.out .cal-daynum { color: var(--text-faint); }
+.cal-cell.today { box-shadow: inset 0 0 0 2px var(--accent); }
+.cal-daynum { display: flex; align-items: center; justify-content: space-between; font-size: var(--fs-meta); font-weight: 800; color: var(--text-dim); }
+.cal-route { font-size: 11px; font-weight: 700; color: var(--accent-deep); }
+.cal-events { display: flex; flex-direction: column; gap: 3px; }
+.cal-event { display: flex; gap: 5px; align-items: baseline; padding: 3px 6px; border-radius: 6px; font-size: 11px; font-weight: 700; overflow: hidden; }
+.cal-event-time { font-variant-numeric: tabular-nums; opacity: .8; flex: 0 0 auto; }
+.cal-event-txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-event.pay-dot-paid { box-shadow: inset 3px 0 0 var(--pos); }
+.cal-event.pay-dot-invoiced { box-shadow: inset 3px 0 0 var(--star); }
+.cal-legend { margin-top: 4px; }

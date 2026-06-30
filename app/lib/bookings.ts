@@ -28,6 +28,18 @@ export function statusLabel(s: string): string {
   return STATUS_LABELS[s as BookingStatus] ?? s;
 }
 
+export type PaymentStatus = "unpaid" | "invoiced" | "paid";
+
+export const PAYMENT_LABELS: Record<PaymentStatus, string> = {
+  unpaid: "Ikke betalt",
+  invoiced: "Faktureret",
+  paid: "Betalt",
+};
+
+export function paymentLabel(s: string): string {
+  return PAYMENT_LABELS[s as PaymentStatus] ?? s;
+}
+
 export function recurrenceLabel(r: string): string {
   return RECURRENCE_LABELS[r as Recurrence] ?? r;
 }

@@ -8,6 +8,7 @@ import { cancelSeries, startOrTopUpSeries, topUpActiveSeries } from "~/lib/serie
 import { isRecurring } from "~/lib/recurrence";
 import {
   formatDanishDate,
+  paymentLabel,
   recurrenceLabel,
   statusLabel,
   STATUS_LABELS,
@@ -44,6 +45,10 @@ export async function loader({ request }: Route.LoaderArgs) {
       by: appBookings.by,
       m2: appBookings.m2,
       estimatedPrice: appBookings.estimatedPrice,
+      paymentStatus: appBookings.paymentStatus,
+      paidAmount: appBookings.paidAmount,
+      paidAt: appBookings.paidAt,
+      createdByAdmin: appBookings.createdByAdmin,
       customerNote: appBookings.customerNote,
       adminNote: appBookings.adminNote,
       createdAt: appBookings.createdAt,
@@ -86,6 +91,21 @@ export async function action({ request }: Route.ActionArgs) {
   }
   if (intent === "complete") {
     await db.update(appBookings).set({ status: "completed", adminNote }).where(eq(appBookings.id, id));
+    return { ok: true };
+  }
+  if (intent === "payment") {
+    const paymentStatus = String(form.get("paymentStatus") ?? "unpaid");
+    const paidRaw = Number(form.get("paidAmount"));
+    const paidAmount = Number.isFinite(paidRaw) && paidRaw > 0 ? Math.round(paidRaw) : null;
+    const today = new Date().toISOString().slice(0, 10);
+    await db
+      .update(appBookings)
+      .set({
+        paymentStatus,
+        paidAmount,
+        paidAt: paymentStatus === "paid" ? today : null,
+      })
+      .where(eq(appBookings.id, id));
     return { ok: true };
   }
   if (intent === "confirm" || intent === "reschedule") {
@@ -145,16 +165,20 @@ export default function AdminBookinger({ loaderData }: Route.ComponentProps) {
         <p className="app-empty">Ingen bookinger i denne kategori.</p>
       ) : (
         bookings.map((b) => (
-          <div key={b.id} className="app-card admin-booking">
+          <div key={b.id} id={`b-${b.id}`} className="app-card admin-booking">
             <div className="admin-booking-top">
               <div>
                 <p className="app-booking-service">
                   {b.service} <span className="app-meta">· {b.audience}</span>
                   {b.seriesId ? <span className="app-badge app-badge-series">Fast aftale</span> : null}
+                  {b.createdByAdmin ? <span className="app-badge app-badge-manual">Oprettet af admin</span> : null}
                 </p>
                 <p className="app-meta">{b.customerName} · {b.customerEmail}{b.customerPhone ? ` · ${b.customerPhone}` : ""}</p>
               </div>
-              <span className={`app-badge status-${b.status}`}>{statusLabel(b.status)}</span>
+              <div className="admin-booking-badges">
+                <span className={`app-badge status-${b.status}`}>{statusLabel(b.status)}</span>
+                <span className={`app-badge pay-${b.paymentStatus}`}>{paymentLabel(b.paymentStatus)}</span>
+              </div>
             </div>
 
             <div className="admin-booking-grid">
@@ -163,6 +187,7 @@ export default function AdminBookinger({ loaderData }: Route.ComponentProps) {
               <div><span className="app-meta">Frekvens</span><b>{recurrenceLabel(b.recurrence)}</b></div>
               <div><span className="app-meta">Areal</span><b>{b.m2 ? `${b.m2} m²` : "—"}</b></div>
               <div><span className="app-meta">Estimat</span><b>{b.estimatedPrice ? `${b.estimatedPrice.toLocaleString("da-DK")} kr.` : "—"}</b></div>
+              <div><span className="app-meta">Betaling</span><b>{paymentLabel(b.paymentStatus)}{b.paidAmount ? ` · ${b.paidAmount.toLocaleString("da-DK")} kr.` : ""}</b></div>
               <div><span className="app-meta">Adresse</span><b>{[b.address, [b.postnr, b.by].filter(Boolean).join(" ")].filter(Boolean).join(", ") || "—"}</b></div>
             </div>
 
@@ -195,6 +220,25 @@ export default function AdminBookinger({ loaderData }: Route.ComponentProps) {
                     <button type="submit" name="intent" value="cancel-series" className="btn btn-ghost btn-sm app-danger">Aflys hele aftalen</button>
                   )}
                 </div>
+              </Form>
+
+              <Form method="post" className="app-form app-form-tight admin-payment-form">
+                <input type="hidden" name="id" value={b.id} />
+                <div className="app-form-row">
+                  <div className="field">
+                    <label htmlFor={`ps-${b.id}`}>Betalingsstatus</label>
+                    <select id={`ps-${b.id}`} name="paymentStatus" defaultValue={b.paymentStatus}>
+                      <option value="unpaid">Ikke betalt</option>
+                      <option value="invoiced">Faktureret</option>
+                      <option value="paid">Betalt</option>
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label htmlFor={`pa-${b.id}`}>Betalt beløb (kr.)</label>
+                    <input id={`pa-${b.id}`} name="paidAmount" type="number" min={0} step={1} defaultValue={b.paidAmount ?? ""} />
+                  </div>
+                </div>
+                <button type="submit" name="intent" value="payment" className="btn btn-ghost btn-sm">Opdatér betaling</button>
               </Form>
             </details>
           </div>

@@ -43,11 +43,19 @@ export async function loader({ request }: Route.LoaderArgs) {
   const byStatus = Object.fromEntries(statusRows.map((r) => [r.status, Number(r.n)]));
   const totalBookings = statusRows.reduce((s, r) => s + Number(r.n), 0);
   // Rough monthly run-rate: sum of estimates for active (confirmed/rescheduled) bookings.
-  const [[pipeline]] = await Promise.all([
+  // Outstanding: delivered (completed) visits not yet marked paid.
+  const [[pipeline], [outstanding]] = await Promise.all([
     db
       .select({ total: sql<number>`COALESCE(SUM(${appBookings.estimatedPrice}), 0)` })
       .from(appBookings)
       .where(sql`${appBookings.status} IN ('confirmed','rescheduled')`),
+    db
+      .select({
+        total: sql<number>`COALESCE(SUM(${appBookings.estimatedPrice}), 0)`,
+        n: count(),
+      })
+      .from(appBookings)
+      .where(sql`${appBookings.status} = 'completed' AND ${appBookings.paymentStatus} <> 'paid'`),
   ]);
 
   return {
@@ -55,12 +63,13 @@ export async function loader({ request }: Route.LoaderArgs) {
     byStatus,
     totalBookings,
     pipeline: Number(pipeline?.total ?? 0),
+    outstanding: { total: Number(outstanding?.total ?? 0), count: Number(outstanding?.n ?? 0) },
     recent,
   };
 }
 
 export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
-  const { customers, byStatus, totalBookings, pipeline, recent } = loaderData;
+  const { customers, byStatus, totalBookings, pipeline, outstanding, recent } = loaderData;
 
   const cards = [
     { label: "Kunder", value: customers, hint: "registrerede konti", to: "/app/admin/kunder", accent: true },
@@ -76,7 +85,10 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
           <h1 className="app-h1">Dashboard</h1>
           <p className="app-sub">Overblik over kunder, bookinger og aktivitet.</p>
         </div>
-        <Link to="/app/admin/priser" className="btn btn-ghost btn-sm">Redigér priser</Link>
+        <div className="admin-headactions">
+          <Link to="/app/admin/kalender" className="btn btn-ghost btn-sm">Kalender</Link>
+          <Link to="/app/admin/ny" className="btn btn-primary btn-sm">+ Ny aftale</Link>
+        </div>
       </div>
 
       <div className="admin-cards">
@@ -89,12 +101,21 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
         ))}
       </div>
 
-      <div className="admin-pipeline app-card">
-        <div>
-          <p className="app-eyebrow">Estimeret omsætning · aktive aftaler</p>
-          <p className="admin-pipeline-num">{pipeline.toLocaleString("da-DK")} kr. <small>/ besøg</small></p>
+      <div className="admin-pipeline-row">
+        <div className="admin-pipeline app-card">
+          <div>
+            <p className="app-eyebrow">Estimeret omsætning · aktive aftaler</p>
+            <p className="admin-pipeline-num">{pipeline.toLocaleString("da-DK")} kr. <small>/ besøg</small></p>
+          </div>
+          <p className="app-meta">Sum af estimater på bekræftede &amp; omlagte bookinger.</p>
         </div>
-        <p className="app-meta">Sum af estimater på bekræftede &amp; omlagte bookinger.</p>
+        <Link to="/app/admin/bookinger?status=completed" className="admin-pipeline app-card">
+          <div>
+            <p className="app-eyebrow">Udestående betaling</p>
+            <p className="admin-pipeline-num">{outstanding.total.toLocaleString("da-DK")} kr.</p>
+          </div>
+          <p className="app-meta">{outstanding.count} udførte besøg mangler betaling.</p>
+        </Link>
       </div>
 
       <div className="app-card">

@@ -84,6 +84,12 @@ export const appBookings = mysqlTable(
     by: varchar("by", { length: 120 }),
     m2: int("m2"),
     estimatedPrice: int("estimated_price"), // kr snapshot at request time
+    // Payment tracking (admin-managed). unpaid | invoiced | paid.
+    paymentStatus: varchar("payment_status", { length: 20 }).notNull().default("unpaid"),
+    paidAmount: int("paid_amount"), // kr actually paid
+    paidAt: date("paid_at", { mode: "string" }),
+    // true when this booking was created manually by an admin (vs a customer request)
+    createdByAdmin: tinyint("created_by_admin").notNull().default(0),
     customerNote: text("customer_note"),
     adminNote: text("admin_note"),
     createdAt: timestamp("created_at").defaultNow(),
