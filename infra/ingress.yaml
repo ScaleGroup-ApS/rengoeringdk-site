@@ -1,0 +1,40 @@
+---
+# Interim subdomain routing for the customer app.
+#
+# app.define-cleaning.dk already resolves to the cluster's ingress IP; this rule
+# routes that host to the SAME customer-site Service (the app is served from the
+# same deployment for now — see the host redirect in app/root.tsx that lands the
+# bare root on /app).
+#
+# ⚠️ CONFIRM these two fields match your cluster (compare with the existing
+#    define-cleaning.dk ingress):
+#      1. spec.ingressClassName   — the ingress controller class (e.g. nginx / traefik)
+#      2. TLS issuer / secret     — either the cert-manager cluster-issuer below,
+#                                   or an existing certificate secretName.
+#    If your platform provisions TLS differently, adjust accordingly.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: customer-app
+  namespace: {{NAMESPACE}}
+  labels:
+    app: customer-site
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - app.define-cleaning.dk
+      secretName: app-define-cleaning-dk-tls
+  rules:
+    - host: app.define-cleaning.dk
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: customer-site
+                port:
+                  number: 80

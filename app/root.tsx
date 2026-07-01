@@ -3,6 +3,7 @@ import {
   Links,
   Meta,
   Outlet,
+  redirect,
   Scripts,
   ScrollRestoration,
 } from "react-router";
@@ -53,6 +54,18 @@ export const links: Route.LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
 ];
+
+export function loader({ request }: Route.LoaderArgs) {
+  // Interim subdomain support: app.define-cleaning.dk serves the same
+  // deployment, so land visitors of its bare root on the app (not the
+  // marketing homepage). The subdomain is wired at the ingress layer.
+  const host = request.headers.get("host") ?? "";
+  const url = new URL(request.url);
+  if (host.startsWith("app.") && url.pathname === "/") {
+    throw redirect("/app");
+  }
+  return null;
+}
 
 export function Layout({ children }: { children: ReactNode }) {
   return (

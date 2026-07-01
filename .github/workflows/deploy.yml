@@ -92,7 +92,7 @@ jobs:
         env:
           SHORT_SHA: ${{ needs.build-and-push.outputs.short-sha }}
         run: |
-          sed -i "s/{{NAMESPACE}}/$NAMESPACE/g"       infra/deployment.yaml infra/migrate-job.yaml
+          sed -i "s/{{NAMESPACE}}/$NAMESPACE/g"       infra/deployment.yaml infra/migrate-job.yaml infra/ingress.yaml
           sed -i "s/{{CUSTOMER_SLUG}}/$NAMESPACE/g"   infra/deployment.yaml infra/migrate-job.yaml
           sed -i "s/{{CUSTOMER_ID}}/${NAMESPACE}/g"   infra/deployment.yaml infra/migrate-job.yaml
           sed -i "s/{{SHORT_SHA}}/${SHORT_SHA}/g"     infra/migrate-job.yaml
@@ -123,6 +123,9 @@ jobs:
         run: |
           kubectl apply -f infra/deployment.yaml \
             || (kubectl delete -f infra/deployment.yaml --ignore-not-found && kubectl apply -f infra/deployment.yaml)
+          # Subdomain ingress for app.define-cleaning.dk (non-fatal if the
+          # ingress class/TLS needs adjusting — the site stays up regardless).
+          kubectl apply -f infra/ingress.yaml || echo "⚠️ ingress apply failed — check ingressClassName / TLS in infra/ingress.yaml"
 
       - name: Deploy with image tags
         env:
