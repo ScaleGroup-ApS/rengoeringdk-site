@@ -88,6 +88,16 @@ jobs:
           echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
 
+      - name: Require ALTCHA deployment prerequisites
+        run: |
+          if ! kubectl get secret contact-altcha -n "$NAMESPACE" \
+            -o jsonpath='{.data.ALTCHA_SECRET_KEY}' | grep -q .; then
+            echo "::error::Provision contact-altcha/ALTCHA_SECRET_KEY in namespace $NAMESPACE before deploying."
+            exit 1
+          fi
+          kubectl label namespace "$NAMESPACE" \
+            scaleweb.dk/altcha-client=true --overwrite
+
       - name: Prepare manifests
         env:
           SHORT_SHA: ${{ needs.build-and-push.outputs.short-sha }}

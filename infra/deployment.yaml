@@ -24,6 +24,7 @@ spec:
   template:
     metadata:
       labels:
+        scaleweb.dk/altcha-client: "true"
         app: customer-site
         customer: "{{CUSTOMER_ID}}"
     spec:
@@ -37,6 +38,21 @@ spec:
               protocol: TCP
 
           env:
+            # Required self-hosted contact protection. The tenant secret must be
+            # provisioned in this namespace before the deploy workflow can continue.
+            - name: CONTACT_SPAM_PROVIDER
+              value: "altcha"
+            - name: ALTCHA_SITE_KEY
+              value: "{{CUSTOMER_SLUG}}-site"
+            - name: ALTCHA_PUBLIC_BASE_URL
+              value: "https://altcha.scaledev.dk"
+            - name: ALTCHA_VERIFY_BASE_URL
+              value: "http://altcha-verify.contact-altcha.svc.cluster.local:3001"
+            - name: ALTCHA_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: contact-altcha
+                  key: ALTCHA_SECRET_KEY
             - name: NODE_ENV
               value: "production"
             - name: PORT
