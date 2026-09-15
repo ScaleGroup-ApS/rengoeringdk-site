@@ -1,0 +1,19 @@
+{
+  "cap_revision": "e02138579482c711ee0bb79c7be3486fe0bf3e84",
+  "widget_version": "0.1.57",
+  "wasm_version": "0.0.7",
+  "pako_version": "2.1.0",
+  "sources": {
+    "cap_wasm_bg.wasm": "https://cdn.jsdelivr.net/npm/@cap.js/wasm@0.0.7/browser/cap_wasm_bg.wasm",
+    "pako_inflate.min.js": "https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako_inflate.min.js",
+    "pako-LICENSE.txt": "https://cdn.jsdelivr.net/npm/pako@2.1.0/LICENSE"
+  },
+  "sha256": {
+    "widget.js": "308c267c6eb90e34d64934a94921263f2ff687944d31f295c47ed0a6431e30b2",
+    "cap-LICENSE.txt": "69acdeead2435cb91bd0d94aaadc8ee2d0fa7e30a789cdeeb9aa2e0d4a986318",
+    "cap_wasm_bg.wasm": "e4f3c00246a775193661f9277ca1288cd310a6514de166ecc2176ccd26fb06a9",
+    "pako_inflate.min.js": "fa226c8e1e3556993260e6a5c1fe94e225da59b3418a06811fdc51d308f8bb43",
+    "pako-LICENSE.txt": "a04665b3b2de56c66730c1f720f528175739e4104f79073614aa611da1e85539",
+    "widget-NOTICE.txt": "bab8e7a6eef76a1d8d2ca51731eaf24dba863823e3a1ea12b10389f2bfe2250e"
+  }
+}

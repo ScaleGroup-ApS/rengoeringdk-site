@@ -1,3 +1,5 @@
+import { ContactSpamProtection } from '~/components/ContactSpamProtection';
+import { CONTACT_SPAM_ERROR, verifyContactSubmission } from '~/lib/contact-spam.server';
 import { useFetcher } from "react-router";
 import { safeParse, flatten } from "valibot";
 import type { Route } from "./+types/kontakt";
@@ -52,6 +54,10 @@ export async function action({ request }: Route.ActionArgs) {
       success: false as const,
       errors: flatten<typeof ContactSchema>(result.issues).nested,
     };
+  }
+
+  if (!(await verifyContactSubmission(form))) {
+    return { success: false as const, spamError: CONTACT_SPAM_ERROR, errors: {} as Record<string, [string, ...string[]]> };
   }
 
   const data = result.output;
@@ -233,7 +239,9 @@ function ContactForm() {
               <span className="msg">&nbsp;</span>
             </div>
           </div>
-          <div className="form-foot">
+          <div className="form-foot" style={{ flexDirection: "column", alignItems: "stretch", gap: 24 }}>
+            {fetcher.data && 'spamError' in fetcher.data && <p role="alert">{fetcher.data.spamError}</p>}
+            <ContactSpamProtection />
             <button type="submit" className="btn btn-primary btn-lg" disabled={submitting}>
               {submitting ? "Sender …" : <><span>Send forespørgsel</span> <Arrow /></>}
             </button>
