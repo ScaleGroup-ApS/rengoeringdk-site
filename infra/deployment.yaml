@@ -14,7 +14,9 @@ metadata:
     app: customer-site
     customer: "{{CUSTOMER_ID}}"
 spec:
-  replicas: 1
+  # This legacy React site is retired. Keep it scaled down until a deliberate
+  # reactivation; the ALTCHA configuration below is ready for that future use.
+  replicas: 0
   revisionHistoryLimit: 3
   selector:
     matchLabels:
