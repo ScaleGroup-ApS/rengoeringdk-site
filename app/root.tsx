@@ -1,3 +1,4 @@
+import { contactChallenge } from "~/lib/contact-spam.server";
 import {
   isRouteErrorResponse,
   Links,
@@ -137,4 +138,8 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       </div>
     </main>
   );
+}
+
+export function loader() {
+  return { contactChallenge: contactChallenge() };
 }

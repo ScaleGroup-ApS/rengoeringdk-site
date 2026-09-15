@@ -1,3 +1,5 @@
+import { ContactSpamProtection } from '~/components/ContactSpamProtection';
+import { CONTACT_SPAM_ERROR, verifyContactSubmission } from '~/lib/contact-spam.server';
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import type { Route } from "./+types/priser";
@@ -91,6 +93,10 @@ export async function action({ request }: Route.ActionArgs) {
       success: false as const,
       errors: flatten<typeof ContactSchema>(result.issues).nested,
     };
+  }
+
+  if (!(await verifyContactSubmission(form))) {
+    return { success: false as const, spamError: CONTACT_SPAM_ERROR, errors: {} as Record<string, [string, ...string[]]> };
   }
 
   const data = result.output;
@@ -723,10 +729,12 @@ function Prisberegner({ pricing }: { pricing: PricingConfig }) {
               />
               {audience === "erhverv" && <input type="hidden" name="cvr" value={formValues.cvr.replace(/\D/g, "")} />}
 
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginTop: 20 }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: 24, marginTop: 20 }}>
                 <span style={{ fontSize: "var(--fs-meta)", color: "var(--text-mute)" }}>
                   Valgt ydelse: <strong style={{ color: "var(--ink)" }}>{serviceLabel}</strong> · estimeret pris <strong style={{ color: "var(--ink)" }}>{kr(perVisit, 5)}</strong>
                 </span>
+                {fetcher.data && 'spamError' in fetcher.data && <p role="alert">{fetcher.data.spamError}</p>}
+                <ContactSpamProtection />
                 <button type="submit" className="btn btn-primary btn-lg" disabled={submitting}>
                   {submitting ? "Sender …" : <>Send forespørgsel <Arrow /></>}
                 </button>
